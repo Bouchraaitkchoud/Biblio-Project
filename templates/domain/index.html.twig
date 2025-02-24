@@ -1,0 +1,114 @@
+{# templates/domain/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Domains{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Domains</h1>
+
+        <!-- Search Form -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <input type="text" id="search-input" placeholder="Search domains, sections, books, or authors..." class="form-control">
+                    <button id="search-button" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="search-results" class="mt-4" style="display: none;">
+            <h2 class="text-center mb-3">Search Results</h2>
+            <div id="domains-results" class="mb-4"></div>
+            <div id="sections-results" class="mb-4"></div>
+            <div id="books-results" class="mb-4"></div>
+        </div>
+
+        <!-- Domains List -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                {% if domains is empty %}
+                    <p class="text-center">No domains found.</p>
+                {% else %}
+                    <ul class="list-group">
+                        {% for domain in domains %}
+                            <li class="list-group-item">
+                                <a href="#" class="domain-link text-decoration-none" data-domain-id="{{ domain.id }}">
+                                    <h5 class="mb-0">{{ domain.name }}</h5>
+                                </a>
+                                <div id="sections-{{ domain.id }}" class="sections-list mt-2" style="display: none;"></div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click event listeners to all domain links
+            document.querySelectorAll('.domain-link').forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent the default link behavior
+
+                    const domainId = this.getAttribute('data-domain-id');
+                    const sectionsDiv = document.getElementById(`sections-${domainId}`);
+
+                    // Toggle the visibility of the sections list
+                    if (sectionsDiv.style.display === 'none') {
+                        // Fetch sections via AJAX
+                        fetch(`/domain/${domainId}/sections`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Update the DOM with the fetched sections
+                                sectionsDiv.innerHTML = `<ul class="list-group">${data.map(section => `<li class="list-group-item">${section.name}</li>`).join('')}</ul>`;
+                                sectionsDiv.style.display = 'block';
+                            })
+                            .catch(error => console.error('Error fetching sections:', error));
+                    } else {
+                        // Hide the sections list
+                        sectionsDiv.style.display = 'none';
+                    }
+                });
+            });
+
+            // Add search functionality
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            const searchResults = document.getElementById('search-results');
+            const domainsResults = document.getElementById('domains-results');
+            const sectionsResults = document.getElementById('sections-results');
+            const booksResults = document.getElementById('books-results');
+
+            searchButton.addEventListener('click', function() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    fetch(`/domains/search?q=${encodeURIComponent(searchTerm)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Display the search results
+                            searchResults.style.display = 'block';
+
+                            // Display domains
+                            domainsResults.innerHTML = data.domains.length > 0
+                                ? `<h3>Domains</h3><ul class="list-group">${data.domains.map(domain => `<li class="list-group-item">${domain.name}</li>`).join('')}</ul>`
+                                : '<p>No domains found.</p>';
+
+                            // Display sections
+                            sectionsResults.innerHTML = data.sections.length > 0
+                                ? `<h3>Sections</h3><ul class="list-group">${data.sections.map(section => `<li class="list-group-item">${section.name}</li>`).join('')}</ul>`
+                                : '<p>No sections found.</p>';
+
+                            // Display books
+                            booksResults.innerHTML = data.books.length > 0
+                                ? `<h3>Books</h3><ul class="list-group">${data.books.map(book => `<li class="list-group-item">${book.title} by ${book.author}</li>`).join('')}</ul>`
+                                : '<p>No books found.</p>';
+                        })
+                        .catch(error => console.error('Error searching:', error));
+                }
+            });
+        });
+    </script>
+{% endblock %}

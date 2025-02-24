@@ -1,0 +1,25 @@
+# Enable stateless CSRF protection for forms and logins/logouts
+# framework:
+#     form:
+#         csrf_protection:
+#             token_id: submit
+
+#     csrf_protection:
+#         stateless_token_ids:
+#             - submit
+#             - authenticate
+#             - logout
+
+# Enable CSRF protection for forms
+framework:
+    form:
+        csrf_protection:
+            enabled: true
+            field_name: _csrf_token  # Optional, default value for the field name
+
+    csrf_protection:
+        # stateless_token_ids:
+        #     - submit
+        #     - authenticate
+        #     - logout
+

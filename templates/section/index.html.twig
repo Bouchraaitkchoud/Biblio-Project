@@ -1,0 +1,15 @@
+{# templates/section/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Sections in {{ domain.name }}{% endblock %}
+
+{% block body %}
+    <h1>Sections in {{ domain.name }}</h1>
+    <ul>
+        {% for section in sections %}
+            <li>
+                <a href="{{ path('app_books', {'id': section.id}) }}">{{ section.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

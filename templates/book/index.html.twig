@@ -1,0 +1,19 @@
+{# templates/book/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Books in {{ section.name }}{% endblock %}
+
+{% block body %}
+    <h1>Books in {{ section.name }}</h1>
+    {% if books is empty %}
+        <p>No books found in this section.</p>
+    {% else %}
+        <ul>
+            {% for book in books %}
+                <li>
+                    <strong>{{ book.title }}</strong> by {{ book.author }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

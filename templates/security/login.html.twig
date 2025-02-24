@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px; border-radius: 10px;">
+            <h2 class="text-center mb-4" style="color: #2c3e50;">Connexion</h2>
+
+            {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+
+            <form action="{{ path('app_login') }}" method="post" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Email :</label>
+                    <input type="text" id="username" name="_username" value="{{ last_username }}" class="form-control" placeholder="Votre email" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Mot de passe :</label>
+                    <input type="password" id="password" name="_password" class="form-control" placeholder="Mot de passe" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
