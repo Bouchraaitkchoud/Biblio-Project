@@ -70,11 +70,13 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                default_target_path: app_domains
+                default_target_path: app_domains 
+                enable_csrf: false 
             logout:
                 path: app_logout
                 target: app_login
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: ROLE_USER }
+        - { path: ^/section/\d+/books, roles: ROLE_USER } # Allow access to the book page for authenticated users
+        - { path: ^/, roles: ROLE_USER } # Default rule for all other routes

@@ -1,7 +1,11 @@
-{# templates/domain/index.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Domains{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }} {# Keeps styles from base.html.twig #}
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+{% endblock %}
 
 {% block body %}
     <div class="container mt-5">
@@ -37,7 +41,17 @@
                                 <a href="#" class="domain-link text-decoration-none" data-domain-id="{{ domain.id }}">
                                     <h5 class="mb-0">{{ domain.name }}</h5>
                                 </a>
-                                <div id="sections-{{ domain.id }}" class="sections-list mt-2" style="display: none;"></div>
+                                <div id="sections-{{ domain.id }}" class="sections-list mt-2" style="display: none;">
+                                    <ul class="list-group">
+                                        {% for section in domain.sections %}
+                                            <li class="list-group-item">
+                                                <a href="{{ path('section_books', {'id': section.id}) }}">
+                                                    {{ section.name }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             </li>
                         {% endfor %}
                     </ul>
@@ -58,17 +72,8 @@
 
                     // Toggle the visibility of the sections list
                     if (sectionsDiv.style.display === 'none') {
-                        // Fetch sections via AJAX
-                        fetch(`/domain/${domainId}/sections`)
-                            .then(response => response.json())
-                            .then(data => {
-                                // Update the DOM with the fetched sections
-                                sectionsDiv.innerHTML = `<ul class="list-group">${data.map(section => `<li class="list-group-item">${section.name}</li>`).join('')}</ul>`;
-                                sectionsDiv.style.display = 'block';
-                            })
-                            .catch(error => console.error('Error fetching sections:', error));
+                        sectionsDiv.style.display = 'block';
                     } else {
-                        // Hide the sections list
                         sectionsDiv.style.display = 'none';
                     }
                 });

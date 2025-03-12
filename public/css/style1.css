@@ -1,0 +1,104 @@
+/* General Styles */
+body {
+    background-color: #e3f2fd; /* Light blue background */
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+/* Centering content */
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Page Title */
+h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #212529;
+}
+
+/* Search Input & Button */
+.input-group {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#search-input {
+    border-radius: 8px 0 0 8px;
+    padding: 10px;
+}
+
+#search-button {
+    border-radius: 0 8px 8px 0;
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+#search-button:hover {
+    background-color: #0056b3;
+}
+
+/* Search Results */
+#search-results {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Domains List */
+.list-group-item {
+    background: white;
+    border: none;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Domain Links */
+.domain-link {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+    transition: color 0.3s ease;
+}
+
+.domain-link:hover {
+    color: #0056b3;
+}
+
+/* Sections List */
+.sections-list {
+    padding-left: 15px;
+}
+
+.sections-list .list-group-item {
+    background: #f8f9fa;
+    border-left: 3px solid #007bff;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    #search-input {
+        font-size: 14px;
+    }
+
+    .domain-link {
+        font-size: 1rem;
+    }
+}

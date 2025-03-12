@@ -3,3 +3,13 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+section_books:
+    path: /section/{id}/books
+    controller: App\Controller\SectionController::showBooks
+    methods: [GET]
+
+add_to_cart:
+    path: /add-to-cart/{id}
+    controller: App\Controller\CartController::addToCart
+    methods: [POST]
