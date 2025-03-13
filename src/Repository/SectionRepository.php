@@ -1,5 +1,5 @@
 <?php
-
+// src/Repository/SectionRepository.php
 namespace App\Repository;
 
 use App\Entity\Section;
@@ -16,37 +16,12 @@ class SectionRepository extends ServiceEntityRepository
         parent::__construct($registry, Section::class);
     }
 
-    public function findByName(string $name): array
+    public function findByName($searchTerm): array
     {
         return $this->createQueryBuilder('s')
-            ->where('LOWER(s.name) LIKE LOWER(:name)')
-            ->setParameter('name', '%' . $name . '%')
+            ->where('LOWER(s.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
             ->getQuery()
             ->getResult();
     }
-
-    //    /**
-    //     * @return Section[] Returns an array of Section objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Section
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }
