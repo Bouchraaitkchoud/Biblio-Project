@@ -9,21 +9,25 @@
 
 {% block body %}
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Domains</h1>
+        <h1 class="text-center mb-4" style="color: #117986;">Domains</h1>
 
-        <!-- Search Form -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-md-8">
-                <div class="input-group">
-                    <input type="text" id="search-input" placeholder="Search domains, sections, books, or authors..." class="form-control">
-                    <button id="search-button" class="btn btn-primary">Search</button>
-                </div>
-            </div>
+<!-- Search Form -->
+<div class="row justify-content-center mb-4">
+    <div class="col-md-8 d-flex justify-content-center">
+        <div class="input-group" style="border: 1px solid #ccc; border-radius: 25px; padding: 5px; display: flex; align-items: center; width: 100%; max-width: 400px;">
+            <input type="text" id="search-input" placeholder="Search domains, sections, books, or authors..." 
+                class="form-control" 
+                style="border: none; box-shadow: none; outline: none; flex: 1; padding-left: 15px; border-radius: 25px;">
+            
+            <button id="search-button" class="btn" type="submit" style="background: transparent; border: none; padding: 5px;">
+                <img src="{{ asset('images/Search-icon.png') }}" alt="Search" style="width: 20px; height: 20px;">
+            </button>
         </div>
-
+    </div>
+</div>
         <!-- Search Results -->
         <div id="search-results" class="mt-4" style="display: none;">
-            <h2 class="text-center mb-3">Search Results</h2>
+            <h2 class="text-center mb-3" style="color: #117986;">Search Results</h2>
             <div id="domains-results" class="mb-4"></div>
             <div id="sections-results" class="mb-4"></div>
             <div id="books-results" class="mb-4"></div>
@@ -37,8 +41,12 @@
                 {% else %}
                     <ul class="list-group">
                         {% for domain in domains %}
-                            <li class="list-group-item">
-                                <a href="#" class="domain-link text-decoration-none" data-domain-id="{{ domain.id }}">
+                            <li class="list-group-item" style="border-left: 4px solid #117986;">
+                                <a href="#" class="domain-link text-decoration-none"
+                                    data-domain-id="{{ domain.id }}"
+                                    style="color: #117986;"
+                                    onmouseover="this.style.color='#0e6655'"
+                                    onmouseout="this.style.color='#117986'">
                                     <h5 class="mb-0">{{ domain.name }}</h5>
                                 </a>
                                 <div id="sections-{{ domain.id }}" class="sections-list mt-2" style="display: none;">
@@ -98,17 +106,17 @@
 
                             // Display domains
                             domainsResults.innerHTML = data.domains.length > 0
-                                ? `<h3>Domains</h3><ul class="list-group">${data.domains.map(domain => `<li class="list-group-item">${domain.name}</li>`).join('')}</ul>`
+                                ? `<h3 style="color: #117986;">Domains</h3><ul class="list-group">${data.domains.map(domain => `<li class="list-group-item">${domain.name}</li>`).join('')}</ul>`
                                 : '<p>No domains found.</p>';
 
                             // Display sections
                             sectionsResults.innerHTML = data.sections.length > 0
-                                ? `<h3>Sections</h3><ul class="list-group">${data.sections.map(section => `<li class="list-group-item">${section.name}</li>`).join('')}</ul>`
+                                ? `<h3 style="color: #117986;">Sections</h3><ul class="list-group">${data.sections.map(section => `<li class="list-group-item">${section.name}</li>`).join('')}</ul>`
                                 : '<p>No sections found.</p>';
 
                             // Display books
                             booksResults.innerHTML = data.books.length > 0
-                                ? `<h3>Books</h3><ul class="list-group">${data.books.map(book => `<li class="list-group-item">${book.title} by ${book.author}</li>`).join('')}</ul>`
+                                ? `<h3 style="color: #117986;">Books</h3><ul class="list-group">${data.books.map(book => `<li class="list-group-item">${book.title} by ${book.author}</li>`).join('')}</ul>`
                                 : '<p>No books found.</p>';
                         })
                         .catch(error => console.error('Error searching:', error));
