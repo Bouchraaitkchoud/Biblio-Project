@@ -1,7 +1,9 @@
 <?php
 // src/Entity/Book.php
+
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
@@ -12,6 +14,9 @@ class Book
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\ManyToMany(targetEntity: Cart::class, mappedBy: 'books')]
+    private Collection $carts;
+
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
@@ -21,6 +26,9 @@ class Book
     #[ORM\ManyToOne(targetEntity: Section::class, inversedBy: 'books')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Section $section = null;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $coverImage = null;  // Added coverImage property
 
     // Getters and setters
     public function getId(): ?int
@@ -58,6 +66,39 @@ class Book
     public function setSection(?Section $section): self
     {
         $this->section = $section;
+        return $this;
+    }
+
+    public function getCoverImage(): ?string  // Getter for coverImage
+    {
+        return $this->coverImage;
+    }
+
+    public function setCoverImage(?string $coverImage): self  // Setter for coverImage
+    {
+        $this->coverImage = $coverImage;
+        return $this;
+    }
+
+    public function getCarts(): Collection
+    {
+        return $this->carts;
+    }
+    
+    public function addCart(Cart $cart): self
+    {
+        if (!$this->carts->contains($cart)) {
+            $this->carts[] = $cart;
+            $cart->addBook($this);
+        }
+        return $this;
+    }
+    
+    public function removeCart(Cart $cart): self
+    {
+        if ($this->carts->removeElement($cart)) {
+            $cart->removeBook($this);
+        }
         return $this;
     }
 }

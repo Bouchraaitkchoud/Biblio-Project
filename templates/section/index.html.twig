@@ -7,9 +7,9 @@
     <h1>Sections in {{ domain.name }}</h1>
     <ul>
         {% for section in sections %}
-            <li>
-                <a href="{{ path('app_books', {'id': section.id}) }}">{{ section.name }}</a>
-            </li>
+            <a href="{{ path('section_books', {'id': section.id}) }}">
+               {{ section.name }}
+            </a>
         {% endfor %}
     </ul>
 {% endblock %}

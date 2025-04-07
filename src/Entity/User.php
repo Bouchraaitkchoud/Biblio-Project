@@ -22,6 +22,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
+    
+    #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'student', cascade: ['persist', 'remove'])]
+    private ?Cart $cart = null;
+
+
     /**
      * @var list<string> The user roles
      */
@@ -121,6 +126,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->isVerified = $isVerified;
 
+        return $this;
+    }
+    public function getCart(): ?Cart
+    {
+        return $this->cart;
+    }
+
+    public function setCart(Cart $cart): self
+    {
+        $this->cart = $cart;
+        $cart->setStudent($this); // Ensure the Cart entity has a setStudent() method
         return $this;
     }
 }

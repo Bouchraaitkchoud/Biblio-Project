@@ -1,0 +1,80 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #eef1f7;
+    margin: 0;
+    padding: 0;
+}
+
+/* Books container */
+.books-container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 25px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Page title */
+.books-title {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* List of books */
+.books-list {
+    list-style: none;
+    padding: 0;
+}
+
+/* Individual book item */
+.book-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease-in-out;
+}
+
+.book-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Book title */
+.book-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Book author */
+.book-author {
+    font-size: 1.1rem;
+    color: #777;
+    font-style: italic;
+}
+
+/* No books message */
+.no-books {
+    text-align: center;
+    color: #888;
+    font-size: 1.2rem;
+    padding: 20px;
+}
+
+/* Add to cart button */
+.add-to-cart {
+    cursor: pointer;
+    color: #888;
+    transition: color 0.3s ease-in-out, transform 0.2s;
+    font-size: 1.4rem;
+}
+
+.add-to-cart:hover {
+    color: #007bff;
+    transform: scale(1.2);
+}
