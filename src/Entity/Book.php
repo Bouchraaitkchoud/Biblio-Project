@@ -1,10 +1,10 @@
 <?php
-// src/Entity/Book.php
-namespace App\Entity;
-use Doctrine\Common\Collections\Collection;
-use App\Repository\BookRepository;
 
+namespace App\Entity;
+
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\BookRepository;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 class Book
@@ -13,7 +13,6 @@ class Book
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
 
     #[ORM\ManyToMany(targetEntity: Cart::class, mappedBy: 'books', cascade: ['persist', 'remove'])]
     private Collection $carts;
@@ -28,7 +27,9 @@ class Book
     #[ORM\JoinColumn(nullable: false)]
     private ?Section $section = null;
 
-    // Getters and setters
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $coverImage = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -66,11 +67,23 @@ class Book
         $this->section = $section;
         return $this;
     }
+
+    public function getCoverImage(): ?string
+    {
+        return $this->coverImage;
+    }
+
+    public function setCoverImage(?string $coverImage): self
+    {
+        $this->coverImage = $coverImage;
+        return $this;
+    }
+
     public function getCarts(): Collection
     {
         return $this->carts;
     }
-    
+
     public function addCart(Cart $cart): self
     {
         if (!$this->carts->contains($cart)) {
@@ -81,7 +94,7 @@ class Book
         }
         return $this;
     }
-    
+
     public function removeCart(Cart $cart): self
     {
         if ($this->carts->removeElement($cart)) {
@@ -91,5 +104,4 @@ class Book
         }
         return $this;
     }
-    
 }

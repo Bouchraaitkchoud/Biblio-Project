@@ -123,7 +123,7 @@
             {% for book in books %}
                 <div class="book-card">
                     <img class="book-cover"
-                         src="{{ book.coverImage is defined ? asset(book.coverImage) : asset('images/default-book.jpg') }}"
+                         src="{{ book.coverImage ? asset('uploads/book_covers/' ~ book.coverImage) : asset('images/default-book.jpg') }}"
                          alt="{{ book.title }}">
                     <div class="book-title">{{ book.title }}</div>
                     <div class="book-author">by {{ book.author }}</div>
