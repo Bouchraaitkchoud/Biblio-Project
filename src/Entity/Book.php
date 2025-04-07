@@ -1,8 +1,9 @@
 <?php
 // src/Entity/Book.php
-namespace App\Entity;
-use Doctrine\Common\Collections\Collection;
 
+namespace App\Entity;
+
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
@@ -12,7 +13,6 @@ class Book
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
 
     #[ORM\ManyToMany(targetEntity: Cart::class, mappedBy: 'books')]
     private Collection $carts;
@@ -26,6 +26,9 @@ class Book
     #[ORM\ManyToOne(targetEntity: Section::class, inversedBy: 'books')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Section $section = null;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $coverImage = null;  // Added coverImage property
 
     // Getters and setters
     public function getId(): ?int
@@ -65,6 +68,18 @@ class Book
         $this->section = $section;
         return $this;
     }
+
+    public function getCoverImage(): ?string  // Getter for coverImage
+    {
+        return $this->coverImage;
+    }
+
+    public function setCoverImage(?string $coverImage): self  // Setter for coverImage
+    {
+        $this->coverImage = $coverImage;
+        return $this;
+    }
+
     public function getCarts(): Collection
     {
         return $this->carts;

@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Card Grid Layout */
         .books-container {
             max-width: 1200px;
             margin: auto;
@@ -87,7 +86,7 @@
             {% for book in books %}
                 <div class="book-card">
                     <img class="book-cover" 
-                         src="{{ book.coverImage is defined ? asset(book.coverImage) : asset('images/default-book.jpg') }}" 
+                         src="{{ book.coverImage ? asset('uploads/book_covers/' ~ book.coverImage) : asset('images/default-book.jpg') }}" 
                          alt="{{ book.title }}">
                     <div class="book-title">{{ book.title }}</div>
                     <div class="book-author">by {{ book.author }}</div>
@@ -103,7 +102,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add event listeners to "Add to Cart" buttons
             document.querySelectorAll('.add-to-cart').forEach(function(button) {
                 button.addEventListener('click', function() {
                     const bookId = this.getAttribute('data-book-id');
