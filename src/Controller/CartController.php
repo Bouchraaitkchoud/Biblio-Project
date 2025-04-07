@@ -1,5 +1,5 @@
 <?php
-// src/Controller/CartController.php
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -8,62 +8,225 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use App\Entity\Book;
 use App\Entity\Cart;
+use App\Entity\User;
+use App\Entity\Receipt;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class CartController extends AbstractController
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     #[Route('/add-to-cart/{id}', name: 'add_to_cart', methods: ['POST'])]
-   
-// src/Controller/CartController.php
-public function addToCart(int $id, EntityManagerInterface $entityManager, Security $security): JsonResponse
-{
-    // Fetch the book
-    $book = $entityManager->getRepository(Book::class)->find($id);
-    if (!$book) {
-        return new JsonResponse(['success' => false, 'message' => 'Book not found']);
+    public function addToCart(int $id, EntityManagerInterface $entityManager, Security $security): JsonResponse
+    {
+        try {
+            // 1. Fetch the book
+            $book = $entityManager->getRepository(Book::class)->find($id);
+            if (!$book) {
+                $this->logger->error('Book not found with ID: {id}', ['id' => $id]);
+                return new JsonResponse(['success' => false, 'message' => 'Book not found'], 404);
+            }
+
+            // 2. Get authenticated user
+            /** @var User $user */
+            $user = $security->getUser();
+            if (!$user) {
+                return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
+            }
+
+            // 3. Find or create cart (get the most recent cart with status 'draft')
+            $cart = $entityManager->getRepository(Cart::class)->findOneBy(
+                ['user' => $user, 'status' => 'draft'],
+                ['createdAt' => 'DESC']
+            );
+
+            if (!$cart) {
+                $cart = new Cart();
+                $cart->setUser($user);
+                $cart->setCreatedAt(new \DateTime());
+                $cart->setStatus('draft');
+                $entityManager->persist($cart);
+            }
+
+            // 4. Add book to cart (with duplicate check)
+            if (!$cart->getBooks()->contains($book)) {
+                $cart->addBook($book);
+                $entityManager->flush();
+                
+                $this->logger->info('Book {bookId} added to cart {cartId}', [
+                    'bookId' => $book->getId(),
+                    'cartId' => $cart->getId()
+                ]);
+                
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'Book added to cart',
+                    'cart_id' => $cart->getId()
+                ]);
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Book already in cart'
+            ]);
+
+        } catch (\Exception $e) {
+            $this->logger->error('Cart addition failed: {error}', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'An error occurred'
+            ], 500);
+        }
     }
 
-    // Debug: Check if the book is fetched correctly
-    dd('Book fetched:', $book);
+    #[Route('/submit-cart', name: 'submit_cart', methods: ['POST'])]
+    public function submitCart(EntityManagerInterface $em, Security $security): JsonResponse
+    {
+        /** @var User $user */
+        $user = $security->getUser();
+        
+        // Get the most recent draft cart
+        $cart = $em->getRepository(Cart::class)->findOneBy(
+            ['user' => $user, 'status' => 'draft'],
+            ['createdAt' => 'DESC']
+        );
 
-    // Get the user
-    $student = $security->getUser();
-    if (!$student) {
-        return new JsonResponse(['success' => false, 'message' => 'User not found']);
+        if (!$cart || $cart->getBooks()->isEmpty()) {
+            return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
+        }
+
+        // Change cart status to pending approval
+        $cart->setStatus('pending');
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Cart submitted for approval',
+            'cart_id' => $cart->getId()
+        ]);
     }
 
-    // Debug: Check if the user is fetched correctly
-    dd('User fetched:', $student);
+    #[Route('/admin/approve-cart/{id}', name: 'approve_cart', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function approveCart(int $id, EntityManagerInterface $em, Request $request): JsonResponse
+    {
+        $cart = $em->getRepository(Cart::class)->find($id);
+        
+        if (!$cart || $cart->getStatus() !== 'pending') {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid cart for approval']);
+        }
 
-    // Get or create the cart
-    $cart = $student->getCart();
-    if (!$cart) {
-        $cart = new Cart();
-        $cart->setStudent($student); // Set the student on the cart
-        $student->setCart($cart); // Set the cart on the user
-        $entityManager->persist($cart); // Persist the cart
+        // Verify CSRF token if coming from web form
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
+        }
+
+        // Generate receipt
+        $receipt = new Receipt();
+        $receipt->setCart($cart);
+        $receipt->setCode('RCPT-' . date('Ymd') . '-' . strtoupper(uniqid()));
+        $receipt->setGeneratedAt(new \DateTime());
+        
+        // Update cart with approval info
+        $cart->setStatus('approved');
+        $cart->setProcessedBy($this->getUser());
+        $cart->setProcessedAt(new \DateTime());
+        
+        $em->persist($receipt);
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'receipt_code' => $receipt->getCode(),
+            'cart_id' => $cart->getId()
+        ]);
     }
 
-    // Debug: Check if the cart is created/updated correctly
-    dd('Cart created/updated:', $cart);
+    #[Route('/admin/reject-cart/{id}', name: 'reject_cart', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function rejectCart(int $id, EntityManagerInterface $em, Request $request): JsonResponse
+    {
+        $cart = $em->getRepository(Cart::class)->find($id);
+        
+        if (!$cart || $cart->getStatus() !== 'pending') {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid cart for rejection']);
+        }
 
-    // Add the book to the cart
-    $cart->addBook($book);
+        // Verify CSRF token if coming from web form
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('reject'.$cart->getId(), $request->request->get('_token'))) {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
+        }
 
-    // Debug: Check if the book is added to the cart
-    if (!$cart->getBooks()->contains($book)) {
-        return new JsonResponse(['success' => false, 'message' => 'Failed to add book to cart']);
+        // Update cart with rejection info
+        $cart->setStatus('rejected');
+        $cart->setProcessedBy($this->getUser());
+        $cart->setProcessedAt(new \DateTime());
+        
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Cart rejected',
+            'cart_id' => $cart->getId()
+        ]);
     }
 
-    // Debug: Inspect the cart object
-    dd('Cart after adding book:', $cart);
-
-    // Save changes
-    $entityManager->flush(); // Only flush here (no need to persist again)
-
-    // Debug: Check if the flush was successful
-    dd('Flush completed');
-
-    return new JsonResponse(['success' => true, 'message' => 'Book added to cart']);
-}
+    #[Route('/my-cart', name: 'view_cart')]
+    public function viewCart(EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        $user = $this->getUser();
+        $cart = $em->getRepository(Cart::class)->findOneBy([
+            'user' => $user,
+            'status' => 'draft'
+        ], ['createdAt' => 'DESC']);
+    
+        // Get a valid section (first book in cart)
+        $section = null;
+        if ($cart && !$cart->getBooks()->isEmpty()) {
+            $section = $cart->getBooks()->first()->getSection();
+        }
+    
+        return $this->render('cart/cartView.html.twig', [
+            'cart' => $cart,
+            'books' => $cart?->getBooks() ?? [],
+            'total' => $cart ? count($cart->getBooks()) : 0,
+            'section' => $section,
+        ]);
+    }
+    
+    #[Route('/remove-from-cart/{id}', name: 'remove_from_cart', methods: ['POST'])]
+    public function removeFromCart(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $book = $em->getRepository(Book::class)->find($id);
+        $user = $this->getUser();
+        
+        // Get the most recent draft cart
+        $cart = $em->getRepository(Cart::class)->findOneBy(
+            ['user' => $user, 'status' => 'draft'],
+            ['createdAt' => 'DESC']
+        );
+        
+        if ($cart && $book) {
+            $cart->removeBook($book);
+            $em->flush();
+            return new JsonResponse(['success' => true]);
+        }
+        
+        return new JsonResponse(['success' => false]);
+    }
 }

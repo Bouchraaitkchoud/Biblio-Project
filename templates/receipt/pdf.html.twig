@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt {{ receipt.code }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; width: 80mm; margin: 0 auto; padding: 10px; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .receipt-info { margin-bottom: 10px; }
+        .items { margin: 15px 0; }
+        .item { display: flex; justify-content: space-between; margin: 5px 0; }
+        .footer { margin-top: 20px; text-align: center; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Library Receipt</h2>
+    </div>
+    
+    <div class="receipt-info">
+        <p><strong>Receipt #:</strong> {{ receipt.code }}</p>
+        <p><strong>Date:</strong> {{ receipt.generatedAt|date('Y-m-d H:i') }}</p>
+        <p><strong>Customer:</strong> {{ receipt.cart.user.email }}</p>
+    </div>
+    
+    <div class="items">
+        <h3>Items:</h3>
+        {% for book in receipt.cart.books %}
+        <div class="item">
+            <span>{{ book.title }}</span>
+            <span>by {{ book.author }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="footer">
+        <p>Status: {{ receipt.cart.status|upper }}</p>
+        <p>Processed by: {{ receipt.cart.processedBy ? receipt.cart.processedBy.email : 'SYSTEM' }}</p>
+        <p>Thank you for your order!</p>
+    </div>
+</body>
+</html>

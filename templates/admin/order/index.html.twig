@@ -1,0 +1,54 @@
+{# templates/admin/order/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Pending Orders{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Pending Orders</h1>
+
+        {% if carts is empty %}
+            <div class="alert alert-info">No pending orders at this time.</div>
+        {% else %}
+            <div class="row">
+                {% for cart in carts %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                Order #{{ cart.id }} - {{ cart.createdAt|date('Y-m-d H:i') }}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">User: {{ cart.user.email }}</h5>
+                                
+                                <h6>Items:</h6>
+                                <ul class="list-group mb-3">
+                                    {% for book in cart.books %}
+                                        <li class="list-group-item">
+                                            {{ book.title }} by {{ book.author }}
+                                            (Qty: 1) {# Default quantity #}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+
+                                <div class="d-flex justify-content-between">
+                                    <form method="post" action="{{ path('admin_order_approve', {'id': cart.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
+                                        <button class="btn btn-success">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('admin_order_reject', {'id': cart.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ cart.id) }}">
+                                        <button class="btn btn-danger">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

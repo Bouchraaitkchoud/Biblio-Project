@@ -2,6 +2,7 @@
 // src/Entity/Book.php
 namespace App\Entity;
 use Doctrine\Common\Collections\Collection;
+use App\Repository\BookRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,7 +15,7 @@ class Book
     private ?int $id = null;
 
 
-    #[ORM\ManyToMany(targetEntity: Cart::class, mappedBy: 'books')]
+    #[ORM\ManyToMany(targetEntity: Cart::class, mappedBy: 'books', cascade: ['persist', 'remove'])]
     private Collection $carts;
 
     #[ORM\Column(length: 255)]
@@ -74,7 +75,9 @@ class Book
     {
         if (!$this->carts->contains($cart)) {
             $this->carts[] = $cart;
-            $cart->addBook($this);
+            if (!$cart->getBooks()->contains($this)) {
+                $cart->addBook($this);
+            }
         }
         return $this;
     }
@@ -82,8 +85,11 @@ class Book
     public function removeCart(Cart $cart): self
     {
         if ($this->carts->removeElement($cart)) {
-            $cart->removeBook($this);
+            if ($cart->getBooks()->contains($this)) {
+                $cart->removeBook($this);
+            }
         }
         return $this;
     }
+    
 }

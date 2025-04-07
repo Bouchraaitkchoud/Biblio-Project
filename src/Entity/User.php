@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -21,16 +23,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180)]
     private ?string $email = null;
+    #[ORM\OneToMany(targetEntity: Cart::class, mappedBy: 'user')]  // Changed from 'student' to 'user'
+    private Collection $carts;
 
-    
-    #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'student', cascade: ['persist', 'remove'])]
-    private ?Cart $cart = null;
+
 
 
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
     /**
@@ -128,15 +130,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-    public function getCart(): ?Cart
-    {
-        return $this->cart;
-    }
+
 
     public function setCart(Cart $cart): self
     {
         $this->cart = $cart;
-        $cart->setStudent($this); // Ensure the Cart entity has a setStudent() method
+        $cart->setUser($this); // Ensure the Cart entity has a setStudent() method
         return $this;
     }
+
+    public function __construct()
+    {
+        $this->carts = new ArrayCollection();
+    }
+
+    public function getCarts(): Collection
+    {
+        return $this->carts;
+    }
+
+    public function addCart(Cart $cart): self
+    {
+        if (!$this->carts->contains($cart)) {
+            $this->carts->add($cart);
+            $cart->setUser($this);
+        }
+        return $this;
+    }
+    public function getLastCart(): ?Cart
+{
+    return $this->carts->last();
+}
 }

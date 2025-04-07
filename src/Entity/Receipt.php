@@ -2,6 +2,8 @@
 
 // src/Entity/Receipt.php
 namespace App\Entity;
+use Doctrine\DBAL\Types\Types; // Add this line at the top
+
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -13,12 +15,15 @@ class Receipt
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: BorrowingRequest::class, inversedBy: 'receipt')]
+    #[ORM\OneToOne(targetEntity: Cart::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?BorrowingRequest $borrowingRequest = null;
+    private ?Cart $cart = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $code = null; // Unique receipt code
+    #[ORM\Column(length: 50)]
+    private ?string $code = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $generatedAt = null; // Unique receipt code
 
     // Getters and setters
     public function getId(): ?int
@@ -26,16 +31,7 @@ class Receipt
         return $this->id;
     }
 
-    public function getBorrowingRequest(): ?BorrowingRequest
-    {
-        return $this->borrowingRequest;
-    }
 
-    public function setBorrowingRequest(?BorrowingRequest $borrowingRequest): self
-    {
-        $this->borrowingRequest = $borrowingRequest;
-        return $this;
-    }
 
     public function getCode(): ?string
     {
@@ -46,5 +42,32 @@ class Receipt
     {
         $this->code = $code;
         return $this;
+    }
+    public function getCart(): ?Cart
+    {
+        return $this->cart;
+    }
+
+    public function setCart(Cart $cart): self
+    {
+        $this->cart = $cart;
+        return $this;
+    }
+
+    public function getGeneratedAt(): ?\DateTimeInterface
+    {
+        return $this->generatedAt;
+    }
+
+    public function setGeneratedAt(\DateTimeInterface $generatedAt): self
+    {
+        $this->generatedAt = $generatedAt;
+        return $this;
+    }
+
+    // Update constructor:
+    public function __construct()
+    {
+        $this->generatedAt = new \DateTime();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity]
 class Cart
@@ -14,18 +15,33 @@ class Cart
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'cart')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'carts')]
     #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+    
 
-    private ?User $student = null;
+    #[ORM\Column(type: 'string', length: 20)]
+    private string $status = 'draft'; // Can be: draft, pending, approved// 'draft', 'pending', 'approved'
 
-    #[ORM\ManyToMany(targetEntity: Book::class, inversedBy: 'carts')]
-    #[ORM\JoinTable(name: 'cart_book')] // Explicitly define the join table
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $createdAt;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $processedBy = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $processedAt = null;
+
+ 
+
+    #[ORM\ManyToMany(targetEntity: Book::class, inversedBy: 'carts', cascade: ['persist', 'remove'])]
+    #[ORM\JoinTable(name: 'cart_book')]
     private Collection $books;
-
+    
     public function __construct()
     {
         $this->books = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     // Getters and setters
@@ -34,17 +50,16 @@ class Cart
         return $this->id;
     }
 
-    public function getStudent(): ?User
+    public function getUser(): ?User
     {
-        return $this->student;
+        return $this->user;
     }
 
-    public function setStudent(User $student): self
+    public function setUser(?User $user): self
     {
-        $this->student = $student;
+        $this->user = $user;
         return $this;
     }
-
     /**
      * @return Collection<int, Book>
      */
@@ -57,13 +72,58 @@ class Cart
     {
         if (!$this->books->contains($book)) {
             $this->books[] = $book;
+            $book->addCart($this); // Ensure bidirectional relationship is set
         }
         return $this;
     }
-
+    
     public function removeBook(Book $book): self
     {
         $this->books->removeElement($book);
         return $this;
     }
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getProcessedBy(): ?User
+{
+    return $this->processedBy;
+}
+public function setProcessedBy(?User $processedBy): self
+{
+    $this->processedBy = $processedBy;
+    return $this;
+}
+
+public function getProcessedAt(): ?\DateTimeInterface
+{
+    return $this->processedAt;
+}
+public function setProcessedAt(?\DateTimeInterface $processedAt): self
+{
+    $this->processedAt = $processedAt;
+    return $this;
+}
+
+  
+  
 }

@@ -80,3 +80,4 @@ security:
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/section/\d+/books, roles: ROLE_USER } # Allow access to the book page for authenticated users
         - { path: ^/, roles: ROLE_USER } # Default rule for all other routes
+        - { path: ^/admin, roles: ROLE_ADMIN }

@@ -78,3 +78,16 @@ body {
     color: #007bff;
     transform: scale(1.2);
 }
+/* Add to your styles.css */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    padding: 0;
+    font-size: 1.2rem;
+}
+
+.add-to-cart-form {
+    display: inline;
+}
