@@ -1,5 +1,6 @@
 <?php
 
+// src/Repository/DomainRepository.php
 namespace App\Repository;
 
 use App\Entity\Domain;
@@ -16,37 +17,12 @@ class DomainRepository extends ServiceEntityRepository
         parent::__construct($registry, Domain::class);
     }
 
-    public function findByName(string $name): array
+    public function findByName($searchTerm): array
     {
         return $this->createQueryBuilder('d')
-            ->where('LOWER(d.name) LIKE LOWER(:name)')
-            ->setParameter('name', '%' . $name . '%')
+            ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
             ->getQuery()
             ->getResult();
     }
-
-    //    /**
-    //     * @return Domain[] Returns an array of Domain objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('d')
-    //            ->andWhere('d.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('d.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Domain
-    //    {
-    //        return $this->createQueryBuilder('d')
-    //            ->andWhere('d.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }
