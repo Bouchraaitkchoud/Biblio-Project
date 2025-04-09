@@ -1,59 +1,171 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    <style>
+        :root {
+            --primary: #117986;
+            --light: #ffffff;
+            --dark: #000000;
+        }
+
+        /* Button Styles */
+        .btn-primary-custom {
+            background-color: var(--primary);
+            color: var(--light);
+            border: none;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #0e606d;
+        }
+
+        .btn-outline-primary-custom {
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            background-color: var(--light);
+        }
+
+        .btn-outline-primary-custom:hover {
+            background-color: var(--primary);
+            color: var(--light);
+        }
+
+        /* Card Styles */
+        .card-custom {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .text-primary-custom {
+            color: var(--primary);
+        }
+
+        .empty-cart {
+            height: 65vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .empty-cart-icon {
+            font-size: 4rem;
+        }
+
+        /* Ensure a consistent layout */
+        .cart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cart-content {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
 {% block title %}My Cart{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <h1>My Cart</h1>
-    
-    {% if books|length > 0 %}
-        <div class="list-group mb-3">
-            {% for book in books %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5>{{ book.title }}</h5>
-                            <small class="text-muted">by {{ book.author }}</small>
-                        </div>
-                        <form action="{{ path('remove_from_cart', {'id': book.id}) }}" method="POST">
-                            <input type="hidden" name="_token" value="{{ csrf_token('remove_item') }}">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Remove
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        
-        <div class="d-flex justify-content-between align-items-center">
-            {# Updated to use your actual book listing route #}
-            {% if section %}
-                <a href="{{ path('section_books', {'id': section.id}) }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Continue
-                </a>
-            {% else %}
-                <a href="{{ path('home') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Continue
-                </a>
-            {% endif %}
+<div class="container py-5 cart-container">
+    <h1 class="mb-4 text-center text-primary-custom">🛒 My Cart</h1>
 
-            <form action="{{ path('submit_cart') }}" method="POST">
-                <input type="hidden" name="_token" value="{{ csrf_token('submit_cart') }}">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check-circle"></i> Submit 
-                </button>
-            </form>
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            Your cart is empty. 
-            {% if section %}
-                <a href="{{ path('section_books', {'id': section.id}) }}">Browse books</a>
-            {% else %}
-                <a href="{{ path('home') }}">Browse books</a>
-            {% endif %}
-        </div>
-    {% endif %}
+    <div class="cart-content">
+        {% if books|length > 0 %}
+            <div class="row g-3 mb-4">
+                {% for book in books %}
+                    <div class="col-12">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ book.title }}</h5>
+                                    <small class="text-muted">by {{ book.author }}</small>
+                                </div>
+                                <form action="{{ path('remove_from_cart', {'id': book.id}) }}" method="POST">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('remove_item') }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        🗑️ Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                {% if section %}
+                    <a href="{{ path('section_books', {'id': section.id}) }}" class="btn btn-outline-primary-custom">
+                        ← Continue Browsing
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_domains') }}" class="btn btn-outline-primary-custom">
+                        ← Continue Browsing
+                    </a>
+                {% endif %}
+
+                <form id="submitCartForm" action="{{ path('submit_cart') }}" method="POST">
+                    <input type="hidden" name="_token" value="{{ csrf_token('submit_cart') }}">
+                    <button type="submit" class="btn btn-primary-custom" id="submitButton">
+                        ✅ Submit Cart
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
+                <h4 class="text-primary-custom mt-3">Your cart is empty</h4>
+                <p class="mb-4">Looks like you haven’t added anything yet. Start exploring!</p>
+                {% if section %}
+                    <a href="{{ path('section_books', {'id': section.id}) }}" class="btn btn-outline-primary-custom">
+                        📖 Browse Books
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_domains') }}" class="btn btn-outline-primary-custom">
+                        📚 Browse Domains
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const form = document.getElementById('submitCartForm');
+    const submitButton = document.getElementById('submitButton');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Disable the submit button after the form is submitted
+                    submitButton.classList.add('hidden');
+                    
+                    // Optionally reload after the form submission
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000); // Reload after 1 second
+                } else {
+                    alert('There was an error submitting your cart.');
+                }
+            });
+        });
+    }
+</script>
 {% endblock %}
