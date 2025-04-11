@@ -1,68 +1,404 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Domains{% endblock %}
+{% block title %}Domaines{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }} {# Keeps styles from base.html.twig #}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-color: #117986;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #0d5c66;
+            border-color: #0d5c66;
+        }
+
+        .btn-outline-primary-custom {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary-custom:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .card-custom {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+        }
+
+        .text-primary-custom {
+            color: var(--primary-color) !important;
+        }
+
+        .search-container {
+            background-color: var(--light-color);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            border-radius: 0.25rem;
+            border: 1px solid #ced4da;
+            padding: 0.5rem 1rem;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(17, 121, 134, 0.25);
+        }
+
+        .search-button {
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .results-container {
+            margin-top: 2rem;
+        }
+
+        .result-card {
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-description {
+            color: #6c757d;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .book-card {
+            height: 100%;
+        }
+
+        .book-image {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .book-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-author {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .book-description {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .book-actions {
+            margin-top: auto;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            color: var(--primary-color);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Library Theme Colors */
+        :root {
+            --primary: #117986;
+            --secondary: #0d5c66;
+            --accent: #117986;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+        }
+
+        /* Main Container */
+        .library-container {
+            padding: 2rem 0;
+            background-color: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .library-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .library-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .library-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Search Section */
+        .search-section {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .search-input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-button {
+            background: transparent;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Domains Grid */
+        .domains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .domain-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .domain-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .domain-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .domain-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .domain-icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .sections-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .domain-card.expanded .sections-list {
+            max-height: 500px;
+        }
+
+        .section-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--light);
+            transition: all 0.2s ease;
+        }
+
+        .section-item:last-child {
+            border-bottom: none;
+        }
+
+        .section-item:hover {
+            background-color: var(--light);
+        }
+
+        .section-link {
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .section-link i {
+            margin-right: 0.5rem;
+            color: var(--accent);
+        }
+
+        /* Search Results */
+        .search-results {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-results-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .result-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .domains-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .library-title {
+                font-size: 2rem;
+            }
+
+            .search-section {
+                margin: 0 1rem 2rem;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        <h1 class="text-center mb-4" style="color: #117986;">Domains</h1>
+    <div class="library-container">
+        <div class="container">
+            <div class="library-header">
+                <h1 class="library-title">Bibliothèque Universitaire</h1>
+                <p class="library-subtitle">Explorez notre collection de domaines et de sections</p>
+            </div>
 
-<!-- Search Form -->
-<div class="row justify-content-center mb-4">
-    <div class="col-md-8 d-flex justify-content-center">
-        <div class="input-group" style="border: 1px solid #ccc; border-radius: 25px; padding: 5px; display: flex; align-items: center; width: 100%; max-width: 400px;">
-            <input type="text" id="search-input" placeholder="Search domains, sections, books, or authors..." 
-                class="form-control" 
-                style="border: none; box-shadow: none; outline: none; flex: 1; padding-left: 15px; border-radius: 25px;">
-            
-            <button id="search-button" class="btn" type="submit" style="background: transparent; border: none; padding: 5px;">
-                <img src="{{ asset('images/Search-icon.png') }}" alt="Search" style="width: 20px; height: 20px;">
-            </button>
-        </div>
-    </div>
-</div>
-        <!-- Search Results -->
-        <div id="search-results" class="mt-4" style="display: none;">
-            <h2 class="text-center mb-3" style="color: #117986;">Search Results</h2>
-            <div id="domains-results" class="mb-4"></div>
-            <div id="sections-results" class="mb-4"></div>
-            <div id="books-results" class="mb-4"></div>
-        </div>
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Rechercher des domaines, sections, livres..." 
+                        class="form-control search-input">
+                    <button id="search-button" class="btn search-button" type="submit">
+                        <i class="fas fa-search search-icon"></i>
+                    </button>
+                </div>
+            </div>
 
-        <!-- Domains List -->
-        <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div id="search-results" class="search-results">
+                <h2 class="search-results-title">Résultats de la recherche</h2>
+                <div id="domains-results" class="mb-4"></div>
+                <div id="sections-results" class="mb-4"></div>
+                <div id="books-results" class="mb-4"></div>
+            </div>
+
+            <div class="domains-grid">
                 {% if domains is empty %}
-                    <p class="text-center">No domains found.</p>
+                    <div class="text-center w-100">
+                        <p>Aucun domaine trouvé.</p>
+                    </div>
                 {% else %}
-                    <ul class="list-group">
-                        {% for domain in domains %}
-                            <li class="list-group-item" style="border-left: 4px solid #117986;">
-                                <a href="#" class="domain-link text-decoration-none"
-                                    data-domain-id="{{ domain.id }}"
-                                    style="color: #117986;"
-                                    onmouseover="this.style.color='#0e6655'"
-                                    onmouseout="this.style.color='#117986'">
-                                    <h5 class="mb-0">{{ domain.name }}</h5>
-                                </a>
-                                <div id="sections-{{ domain.id }}" class="sections-list mt-2" style="display: none;">
-                                    <ul class="list-group">
-                                        {% for section in domain.sections %}
-                                            <li class="list-group-item">
-                                                <a href="{{ path('section_books', {'id': section.id}) }}">
-                                                    {{ section.name }}
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% for domain in domains %}
+                        <div class="domain-card" data-domain-id="{{ domain.id }}">
+                            <div class="domain-header">
+                                <h3 class="domain-title">{{ domain.name }}</h3>
+                                <i class="fas fa-book-open domain-icon"></i>
+                            </div>
+                            <div class="sections-list">
+                                {% for section in domain.sections %}
+                                    <div class="section-item">
+                                        <a href="{{ path('section_books', {'id': section.id}) }}" class="section-link">
+                                            <i class="fas fa-folder"></i>
+                                            {{ section.name }}
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% endif %}
             </div>
         </div>
@@ -70,24 +406,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add click event listeners to all domain links
-            document.querySelectorAll('.domain-link').forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault(); // Prevent the default link behavior
-
-                    const domainId = this.getAttribute('data-domain-id');
-                    const sectionsDiv = document.getElementById(`sections-${domainId}`);
-
-                    // Toggle the visibility of the sections list
-                    if (sectionsDiv.style.display === 'none') {
-                        sectionsDiv.style.display = 'block';
-                    } else {
-                        sectionsDiv.style.display = 'none';
+            // Add click event listeners to domain cards
+            document.querySelectorAll('.domain-card').forEach(function(card) {
+                card.addEventListener('click', function(event) {
+                    if (!event.target.classList.contains('section-link')) {
+                        this.classList.toggle('expanded');
                     }
                 });
             });
 
-            // Add search functionality
+            // Search functionality
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
             const searchResults = document.getElementById('search-results');
@@ -101,23 +429,29 @@
                     fetch(`/domains/search?q=${encodeURIComponent(searchTerm)}`)
                         .then(response => response.json())
                         .then(data => {
-                            // Display the search results
                             searchResults.style.display = 'block';
 
-                            // Display domains
                             domainsResults.innerHTML = data.domains.length > 0
-                                ? `<h3 style="color: #117986;">Domains</h3><ul class="list-group">${data.domains.map(domain => `<li class="list-group-item">${domain.name}</li>`).join('')}</ul>`
-                                : '<p>No domains found.</p>';
+                                ? `<h3 class="search-results-title">Domaines</h3>${data.domains.map(domain => `
+                                    <div class="result-item">
+                                        <h4>${domain.name}</h4>
+                                    </div>`).join('')}`
+                                : '<p>Aucun domaine trouvé.</p>';
 
-                            // Display sections
                             sectionsResults.innerHTML = data.sections.length > 0
-                                ? `<h3 style="color: #117986;">Sections</h3><ul class="list-group">${data.sections.map(section => `<li class="list-group-item">${section.name}</li>`).join('')}</ul>`
-                                : '<p>No sections found.</p>';
+                                ? `<h3 class="search-results-title">Sections</h3>${data.sections.map(section => `
+                                    <div class="result-item">
+                                        <h4>${section.name}</h4>
+                                    </div>`).join('')}`
+                                : '<p>Aucune section trouvée.</p>';
 
-                            // Display books
                             booksResults.innerHTML = data.books.length > 0
-                                ? `<h3 style="color: #117986;">Books</h3><ul class="list-group">${data.books.map(book => `<li class="list-group-item">${book.title} by ${book.author}</li>`).join('')}</ul>`
-                                : '<p>No books found.</p>';
+                                ? `<h3 class="search-results-title">Livres</h3>${data.books.map(book => `
+                                    <div class="result-item">
+                                        <h4>${book.title}</h4>
+                                        <p class="text-muted">${book.author}</p>
+                                    </div>`).join('')}`
+                                : '<p>Aucun livre trouvé.</p>';
                         })
                         .catch(error => console.error('Error searching:', error));
                 }
