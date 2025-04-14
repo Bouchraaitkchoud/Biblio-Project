@@ -410,6 +410,14 @@
             document.querySelectorAll('.domain-card').forEach(function(card) {
                 card.addEventListener('click', function(event) {
                     if (!event.target.classList.contains('section-link')) {
+                        // First, collapse all other domain cards
+                        document.querySelectorAll('.domain-card').forEach(function(otherCard) {
+                            if (otherCard !== card) {
+                                otherCard.classList.remove('expanded');
+                            }
+                        });
+                        
+                        // Toggle the clicked card
                         this.classList.toggle('expanded');
                     }
                 });
