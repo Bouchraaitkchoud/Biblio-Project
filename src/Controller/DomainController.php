@@ -46,20 +46,77 @@ class DomainController extends AbstractController
     {
         // Get the search term from the query parameters
         $searchTerm = $request->query->get('q', '');
+        
+        // Return empty results if search term is empty or too short
+        if (empty($searchTerm) || strlen($searchTerm) < 2) {
+            return $this->json([
+                'domains' => [],
+                'sections' => [],
+                'books' => [],
+            ]);
+        }
 
-        // Search for domains, sections, books, and authors
-        $domains = $domainRepository->findByName($searchTerm);
-        $sections = $sectionRepository->findByName($searchTerm);
-        $books = $bookRepository->findByTitleOrAuthor($searchTerm);
+        // Search for domains, sections, books
+        $domains = $domainRepository->createQueryBuilder('d')
+            ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('d.name', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+        
+        $sections = $sectionRepository->createQueryBuilder('s')
+            ->where('LOWER(s.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('s.name', 'ASC') 
+            ->setMaxResults(15)
+            ->getQuery()
+            ->getResult();
+        
+        $books = $bookRepository->createQueryBuilder('b')
+            ->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
+            ->orWhere('LOWER(b.author) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('b.title', 'ASC')
+            ->setMaxResults(20)
+            ->getQuery()
+            ->getResult();
 
-        // Combine the results into a single array
-        $results = [
-            'domains' => $domains,
-            'sections' => $sections,
-            'books' => $books,
-        ];
+        // Format the domain results for better display
+        $formattedDomains = [];
+        foreach ($domains as $domain) {
+            $formattedDomains[] = [
+                'id' => $domain->getId(),
+                'name' => $domain->getName()
+            ];
+        }
 
-        // Return the search results as JSON
-        return $this->json($results);
+        // Format the section results for better display
+        $formattedSections = [];
+        foreach ($sections as $section) {
+            $formattedSections[] = [
+                'id' => $section->getId(),
+                'name' => $section->getName(),
+                'domainId' => $section->getDomain() ? $section->getDomain()->getId() : null,
+                'domainName' => $section->getDomain() ? $section->getDomain()->getName() : null
+            ];
+        }
+
+        // Format the book results for better display
+        $formattedBooks = [];
+        foreach ($books as $book) {
+            $formattedBooks[] = [
+                'id' => $book->getId(),
+                'title' => $book->getTitle(),
+                'author' => $book->getAuthor()
+            ];
+        }
+
+        // Return the optimized search results as JSON
+        return $this->json([
+            'domains' => $formattedDomains,
+            'sections' => $formattedSections,
+            'books' => $formattedBooks,
+        ]);
     }
 }

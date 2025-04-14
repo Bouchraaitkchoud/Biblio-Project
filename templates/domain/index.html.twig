@@ -431,37 +431,93 @@
             const sectionsResults = document.getElementById('sections-results');
             const booksResults = document.getElementById('books-results');
 
-            searchButton.addEventListener('click', function() {
+            // Debounce function to prevent too many requests
+            function debounce(func, delay) {
+                let timer;
+                return function() {
+                    const context = this;
+                    const args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(() => func.apply(context, args), delay);
+                };
+            }
+
+            // Function to perform search
+            function performSearch() {
                 const searchTerm = searchInput.value.trim();
-                if (searchTerm) {
-                    fetch(`/domains/search?q=${encodeURIComponent(searchTerm)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            searchResults.style.display = 'block';
+                if (searchTerm.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Show loading state
+                searchResults.style.display = 'block';
+                domainsResults.innerHTML = '<p>Recherche en cours...</p>';
+                sectionsResults.innerHTML = '';
+                booksResults.innerHTML = '';
+                
+                fetch(`/domains/search?q=${encodeURIComponent(searchTerm)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        domainsResults.innerHTML = data.domains.length > 0
+                            ? `<h3 class="search-results-title">Domaines</h3>${data.domains.map(domain => `
+                                <div class="result-item domain-result" data-id="${domain.id}">
+                                    <h4>${domain.name}</h4>
+                                </div>`).join('')}`
+                            : '<p>Aucun domaine trouvé.</p>';
 
-                            domainsResults.innerHTML = data.domains.length > 0
-                                ? `<h3 class="search-results-title">Domaines</h3>${data.domains.map(domain => `
-                                    <div class="result-item">
-                                        <h4>${domain.name}</h4>
-                                    </div>`).join('')}`
-                                : '<p>Aucun domaine trouvé.</p>';
+                        sectionsResults.innerHTML = data.sections.length > 0
+                            ? `<h3 class="search-results-title">Sections</h3>${data.sections.map(section => `
+                                <div class="result-item section-result" data-id="${section.id}">
+                                    <h4>${section.name}</h4>
+                                    ${section.domainName ? `<p class="text-muted">Domain: ${section.domainName}</p>` : ''}
+                                </div>`).join('')}`
+                            : '<p>Aucune section trouvée.</p>';
 
-                            sectionsResults.innerHTML = data.sections.length > 0
-                                ? `<h3 class="search-results-title">Sections</h3>${data.sections.map(section => `
-                                    <div class="result-item">
-                                        <h4>${section.name}</h4>
-                                    </div>`).join('')}`
-                                : '<p>Aucune section trouvée.</p>';
-
-                            booksResults.innerHTML = data.books.length > 0
-                                ? `<h3 class="search-results-title">Livres</h3>${data.books.map(book => `
-                                    <div class="result-item">
-                                        <h4>${book.title}</h4>
-                                        <p class="text-muted">${book.author}</p>
-                                    </div>`).join('')}`
-                                : '<p>Aucun livre trouvé.</p>';
-                        })
-                        .catch(error => console.error('Error searching:', error));
+                        booksResults.innerHTML = data.books.length > 0
+                            ? `<h3 class="search-results-title">Livres</h3>${data.books.map(book => `
+                                <div class="result-item book-result" data-id="${book.id}">
+                                    <h4>${book.title}</h4>
+                                    <p class="text-muted">${book.author}</p>
+                                </div>`).join('')}`
+                            : '<p>Aucun livre trouvé.</p>';
+                            
+                        // Add click handlers for search results
+                        document.querySelectorAll('.domain-result').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const domainId = this.getAttribute('data-id');
+                                const domainCard = document.querySelector(`.domain-card[data-domain-id="${domainId}"]`);
+                                if (domainCard) {
+                                    // Collapse other domains and expand this one
+                                    document.querySelectorAll('.domain-card').forEach(otherCard => {
+                                        otherCard.classList.remove('expanded');
+                                    });
+                                    domainCard.classList.add('expanded');
+                                    // Scroll to the domain card
+                                    domainCard.scrollIntoView({behavior: 'smooth'});
+                                    // Hide search results
+                                    searchResults.style.display = 'none';
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error searching:', error);
+                        searchResults.innerHTML = '<p>Une erreur est survenue pendant la recherche.</p>';
+                    });
+            }
+            
+            // Debounced search for input typing
+            const debouncedSearch = debounce(performSearch, 300);
+            
+            // Add event listeners
+            searchInput.addEventListener('input', debouncedSearch);
+            searchButton.addEventListener('click', performSearch);
+            
+            // Also trigger search on Enter key
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
                 }
             });
         });
