@@ -204,39 +204,44 @@
                     const orderId = orderItem.dataset.orderId;
                     const formData = new FormData(this);
                     
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            // Add fade-out class to the order item
-                            orderItem.classList.add('fade-out');
-                            
-                            // Remove the order item after animation completes
-                            setTimeout(() => {
-                                orderItem.remove();
-                                
-                                // Check if there are any orders left
-                                const remainingOrders = document.querySelectorAll('.order-item');
-                                if (remainingOrders.length === 0) {
-                                    // Show no orders message
-                                    const ordersContainer = document.querySelector('.orders-container');
-                                    ordersContainer.innerHTML = `
-                                        <div class="no-orders">
-                                            <i class="fas fa-inbox"></i>
-                                            <h3>No pending orders at this time</h3>
-                                            <p class="text-muted">All orders have been processed</p>
-                                        </div>
-                                    `;
-                                }
-                            }, 300);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
+fetch(this.action, {
+    method: 'POST',
+    body: formData,
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+})
+.then(response => {
+    if (response.ok) {
+        // Extract order ID from data attribute
+        const receiptId = orderItem.dataset.orderId;
+
+        // Open the PDF in a new tab
+        window.open(`/receipt/${receiptId}`, '_blank');
+
+        // Add fade-out class to the order item
+        orderItem.classList.add('fade-out');
+
+        // Remove the order item after animation completes
+        setTimeout(() => {
+            orderItem.remove();
+
+            // Check if there are any orders left
+            const remainingOrders = document.querySelectorAll('.order-item');
+            if (remainingOrders.length === 0) {
+                const ordersContainer = document.querySelector('.orders-container');
+                ordersContainer.innerHTML = `
+                    <div class="no-orders">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No pending orders at this time</h3>
+                        <p class="text-muted">All orders have been processed</p>
+                    </div>
+                `;
+            }
+        }, 300);
+    }
+})
+.catch(error => console.error('Error:', error));
                 });
             });
         });

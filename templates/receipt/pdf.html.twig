@@ -2,41 +2,99 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Receipt {{ receipt.code }}</title>
+    <title>Reçu {{ receipt.code }}</title>
     <style>
-        body { font-family: Arial, sans-serif; width: 80mm; margin: 0 auto; padding: 10px; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .receipt-info { margin-bottom: 10px; }
-        .items { margin: 15px 0; }
-        .item { display: flex; justify-content: space-between; margin: 5px 0; }
-        .footer { margin-top: 20px; text-align: center; font-size: 0.8em; }
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            width: 80mm; 
+            margin: 0 auto; 
+            padding: 15px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .receipt-info { 
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .items { 
+            margin: 20px 0;
+            background: #fff;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .items h3 {
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 8px;
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .item { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px dotted #eee;
+        }
+        .item span:first-child {
+            font-weight: 500;
+        }
+        .footer { 
+            margin-top: 25px; 
+            text-align: center; 
+            font-size: 0.85em;
+            color: #7f8c8d;
+            border-top: 2px solid #3498db;
+            padding-top: 10px;
+        }
+        .status {
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .processed-by {
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>Library Receipt</h2>
+        <h2>Reçu de Bibliothèque</h2>
     </div>
     
     <div class="receipt-info">
-        <p><strong>Receipt #:</strong> {{ receipt.code }}</p>
-        <p><strong>Date:</strong> {{ receipt.generatedAt|date('Y-m-d H:i') }}</p>
-        <p><strong>Customer:</strong> {{ receipt.cart.user.email }}</p>
+        <p><strong>N° de reçu :</strong> {{ receipt.code }}</p>
+        <p><strong>Date :</strong> {{ receipt.generatedAt|date('d/m/Y H:i') }}</p>
+        <p><strong>Client :</strong> {{ receipt.cart.user.email }}</p>
     </div>
     
     <div class="items">
-        <h3>Items:</h3>
+        <h3>Livres empruntés :</h3>
         {% for book in receipt.cart.books %}
         <div class="item">
             <span>{{ book.title }}</span>
-            <span>by {{ book.author }}</span>
+            <span>par {{ book.author }}</span>
         </div>
         {% endfor %}
     </div>
     
     <div class="footer">
-        <p>Status: {{ receipt.cart.status|upper }}</p>
-        <p>Processed by: {{ receipt.cart.processedBy ? receipt.cart.processedBy.email : 'SYSTEM' }}</p>
-        <p>Thank you for your order!</p>
+        <p><span class="status">Statut : {{ receipt.cart.status|upper }}</span></p>
+        <p class="processed-by">Traité par : {{ receipt.cart.processedBy ? receipt.cart.processedBy.email : 'SYSTÈME' }}</p>
+        <p>Merci pour votre emprunt !</p>
     </div>
 </body>
 </html>

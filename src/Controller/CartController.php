@@ -121,7 +121,7 @@ class CartController extends AbstractController
 
     #[Route('/admin/approve-cart/{id}', name: 'approve_cart', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function approveCart(int $id, EntityManagerInterface $em, Request $request): JsonResponse
+    public function approveCart(int $id, EntityManagerInterface $em, Request $request)
     {
         $cart = $em->getRepository(Cart::class)->find($id);
         
@@ -148,11 +148,8 @@ class CartController extends AbstractController
         $em->persist($receipt);
         $em->flush();
 
-        return new JsonResponse([
-            'success' => true,
-            'receipt_code' => $receipt->getCode(),
-            'cart_id' => $cart->getId()
-        ]);
+        return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+
     }
 
     #[Route('/admin/reject-cart/{id}', name: 'reject_cart', methods: ['POST'])]

@@ -10,20 +10,27 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ReceiptController extends AbstractController
 {
+
     #[Route('/receipt/{id}', name: 'receipt_show')]
     public function show(Receipt $receipt, Pdf $knpSnappyPdf): Response
     {
-        $html = $this->renderView('receipt/pdf.html.twig', [
-            'receipt' => $receipt
-        ]);
-
-        return new Response(
-            $knpSnappyPdf->getOutputFromHtml($html),
-            200,
-            [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="receipt-'.$receipt->getCode().'.pdf"'
-            ]
-        );
+        try {
+            $html = $this->renderView('receipt/pdf.html.twig', [
+                'receipt' => $receipt
+            ]);
+    
+            return new Response(
+                $knpSnappyPdf->getOutputFromHtml($html),
+                200,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="receipt-'.$receipt->getCode().'.pdf"'
+                ]
+            );
+        } catch (\Exception $e) {
+            // Log the error and return a meaningful response
+            $this->addFlash('error', 'Failed to generate PDF: '.$e->getMessage());
+            return $this->redirectToRoute('admin_orders_index');
+        }
     }
 }

@@ -34,32 +34,8 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}/approve', name: 'admin_order_approve', methods: ['POST'])]
-    // public function approve(Request $request, Cart $cart): Response
-    // {
-    //     if ($this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
-    //         $cart->setStatus('approved');
-    //         $cart->setProcessedBy($this->getUser());
-    //         $cart->setProcessedAt(new \DateTime());
-
-    //         // Generate receipt
-    //         $receipt = new Receipt();
-    //         $receipt->setCart($cart);
-    //         $receipt->setCode('REC-'.date('Ymd').'-'.uniqid());
-    //         $receipt->setGeneratedAt(new \DateTime());
-            
-    //         $this->em->persist($receipt);
-    //         $this->em->flush();
-
-    //         $this->addFlash('success', 'Order approved and receipt generated.');
-    //     }
-
-    //     return $this->redirectToRoute('admin_orders_index');
-    // }
-    public function approve(
-        Request $request,
-        Cart $cart,
-        EntityManagerInterface $em
-    ): Response {
+    public function approve(Request $request, Cart $cart, EntityManagerInterface $em): Response 
+    {
         if ($this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
             // Generate receipt
             $receipt = new Receipt();
@@ -74,8 +50,8 @@ class OrderController extends AbstractController
             $em->persist($receipt);
             $em->flush();
     
-            // Redirect to PDF view
-            return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+            // Simply return to orders list after approval
+            return $this->redirectToRoute('admin_orders_index');
         }
     
         return $this->redirectToRoute('admin_orders_index');
