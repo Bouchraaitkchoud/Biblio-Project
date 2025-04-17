@@ -120,7 +120,13 @@ class Book
             return null;
         }
         
-        $data = stream_get_contents($this->coverImage);
+        if (is_resource($this->coverImage)) {
+            // Reset stream pointer
+            rewind($this->coverImage);
+            $data = stream_get_contents($this->coverImage);
+        } else {
+            $data = $this->coverImage;
+        }
         
         if ($data) {
             return 'data:image/jpeg;base64,' . base64_encode($data);
