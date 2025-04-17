@@ -1,0 +1,143 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Author Details{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <style>
+        .author-name {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+        .author-info {
+            margin-bottom: 30px;
+        }
+        .author-info h3 {
+            font-size: 1.2rem;
+            color: #117986;
+            margin-bottom: 15px;
+        }
+        .books-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .books-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .books-list li:last-child {
+            border-bottom: none;
+        }
+        .content-container {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
+                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
+                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
+                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link active">Authors</a>
+                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
+                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+            </div>
+        </div>
+        
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        <div class="page-header">
+            <h1>Author Details</h1>
+            <div class="actions">
+                <a href="{{ path('admin_author_edit', {'id': author.id}) }}" class="btn btn-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        
+        <div class="content-container">
+            <div class="author-name">{{ author.name }}</div>
+            
+            {% if author.bio is defined and author.bio %}
+            <div class="author-info">
+                <h3>Biography</h3>
+                <p>{{ author.bio }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="author-info">
+                <h3>Books by this Author ({{ author.books|length }})</h3>
+                {% if author.books|length > 0 %}
+                    <ul class="books-list">
+                        {% for book in author.books %}
+                            <li>
+                                <a href="{{ path('admin_books_show', {'id': book.id}) }}">{{ book.title }}</a>
+                                ({{ book.section.name }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No books found for this author.</p>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{{ path('admin_authors_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the author "{{ author.name }}"?
+                    
+                    {% if author.books|length > 0 %}
+                        <div class="alert alert-warning mt-3">
+                            <strong>Warning:</strong> This author has {{ author.books|length }} books. Deleting this author may affect these books.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="{{ path('admin_author_delete', {'id': author.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
+                        <button type="submit" class="btn btn-delete">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

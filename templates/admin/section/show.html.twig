@@ -1,0 +1,244 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Section Details{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+    <style>
+        .admin-nav {
+            background-color: #117986;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .admin-nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .admin-nav-link:hover, .admin-nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        .admin-user-info {
+            color: white;
+        }
+        .content-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: #117986;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover {
+            background-color: #0d6974;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .alert {
+            border-radius: 8px;
+        }
+        .section-name {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: #212529;
+        }
+        .domain-name {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        .section-info {
+            margin-bottom: 30px;
+        }
+        .section-info h3 {
+            font-size: 1.2rem;
+            color: #117986;
+            margin-bottom: 15px;
+        }
+        .books-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .books-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .books-list li:last-child {
+            border-bottom: none;
+        }
+        .actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .book-count {
+            font-weight: normal;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
+                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
+                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link active">Sections</a>
+                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
+                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
+                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+            </div>
+        </div>
+        
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        <div class="actions-header">
+            <h1>Section Details</h1>
+            <div class="action-buttons">
+                <a href="{{ path('admin_section_edit', {'id': section.id}) }}" class="btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <button type="button" class="btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        
+        <div class="content-container">
+            <div class="section-name">{{ section.name }}</div>
+            <div class="domain-name">Domain: {{ section.domain.name }}</div>
+            
+            <div class="section-info">
+                <h3>Books in this Section <span class="book-count">({{ section.books|length }})</span></h3>
+                {% if section.books|length > 0 %}
+                    <ul class="books-list">
+                        {% for book in section.books %}
+                            <li>
+                                <a href="{{ path('admin_books_show', {'id': book.id}) }}">{{ book.title }}</a>
+                                <small>by {{ book.authorName }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No books found in this section.</p>
+                {% endif %}
+            </div>
+            
+            <div class="btn-container">
+                <a href="{{ path('admin_sections_index') }}" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the section "{{ section.name }}"?
+                    
+                    {% if section.books|length > 0 %}
+                        <div class="alert alert-warning mt-3">
+                            <strong>Warning:</strong> This section contains {{ section.books|length }} books. Deleting this section may affect these books.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="{{ path('admin_section_delete', {'id': section.id}) }}" style="display: inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ section.id) }}">
+                        <button type="submit" class="btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 
