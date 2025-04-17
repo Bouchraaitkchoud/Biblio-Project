@@ -19,11 +19,14 @@ class BookRepository extends ServiceEntityRepository
 
     public function findByTitleOrAuthor($searchTerm): array
     {
-        return $this->createQueryBuilder('b')
+        $qb = $this->createQueryBuilder('b')
+            ->leftJoin('b.authors', 'a')
             ->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
-            ->orWhere('LOWER(b.author) LIKE LOWER(:searchTerm)')
+            ->orWhere('LOWER(a.name) LIKE LOWER(:searchTerm)')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('b.title', 'ASC')
+            ->setMaxResults(20);
+            
+        return $qb->getQuery()->getResult();
     }
 }

@@ -1,12 +1,17 @@
 knp_snappy:
-    pdf:
-        enabled:    true
-        binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"' 
-        options:    
-              enable-local-file-access: true  # Important for file permissions
-              encoding: 'UTF-8'
-        
-    image:
-        enabled:    true
-        binary:     '%env(WKHTMLTOIMAGE_PATH)%'
-        options:    []
+  pdf:
+    enabled: true
+    binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
+    options:
+      enable-local-file-access: true
+      encoding: UTF-8
+      page-size: A4
+      lowquality: false
+      margin-top: 15
+      margin-right: 15
+      margin-bottom: 15
+      margin-left: 15
+  image:
+    enabled: true
+    binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe"'
+    options: []

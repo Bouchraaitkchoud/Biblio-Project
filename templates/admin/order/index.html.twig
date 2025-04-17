@@ -165,7 +165,7 @@
                                     <div class="book-item">
                                         <div class="book-info">
                                             <div class="book-title">{{ book.title }}</div>
-                                            <div class="book-author">by {{ book.author }}</div>
+                                            <div class="book-author">by {{ book.authorName }}</div>
                                         </div>
                                         <span class="book-quantity">Qty: 1</span>
                                     </div>
@@ -173,18 +173,24 @@
                             </div>
 
                             <div class="action-buttons">
-                                <form method="post" action="{{ path('admin_order_approve', {'id': cart.id}) }}" class="approve-form">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
-                                    <button type="submit" class="btn btn-approve">
-                                        <i class="fas fa-check"></i> Approve
-                                    </button>
-                                </form>
-                                <form method="post" action="{{ path('admin_order_reject', {'id': cart.id}) }}" class="reject-form">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ cart.id) }}">
-                                    <button type="submit" class="btn btn-reject">
-                                        <i class="fas fa-times"></i> Reject
-                                    </button>
-                                </form>
+                                {% if cart.status == 'approved' %}
+                                    <a href="{{ path('admin_order_receipt', {'id': cart.id}) }}" class="btn btn-info" target="_blank">
+                                        <i class="fas fa-file-pdf"></i> View Receipt
+                                    </a>
+                                {% else %}
+                                    <form method="post" action="{{ path('admin_order_approve', {'id': cart.id}) }}" class="approve-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
+                                        <button type="submit" class="btn btn-approve">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('admin_order_reject', {'id': cart.id}) }}" class="reject-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ cart.id) }}">
+                                        <button type="submit" class="btn btn-reject">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -213,12 +219,6 @@ fetch(this.action, {
 })
 .then(response => {
     if (response.ok) {
-        // Extract order ID from data attribute
-        const receiptId = orderItem.dataset.orderId;
-
-        // Open the PDF in a new tab
-        window.open(`/receipt/${receiptId}`, '_blank');
-
         // Add fade-out class to the order item
         orderItem.classList.add('fade-out');
 
@@ -238,6 +238,9 @@ fetch(this.action, {
                     </div>
                 `;
             }
+
+            // Show success message
+            alert('Order processed successfully!');
         }, 300);
     }
 })

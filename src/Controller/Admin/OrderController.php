@@ -49,11 +49,16 @@ class OrderController extends AbstractController
             
             $em->persist($receipt);
             $em->flush();
-    
-            // Simply return to orders list after approval
-            return $this->redirectToRoute('admin_orders_index');
+
+            // Check if it's an AJAX request
+            if ($request->isXmlHttpRequest()) {
+                return new Response('Order approved', Response::HTTP_OK);
+            }
+
+            // For normal POST requests, redirect to the receipt page
+            return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
         }
-    
+
         return $this->redirectToRoute('admin_orders_index');
     }
 
@@ -71,5 +76,20 @@ class OrderController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_orders_index');
+    }
+
+    #[Route('/{id}/receipt', name: 'admin_order_receipt', methods: ['GET'])]
+    public function viewReceipt(Cart $cart, EntityManagerInterface $em): Response
+    {
+        // Find the receipt for this cart
+        $receipt = $em->getRepository(Receipt::class)->findByCartId($cart->getId());
+        
+        if (!$receipt) {
+            $this->addFlash('error', 'No receipt found for this order.');
+            return $this->redirectToRoute('admin_orders_index');
+        }
+        
+        // Redirect to the receipt controller
+        return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
     }
 }

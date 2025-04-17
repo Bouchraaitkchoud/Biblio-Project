@@ -31,6 +31,16 @@ class ReceiptRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+    public function findByCartId(int $cartId): ?Receipt
+    {
+        return $this->createQueryBuilder('r')
+            ->join('r.cart', 'c')
+            ->where('c.id = :cartId')
+            ->setParameter('cartId', $cartId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    public function findOneBySomeField($value): ?Receipt
     //    {
     //        return $this->createQueryBuilder('r')

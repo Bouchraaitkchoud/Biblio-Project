@@ -6,6 +6,7 @@ use App\Entity\Domain;
 use App\Repository\DomainRepository;
 use App\Repository\SectionRepository;
 use App\Repository\BookRepository;
+use App\Repository\AuthorRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,7 +43,7 @@ class DomainController extends AbstractController
     }
 
     #[Route('/domains/search', name: 'app_domains_search', methods: ['GET'])]
-    public function search(Request $request, DomainRepository $domainRepository, SectionRepository $sectionRepository, BookRepository $bookRepository): JsonResponse
+    public function search(Request $request, DomainRepository $domainRepository, SectionRepository $sectionRepository, BookRepository $bookRepository, AuthorRepository $authorRepository): JsonResponse
     {
         // Get the search term from the query parameters
         $searchTerm = $request->query->get('q', '');
@@ -53,10 +54,11 @@ class DomainController extends AbstractController
                 'domains' => [],
                 'sections' => [],
                 'books' => [],
+                'authors' => [],
             ]);
         }
 
-        // Search for domains, sections, books
+        // Search for domains, sections, books, and authors
         $domains = $domainRepository->createQueryBuilder('d')
             ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
@@ -73,14 +75,9 @@ class DomainController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        $books = $bookRepository->createQueryBuilder('b')
-            ->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
-            ->orWhere('LOWER(b.author) LIKE LOWER(:searchTerm)')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->orderBy('b.title', 'ASC')
-            ->setMaxResults(20)
-            ->getQuery()
-            ->getResult();
+        $books = $bookRepository->findByTitleOrAuthor($searchTerm);
+        
+        $authors = $authorRepository->findByName($searchTerm);
 
         // Format the domain results for better display
         $formattedDomains = [];
@@ -105,10 +102,35 @@ class DomainController extends AbstractController
         // Format the book results for better display
         $formattedBooks = [];
         foreach ($books as $book) {
+            // Get author names
+            $authorNames = [];
+            foreach ($book->getAuthors() as $author) {
+                $authorNames[] = $author->getName();
+            }
+            
+            // Convert image BLOB to base64 if exists
+            $coverImageBase64 = null;
+            $coverImage = $book->getCoverImage();
+            if ($coverImage) {
+                $coverImageBase64 = 'data:image/jpeg;base64,' . base64_encode($coverImage);
+            }
+            
             $formattedBooks[] = [
                 'id' => $book->getId(),
                 'title' => $book->getTitle(),
-                'author' => $book->getAuthor()
+                'author' => !empty($authorNames) ? implode(', ', $authorNames) : 'Unknown',
+                'coverImageBase64' => $coverImageBase64,
+                'publicationYear' => $book->getPublicationYear(),
+            ];
+        }
+        
+        // Format the author results
+        $formattedAuthors = [];
+        foreach ($authors as $author) {
+            $formattedAuthors[] = [
+                'id' => $author->getId(),
+                'name' => $author->getName(),
+                'bookCount' => count($author->getBooks())
             ];
         }
 
@@ -117,6 +139,7 @@ class DomainController extends AbstractController
             'domains' => $formattedDomains,
             'sections' => $formattedSections,
             'books' => $formattedBooks,
+            'authors' => $formattedAuthors,
         ]);
     }
 }

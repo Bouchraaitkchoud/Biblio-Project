@@ -123,10 +123,10 @@
             {% for book in books %}
                 <div class="book-card">
                     <img class="book-cover"
-                         src="{{ book.coverImage ? asset('uploads/book_covers/' ~ book.coverImage) : asset('images/default-book.jpg') }}"
+                         src="{{ book.coverImage ?: asset('images/default-book.jpg') }}"
                          alt="{{ book.title }}">
                     <div class="book-title">{{ book.title }}</div>
-                    <div class="book-author">by {{ book.author }}</div>
+                    <div class="book-author">by {{ book.authorName }}</div>
                     <form action="{{ path('add_to_cart', {'id': book.id}) }}" method="POST" class="add-to-cart-form">
                         <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart') }}">
                         <button type="submit">
