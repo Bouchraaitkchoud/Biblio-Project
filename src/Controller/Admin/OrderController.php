@@ -24,12 +24,35 @@ class OrderController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_orders_index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $pendingCarts = $this->cartRepository->findBy(['status' => 'pending']);
-
+        $status = $request->query->get('status', '');
+        $orderBy = $request->query->get('orderBy', 'createdAt');
+        $order = $request->query->get('order', 'DESC');
+        
+        $criteria = [];
+        if (!empty($status)) {
+            $criteria['status'] = $status;
+        }
+        
+        $carts = $this->cartRepository->findBy(
+            $criteria, 
+            [$orderBy => $order]
+        );
+        
+        // Get count by status for the statistics
+        $pendingCount = $this->cartRepository->count(['status' => 'pending']);
+        $approvedCount = $this->cartRepository->count(['status' => 'approved']);
+        $rejectedCount = $this->cartRepository->count(['status' => 'rejected']);
+        
         return $this->render('admin/order/index.html.twig', [
-            'carts' => $pendingCarts,
+            'carts' => $carts,
+            'currentStatus' => $status,
+            'pendingCount' => $pendingCount,
+            'approvedCount' => $approvedCount,
+            'rejectedCount' => $rejectedCount,
+            'currentOrderBy' => $orderBy,
+            'currentOrder' => $order,
         ]);
     }
 
@@ -55,8 +78,11 @@ class OrderController extends AbstractController
                 return new Response('Order approved', Response::HTTP_OK);
             }
 
-            // For normal POST requests, redirect to the receipt page
-            return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+            // Add a flash message
+            $this->addFlash('success', 'Order approved successfully.');
+            
+            // For normal POST requests, redirect to the order list - let the receipt be viewed separately
+            return $this->redirectToRoute('admin_orders_index', ['status' => 'approved']);
         }
 
         return $this->redirectToRoute('admin_orders_index');
@@ -82,14 +108,15 @@ class OrderController extends AbstractController
     public function viewReceipt(Cart $cart, EntityManagerInterface $em): Response
     {
         // Find the receipt for this cart
-        $receipt = $em->getRepository(Receipt::class)->findByCartId($cart->getId());
+        $receipt = $em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
         
         if (!$receipt) {
             $this->addFlash('error', 'No receipt found for this order.');
             return $this->redirectToRoute('admin_orders_index');
         }
         
-        // Redirect to the receipt controller
-        return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+        // Redirect to the receipt controller with absolute URL
+        $url = $this->generateUrl('receipt_show', ['id' => $receipt->getId()], 0);
+        return $this->redirect($url);
     }
 }

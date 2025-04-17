@@ -8,7 +8,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_USER')]
 class ReceiptController extends AbstractController
 {
     private $logger;
@@ -21,6 +23,13 @@ class ReceiptController extends AbstractController
     #[Route('/receipt/{id}', name: 'receipt_show')]
     public function show(Receipt $receipt, Pdf $knpSnappyPdf): Response
     {
+        // Check if the user is allowed to view this receipt
+        // Allow ROLE_ADMIN to view any receipt
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $receipt->getCart()->getUser() !== $user) {
+            throw $this->createAccessDeniedException('You are not authorized to view this receipt.');
+        }
+        
         try {
             // Log the request
             $this->logger->info('Generating receipt PDF for receipt ID: ' . $receipt->getId());
@@ -55,8 +64,12 @@ class ReceiptController extends AbstractController
             // Show friendly error message to the user
             $this->addFlash('error', 'Failed to generate PDF. Please try again or contact support.');
             
-            // Redirect back to the admin orders page
-            return $this->redirectToRoute('admin_orders_index');
+            // If admin, redirect to admin orders page, otherwise go to home
+            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+                return $this->redirectToRoute('admin_orders_index');
+            } else {
+                return $this->redirectToRoute('app_domains');
+            }
         }
     }
 }

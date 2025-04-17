@@ -70,14 +70,20 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                default_target_path: app_domains 
-                enable_csrf: false 
+                default_target_path: app_domains
+                enable_csrf: false
+                success_handler: App\Security\LoginSuccessHandler
+                # Ensure proper target path saving
+                use_referer: true
+                always_use_default_target_path: false
+                target_path_parameter: _target_path
             logout:
                 path: app_logout
                 target: app_login
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/receipt, roles: ROLE_USER } # Allow access to receipts for authenticated users
         - { path: ^/section/\d+/books, roles: ROLE_USER } # Allow access to the book page for authenticated users
+        - { path: ^/admin, roles: ROLE_ADMIN } # Admin access rule needs to be before the catch-all rule
         - { path: ^/, roles: ROLE_USER } # Default rule for all other routes
-        - { path: ^/admin, roles: ROLE_ADMIN }

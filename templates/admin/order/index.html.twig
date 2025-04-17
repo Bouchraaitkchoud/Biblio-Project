@@ -1,7 +1,7 @@
 {# templates/admin/order/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Pending Orders{% endblock %}
+{% block title %}Orders Management{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -20,6 +20,15 @@
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
+        }
+        .order-item.status-pending {
+            border-left-color: #fd7e14;
+        }
+        .order-item.status-approved {
+            border-left-color: #28a745;
+        }
+        .order-item.status-rejected {
+            border-left-color: #dc3545;
         }
         .order-item:hover {
             transform: translateX(5px);
@@ -132,27 +141,202 @@
             transform: translateX(-20px);
             transition: all 0.3s ease;
         }
+        .filters-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .filter-btn-all {
+            background-color: #117986;
+        }
+        .filter-btn-pending {
+            background-color: #fd7e14;
+        }
+        .filter-btn-approved {
+            background-color: #28a745;
+        }
+        .filter-btn-rejected {
+            background-color: #dc3545;
+        }
+        .order-stats {
+            display: flex;
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .stat-pending {
+            color: #fd7e14;
+        }
+        .stat-approved {
+            color: #28a745;
+        }
+        .stat-rejected {
+            color: #dc3545;
+        }
+        .stat-label {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        .sort-options {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sort-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .sort-select {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-pending {
+            background-color: #fd7e14;
+        }
+        .badge-approved {
+            background-color: #28a745;
+        }
+        .badge-rejected {
+            background-color: #dc3545;
+        }
+        .admin-nav {
+            background-color: #117986;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .admin-nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .admin-nav-link:hover, .admin-nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        .admin-user-info {
+            color: white;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container mt-5">
-        <h1 class="text-center mb-4" style="color: #117986;">Pending Orders</h1>
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link active">Orders</a>
+                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+            </div>
+        </div>
+        
+        <h1 class="text-center mb-4" style="color: #117986;">Orders Management</h1>
+        
+        <div class="filters-container">
+            <div class="filter-buttons">
+                <a href="{{ path('admin_orders_index') }}" class="filter-btn filter-btn-all {{ currentStatus == '' ? 'active' : '' }}">
+                    All Orders
+                </a>
+                <a href="{{ path('admin_orders_index', {'status': 'pending'}) }}" class="filter-btn filter-btn-pending {{ currentStatus == 'pending' ? 'active' : '' }}">
+                    Pending
+                </a>
+                <a href="{{ path('admin_orders_index', {'status': 'approved'}) }}" class="filter-btn filter-btn-approved {{ currentStatus == 'approved' ? 'active' : '' }}">
+                    Approved
+                </a>
+                <a href="{{ path('admin_orders_index', {'status': 'rejected'}) }}" class="filter-btn filter-btn-rejected {{ currentStatus == 'rejected' ? 'active' : '' }}">
+                    Rejected
+                </a>
+            </div>
+            
+            <div class="order-stats">
+                <div class="stat-item">
+                    <div class="stat-value stat-pending">{{ pendingCount }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value stat-approved">{{ approvedCount }}</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value stat-rejected">{{ rejectedCount }}</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+            </div>
+            
+            <div class="sort-options">
+                <span class="sort-label">Sort by:</span>
+                <select id="sortSelect" class="sort-select" onchange="updateSort(this.value)">
+                    <option value="createdAt-DESC" {{ currentOrderBy == 'createdAt' and currentOrder == 'DESC' ? 'selected' : '' }}>Newest First</option>
+                    <option value="createdAt-ASC" {{ currentOrderBy == 'createdAt' and currentOrder == 'ASC' ? 'selected' : '' }}>Oldest First</option>
+                </select>
+            </div>
+        </div>
 
         <div class="orders-container">
             {% if carts is empty %}
                 <div class="no-orders">
                     <i class="fas fa-inbox"></i>
-                    <h3>No pending orders at this time</h3>
-                    <p class="text-muted">All orders have been processed</p>
+                    <h3>No orders found</h3>
+                    <p class="text-muted">Try a different filter</p>
                 </div>
             {% else %}
                 <div id="orders-list">
                     {% for cart in carts %}
-                        <div class="order-item" data-order-id="{{ cart.id }}">
+                        <div class="order-item status-{{ cart.status }}" data-order-id="{{ cart.id }}">
                             <div class="order-header">
                                 <span class="order-id">Order #{{ cart.id }}</span>
-                                <span class="order-date">{{ cart.createdAt|date('Y-m-d H:i') }}</span>
+                                <div>
+                                    <span class="status-badge badge-{{ cart.status }}">{{ cart.status|upper }}</span>
+                                    <span class="order-date ml-2">{{ cart.createdAt|date('Y-m-d H:i') }}</span>
+                                </div>
                             </div>
                             
                             <div class="user-info">
@@ -177,7 +361,7 @@
                                     <a href="{{ path('admin_order_receipt', {'id': cart.id}) }}" class="btn btn-info" target="_blank">
                                         <i class="fas fa-file-pdf"></i> View Receipt
                                     </a>
-                                {% else %}
+                                {% elseif cart.status == 'pending' %}
                                     <form method="post" action="{{ path('admin_order_approve', {'id': cart.id}) }}" class="approve-form">
                                         <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
                                         <button type="submit" class="btn btn-approve">
@@ -210,43 +394,57 @@
                     const orderId = orderItem.dataset.orderId;
                     const formData = new FormData(this);
                     
-fetch(this.action, {
-    method: 'POST',
-    body: formData,
-    headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-    }
-})
-.then(response => {
-    if (response.ok) {
-        // Add fade-out class to the order item
-        orderItem.classList.add('fade-out');
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Add fade-out class to the order item
+                            orderItem.classList.add('fade-out');
 
-        // Remove the order item after animation completes
-        setTimeout(() => {
-            orderItem.remove();
+                            // Remove the order item after animation completes
+                            setTimeout(() => {
+                                // If we're filtering by pending, remove the item
+                                if (window.location.search.includes('status=pending')) {
+                                    orderItem.remove();
+                                    
+                                    // Check if there are any orders left
+                                    const remainingOrders = document.querySelectorAll('.order-item');
+                                    if (remainingOrders.length === 0) {
+                                        const ordersContainer = document.querySelector('.orders-container');
+                                        ordersContainer.innerHTML = `
+                                            <div class="no-orders">
+                                                <i class="fas fa-inbox"></i>
+                                                <h3>No orders found</h3>
+                                                <p class="text-muted">Try a different filter</p>
+                                            </div>
+                                        `;
+                                    }
+                                } else {
+                                    // Just refresh the page to show updated state
+                                    window.location.reload();
+                                }
 
-            // Check if there are any orders left
-            const remainingOrders = document.querySelectorAll('.order-item');
-            if (remainingOrders.length === 0) {
-                const ordersContainer = document.querySelector('.orders-container');
-                ordersContainer.innerHTML = `
-                    <div class="no-orders">
-                        <i class="fas fa-inbox"></i>
-                        <h3>No pending orders at this time</h3>
-                        <p class="text-muted">All orders have been processed</p>
-                    </div>
-                `;
-            }
-
-            // Show success message
-            alert('Order processed successfully!');
-        }, 300);
-    }
-})
-.catch(error => console.error('Error:', error));
+                                // Show success message
+                                alert('Order processed successfully!');
+                            }, 300);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
                 });
             });
         });
+        
+        function updateSort(value) {
+            const [orderBy, order] = value.split('-');
+            const url = new URL(window.location.href);
+            url.searchParams.set('orderBy', orderBy);
+            url.searchParams.set('order', order);
+            window.location.href = url.toString();
+        }
     </script>
 {% endblock %}
