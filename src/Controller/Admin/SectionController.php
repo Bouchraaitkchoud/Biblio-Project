@@ -25,12 +25,22 @@ class SectionController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_sections_index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $sections = $this->sectionRepository->findAll();
+        $searchTerm = $request->query->get('search');
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 20;
+        
+        $paginationData = $this->sectionRepository->getPaginatedSections($page, $limit, $searchTerm);
         
         return $this->render('admin/section/index.html.twig', [
-            'sections' => $sections,
+            'sections' => $paginationData['sections'],
+            'pagination' => [
+                'currentPage' => $paginationData['currentPage'],
+                'totalPages' => $paginationData['totalPages'],
+                'totalItems' => $paginationData['totalItems'],
+            ],
+            'searchTerm' => $searchTerm,
         ]);
     }
     

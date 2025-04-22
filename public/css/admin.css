@@ -36,21 +36,23 @@
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
+    font-size: 0.85rem;
 }
 
 .admin-table th {
     background-color: #f0f0f0;
     text-align: left;
-    padding: 12px 15px;
+    padding: 4px 6px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .admin-table td {
-    padding: 12px 15px;
+    padding: 4px 6px;
     border-top: 1px solid #e9ecef;
     vertical-align: middle;
 }
@@ -61,7 +63,40 @@
 
 .admin-table .actions {
     display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+.admin-table .actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-table .actions .btn i {
+    font-size: 0.9rem;
+}
+
+/* Search form */
+.admin-search-form {
+    margin-bottom: 20px;
+    display: flex;
     gap: 10px;
+}
+
+.admin-search-form .form-control {
+    max-width: 300px;
+}
+
+.pagination {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    justify-content: center;
 }
 
 /* Buttons */

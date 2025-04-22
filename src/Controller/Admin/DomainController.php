@@ -22,12 +22,22 @@ class DomainController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_domains_index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $domains = $this->domainRepository->findAll();
+        $searchTerm = $request->query->get('search');
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 20;
+        
+        $paginationData = $this->domainRepository->getPaginatedDomains($page, $limit, $searchTerm);
         
         return $this->render('admin/domain/index.html.twig', [
-            'domains' => $domains,
+            'domains' => $paginationData['domains'],
+            'pagination' => [
+                'currentPage' => $paginationData['currentPage'],
+                'totalPages' => $paginationData['totalPages'],
+                'totalItems' => $paginationData['totalItems'],
+            ],
+            'searchTerm' => $searchTerm,
         ]);
     }
     

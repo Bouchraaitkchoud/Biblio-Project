@@ -22,12 +22,22 @@ class AuthorController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_authors_index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $authors = $this->authorRepository->findAll();
+        $searchTerm = $request->query->get('search');
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 20;
+        
+        $paginationData = $this->authorRepository->getPaginatedAuthors($page, $limit, $searchTerm);
         
         return $this->render('admin/author/index.html.twig', [
-            'authors' => $authors,
+            'authors' => $paginationData['authors'],
+            'pagination' => [
+                'currentPage' => $paginationData['currentPage'],
+                'totalPages' => $paginationData['totalPages'],
+                'totalItems' => $paginationData['totalItems'],
+            ],
+            'searchTerm' => $searchTerm,
         ]);
     }
     
