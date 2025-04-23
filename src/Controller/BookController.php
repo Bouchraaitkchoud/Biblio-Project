@@ -3,7 +3,7 @@
 // src/Controller/BookController.php
 namespace App\Controller;
 
-use App\Entity\Section;
+use App\Entity\Book;
 use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,14 +11,18 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class BookController extends AbstractController
 {
-    #[Route('/section/{id}/books', name: 'app_books')]
-    public function index(Section $section, BookRepository $bookRepository): Response
+    private $bookRepository;
+    
+    public function __construct(BookRepository $bookRepository)
     {
-        $books = $bookRepository->findBy(['section' => $section]);
-
-        return $this->render('book/index.html.twig', [
-            'books' => $books,
-            'section' => $section,
+        $this->bookRepository = $bookRepository;
+    }
+    
+    #[Route('/book/{id}', name: 'book_show', methods: ['GET'])]
+    public function show(Book $book): Response
+    {
+        return $this->render('book/show.html.twig', [
+            'book' => $book,
         ]);
     }
 }

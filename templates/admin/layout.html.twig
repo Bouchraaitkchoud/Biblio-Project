@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}?v={{ "now"|date('YmdHis') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ "now"|date('YmdHis') }}">
+    <style>
+        /* Critical admin styles that should never be overridden */
+        .admin-nav {
+            background-color: #117986 !important;
+            padding: 15px !important;
+            border-radius: 10px !important;
+            margin-bottom: 25px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+        
+        .admin-nav-links {
+            display: flex !important;
+            gap: 20px !important;
+        }
+        
+        .admin-nav-link {
+            color: white !important;
+            text-decoration: none !important;
+            font-weight: bold !important;
+            padding: 5px 10px !important;
+            border-radius: 5px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .admin-nav-link:hover,
+        .admin-nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        .admin-user-info {
+            color: white !important;
+        }
+        
+        .admin-user-info a {
+            color: white !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link {% if app.request.get('_route') == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_orders' %}active{% endif %}">Orders</a>
+                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_domains' %}active{% endif %}">Domains</a>
+                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_sections' %}active{% endif %}">Sections</a>
+                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_authors' %}active{% endif %}">Authors</a>
+                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_publishers' %}active{% endif %}">Publishers</a>
+                <a href="{{ path('admin_books_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_books' %}active{% endif %}">Books</a>
+                <a href="{{ path('app_domains') }}" class="admin-nav-link" data-turbo="false">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+            </div>
+        </div>
+        
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        {% block admin_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Force immediate CSS reloading on every page transition
+        document.addEventListener('DOMContentLoaded', function() {
+            // Reload stylesheets
+            var links = document.getElementsByTagName('link');
+            for (var i = 0; i < links.length; i++) {
+                if (links[i].rel === 'stylesheet') {
+                    var href = links[i].href;
+                    links[i].href = href + (href.indexOf('?') >= 0 ? '&' : '?') + 'forceReload=' + new Date().getTime();
+                }
+            }
+            
+            // Force style recalculation
+            setTimeout(function() {
+                document.querySelectorAll('.admin-nav, .admin-table, .actions').forEach(function(el) {
+                    el.style.display = 'none';
+                    el.offsetHeight; // Force reflow
+                    el.style.display = '';
+                });
+                
+                // Make sure action buttons are properly styled
+                document.querySelectorAll('.actions .btn').forEach(function(btn) {
+                    btn.style.display = 'inline-flex !important';
+                    btn.style.alignItems = 'center !important';
+                    btn.style.justifyContent = 'center !important';
+                });
+            }, 50);
+        });
+        
+        // Prevent caching and ensure full page reload when navigating
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        };
+        
+        // Add cache-busting parameter to certain links
+        document.addEventListener('DOMContentLoaded', function() {
+            // For special navigation that requires full page reload (like admin to main site)
+            document.querySelectorAll('a[href*="app_domains"]').forEach(function(link) {
+                if (!link.getAttribute('onclick')) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        let url = this.href;
+                        url += (url.includes('?') ? '&' : '?') + '_=' + new Date().getTime();
+                        window.location.href = url;
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %} 

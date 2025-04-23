@@ -150,20 +150,29 @@
 
             fetch(form.action, {
                 method: 'POST',
-                body: new FormData(form)
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'include' // To ensure cookies are sent with the request
             })
-            .then(response => {
-                if (response.ok) {
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
                     // Disable the submit button after the form is submitted
-                    submitButton.classList.add('hidden');
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '✓ Cart Submitted';
                     
                     // Optionally reload after the form submission
                     setTimeout(() => {
-                        location.reload();
-                    }, 1000); // Reload after 1 second
+                        window.location.href = '{{ path('app_domains') }}';
+                    }, 1500); // Redirect after 1.5 seconds
                 } else {
-                    alert('There was an error submitting your cart.');
+                    alert('There was an error submitting your cart: ' + data.message);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred. Please try again.');
             });
         });
     }

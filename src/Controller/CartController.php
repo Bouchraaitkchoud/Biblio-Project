@@ -10,6 +10,7 @@ use App\Entity\Book;
 use App\Entity\Cart;
 use App\Entity\User;
 use App\Entity\Receipt;
+use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,14 +20,16 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class CartController extends AbstractController
 {
     private LoggerInterface $logger;
+    private CartService $cartService;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, CartService $cartService)
     {
         $this->logger = $logger;
+        $this->cartService = $cartService;
     }
 
     #[Route('/add-to-cart/{id}', name: 'add_to_cart', methods: ['POST'])]
-    public function addToCart(int $id, EntityManagerInterface $entityManager, Security $security): JsonResponse
+    public function addToCart(int $id, EntityManagerInterface $entityManager, Security $security): Response
     {
         try {
             // 1. Fetch the book
@@ -43,41 +46,21 @@ class CartController extends AbstractController
                 return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
             }
 
-            // 3. Find or create cart (get the most recent cart with status 'draft')
-            $cart = $entityManager->getRepository(Cart::class)->findOneBy(
-                ['user' => $user, 'status' => 'draft'],
-                ['createdAt' => 'DESC']
-            );
-
-            if (!$cart) {
-                $cart = new Cart();
-                $cart->setUser($user);
-                $cart->setCreatedAt(new \DateTime());
-                $cart->setStatus('draft');
-                $entityManager->persist($cart);
-            }
-
-            // 4. Add book to cart (with duplicate check)
-            if (!$cart->getBooks()->contains($book)) {
-                $cart->addBook($book);
-                $entityManager->flush();
-                
-                $this->logger->info('Book {bookId} added to cart {cartId}', [
-                    'bookId' => $book->getId(),
-                    'cartId' => $cart->getId()
-                ]);
-                
-                return new JsonResponse([
-                    'success' => true,
-                    'message' => 'Book added to cart',
-                    'cart_id' => $cart->getId()
-                ]);
-            }
-
-            return new JsonResponse([
+            // Add book to cookie cart
+            $cookie = $this->cartService->addBookToDraftCart($book);
+            
+            $response = new JsonResponse([
                 'success' => true,
-                'message' => 'Book already in cart'
+                'message' => 'Book added to cart'
             ]);
+            
+            $response->headers->setCookie($cookie);
+            
+            $this->logger->info('Book {bookId} added to draft cart', [
+                'bookId' => $book->getId()
+            ]);
+                
+            return $response;
 
         } catch (\Exception $e) {
             $this->logger->error('Cart addition failed: {error}', [
@@ -93,30 +76,32 @@ class CartController extends AbstractController
     }
 
     #[Route('/submit-cart', name: 'submit_cart', methods: ['POST'])]
-    public function submitCart(EntityManagerInterface $em, Security $security): JsonResponse
+    public function submitCart(EntityManagerInterface $em, Security $security): Response
     {
         /** @var User $user */
         $user = $security->getUser();
         
-        // Get the most recent draft cart
-        $cart = $em->getRepository(Cart::class)->findOneBy(
-            ['user' => $user, 'status' => 'draft'],
-            ['createdAt' => 'DESC']
-        );
-
-        if (!$cart || $cart->getBooks()->isEmpty()) {
+        if (!$user) {
+            return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
+        }
+        
+        // Convert cookie cart to database entity
+        $cart = $this->cartService->convertCookieCartToEntity($user);
+        
+        if (!$cart) {
             return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
         }
-
-        // Change cart status to pending approval
-        $cart->setStatus('pending');
-        $em->flush();
-
-        return new JsonResponse([
+        
+        // Clear the cookie cart
+        $response = new JsonResponse([
             'success' => true,
             'message' => 'Cart submitted for approval',
             'cart_id' => $cart->getId()
         ]);
+        
+        $response->headers->setCookie($this->cartService->clearDraftCart());
+        
+        return $response;
     }
 
     #[Route('/admin/approve-cart/{id}', name: 'approve_cart', methods: ['POST'])]
@@ -149,7 +134,6 @@ class CartController extends AbstractController
         $em->flush();
 
         return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
-
     }
 
     #[Route('/admin/reject-cart/{id}', name: 'reject_cart', methods: ['POST'])]
@@ -182,48 +166,41 @@ class CartController extends AbstractController
     }
 
     #[Route('/my-cart', name: 'view_cart')]
-    public function viewCart(EntityManagerInterface $em): Response
+    public function viewCart(): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
-        $user = $this->getUser();
-        $cart = $em->getRepository(Cart::class)->findOneBy([
-            'user' => $user,
-            'status' => 'draft'
-        ], ['createdAt' => 'DESC']);
-    
+        // Load books from cookie cart
+        $books = $this->cartService->getCartBooks();
+        
         // Get a valid section (first book in cart)
         $section = null;
-        if ($cart && !$cart->getBooks()->isEmpty()) {
-            $section = $cart->getBooks()->first()->getSection();
+        if (!empty($books)) {
+            $section = $books[0]->getSection();
         }
     
         return $this->render('cart/cartView.html.twig', [
-            'cart' => $cart,
-            'books' => $cart?->getBooks() ?? [],
-            'total' => $cart ? count($cart->getBooks()) : 0,
+            'cart' => null, // No database cart for draft
+            'books' => $books,
+            'total' => count($books),
             'section' => $section,
         ]);
     }
     
     #[Route('/remove-from-cart/{id}', name: 'remove_from_cart', methods: ['POST'])]
-    public function removeFromCart(int $id, EntityManagerInterface $em): JsonResponse
+    public function removeFromCart(int $id, EntityManagerInterface $em): Response
     {
         $book = $em->getRepository(Book::class)->find($id);
-        $user = $this->getUser();
         
-        // Get the most recent draft cart
-        $cart = $em->getRepository(Cart::class)->findOneBy(
-            ['user' => $user, 'status' => 'draft'],
-            ['createdAt' => 'DESC']
-        );
-        
-        if ($cart && $book) {
-            $cart->removeBook($book);
-            $em->flush();
-            return new JsonResponse(['success' => true]);
+        if (!$book) {
+            return new JsonResponse(['success' => false, 'message' => 'Book not found'], 404);
         }
         
-        return new JsonResponse(['success' => false]);
+        $cookie = $this->cartService->removeBookFromDraftCart($book);
+        
+        $response = new JsonResponse(['success' => true]);
+        $response->headers->setCookie($cookie);
+        
+        return $response;
     }
 }

@@ -40,11 +40,15 @@ class Book
 
     #[ORM\Column(type: "string", length: 50, nullable: true)]
     private ?string $isbn = null;
+    
+    #[ORM\ManyToMany(targetEntity: Publisher::class, mappedBy: 'books')]
+    private Collection $publishers;
 
     public function __construct()
     {
         $this->carts = new ArrayCollection();
         $this->authors = new ArrayCollection();
+        $this->publishers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -198,5 +202,45 @@ class Book
             }
         }
         return $this;
+    }
+    
+    /**
+     * @return Collection<int, Publisher>
+     */
+    public function getPublishers(): Collection
+    {
+        return $this->publishers;
+    }
+    
+    public function addPublisher(Publisher $publisher): self
+    {
+        if (!$this->publishers->contains($publisher)) {
+            $this->publishers->add($publisher);
+        }
+        
+        return $this;
+    }
+    
+    public function removePublisher(Publisher $publisher): self
+    {
+        $this->publishers->removeElement($publisher);
+        return $this;
+    }
+    
+    /**
+     * For convenience - gets the main publisher's name
+     */
+    public function getPublisherName(): ?string
+    {
+        if ($this->publishers->isEmpty()) {
+            return null;
+        }
+        
+        $publisherNames = [];
+        foreach ($this->publishers as $publisher) {
+            $publisherNames[] = $publisher->getName();
+        }
+        
+        return implode(', ', $publisherNames);
     }
 }
