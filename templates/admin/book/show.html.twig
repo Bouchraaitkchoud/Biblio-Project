@@ -31,6 +31,21 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
+        .exemplaires-table {
+            margin-top: 30px;
+        }
+        .exemplaires-table th {
+            background-color: #f8f9fa;
+        }
+        .status-available {
+            color: #28a745;
+        }
+        .status-borrowed {
+            color: #dc3545;
+        }
+        .status-maintenance {
+            color: #ffc107;
+        }
     </style>
 {% endblock %}
 
@@ -63,7 +78,7 @@
         <div class="page-header">
             <h1>Book Details</h1>
             <div class="actions">
-                <a href="{{ path('admin_books_edit', {'id': book.id}) }}" class="btn btn-edit">
+                <a href="{{ path('admin_book_edit', {'id': book.id}) }}" class="btn btn-edit">
                     <i class="fas fa-edit"></i> Edit
                 </a>
                 <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteBookModal">
@@ -152,8 +167,84 @@
                 </div>
             </div>
             
+            <div class="exemplaires-table">
+                <h3 class="mb-4">Exemplaires</h3>
+                {% if exemplaires|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Barcode</th>
+                                    <th>Section</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                    <th>Call Number</th>
+                                    <th>Acquisition Date</th>
+                                    <th>Return Date</th>
+                                    <th>Price</th>
+                                    <th>Comment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exemplaire in exemplaires %}
+                                    <tr>
+                                        <td>{{ exemplaire.id }}</td>
+                                        <td>{{ exemplaire.barcode }}</td>
+                                        <td>{{ exemplaire.sectionId }}</td>
+                                        <td>
+                                            {% if exemplaire.statusId is defined %}
+                                                <span class="status-{{ exemplaire.statusId }}">
+                                                    {{ exemplaire.statusId }}
+                                                </span>
+                                            {% else %}
+                                                <span>-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ exemplaire.locationId }}</td>
+                                        <td>{{ exemplaire.callNumber }}</td>
+                                        <td>
+                                            {% if exemplaire.acquisitionDate %}
+                                                {{ exemplaire.acquisitionDate|date('Y-m-d') }}
+                                            {% else %}
+                                                <span>-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if exemplaire.returnDate %}
+                                                {{ exemplaire.returnDate|date('Y-m-d') }}
+                                            {% else %}
+                                                <span>-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ exemplaire.price }}</td>
+                                        <td>{{ exemplaire.comment }}</td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No exemplaires found for this book.
+                    </div>
+                {% endif %}
+            </div>
+            
             <div class="d-flex justify-content-end mt-4">
-                <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
+                <a href="{{ path('admin_book_add_exemplaire', {'id': book.id}) }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Exemplaire
+                </a>
+                <a href="{{ path('admin_books_index') }}" class="btn btn-secondary ms-2">
                     <i class="fas fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -175,7 +266,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <form method="post" action="{{ path('admin_book_delete', {'id': book.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
-                        <button type="submit" class="btn btn-delete">Delete</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
             </div>

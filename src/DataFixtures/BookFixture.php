@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Book;
 use App\Entity\Section;
+use App\Entity\Author;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -18,7 +19,7 @@ class BookFixture extends Fixture implements DependentFixtureInterface
         if ($programmingSection) {
             $book1 = new Book();
             $book1->setTitle('The Art of Computer Programming');
-            $book1->addAuthor($this->getReference(AuthorFixtures::AUTHOR_REFERENCE_PREFIX . '0')); // Donald Knuth
+            $book1->addAuthor($this->getReference(AuthorFixtures::AUTHOR_REFERENCE_PREFIX . '0', Author::class)); // Donald Knuth
             $book1->setSection($programmingSection);
             
             // Set cover image from file if exists
@@ -34,7 +35,7 @@ class BookFixture extends Fixture implements DependentFixtureInterface
             
             $book2 = new Book();
             $book2->setTitle('Clean Code');
-            $book2->addAuthor($this->getReference(AuthorFixtures::AUTHOR_REFERENCE_PREFIX . '1')); // Robert C. Martin
+            $book2->addAuthor($this->getReference(AuthorFixtures::AUTHOR_REFERENCE_PREFIX . '1', Author::class)); // Robert C. Martin
             $book2->setSection($programmingSection);
             
             // Set cover image from file if exists
@@ -55,7 +56,7 @@ class BookFixture extends Fixture implements DependentFixtureInterface
         if ($databaseSection) {
             $book3 = new Book();
             $book3->setTitle('Patterns of Enterprise Application Architecture');
-            $book3->addAuthor($this->getReference(AuthorFixtures::AUTHOR_REFERENCE_PREFIX . '2')); // Martin Fowler
+            $book3->addAuthor($this->getReference(AuthorFixtures::AUTHOR_REFERENCE_PREFIX . '2', Author::class)); // Martin Fowler
             $book3->setSection($databaseSection);
             
             // Set cover image from file if exists

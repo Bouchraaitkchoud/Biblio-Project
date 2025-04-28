@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Form\ExemplaireType;
+use App\Entity\Exemplaire;
 
 #[Route('/admin/books')]
 #[IsGranted('ROLE_ADMIN')]
@@ -124,7 +126,10 @@ class BookController extends AbstractController
     #[Route('/{id}', name: 'admin_books_show', methods: ['GET'])]
     public function show(Book $book): Response
     {
-        return $this->redirectToRoute('book_show', ['id' => $book->getId()]);
+        return $this->render('admin/book/show.html.twig', [
+            'book' => $book,
+            'exemplaires' => $book->getExemplaires()
+        ]);
     }
     
     #[Route('/{id}/edit', name: 'admin_book_edit', methods: ['GET', 'POST'])]
@@ -227,5 +232,53 @@ class BookController extends AbstractController
         }
         
         return $this->redirectToRoute('admin_books_index');
+    }
+
+    #[Route('/{id}/add-exemplaire', name: 'admin_book_add_exemplaire', methods: ['GET', 'POST'])]
+    public function addExemplaire(Request $request, Book $book): Response
+    {
+        $exemplaire = new Exemplaire();
+        $exemplaire->setBook($book);
+        
+        $form = $this->createForm(ExemplaireType::class, $exemplaire);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                // Start transaction
+                $this->entityManager->beginTransaction();
+                
+                // Set default status if not provided
+                if (!$exemplaire->getStatusId()) {
+                    $exemplaire->setStatusId(1); // Assuming 1 is the default "Available" status
+                }
+                
+                // Set default section if not provided
+                if (!$exemplaire->getSectionId()) {
+                    $exemplaire->setSectionId($book->getSection()->getId());
+                }
+                
+                $this->entityManager->persist($exemplaire);
+                $this->entityManager->flush();
+                
+                // Commit transaction
+                $this->entityManager->commit();
+                
+                $this->addFlash('success', 'Exemplaire added successfully.');
+                return $this->redirectToRoute('admin_books_show', ['id' => $book->getId()]);
+            } catch (\Exception $e) {
+                // Rollback transaction on error
+                $this->entityManager->rollback();
+                
+                $this->addFlash('error', 'An error occurred while adding the exemplaire. Please try again.');
+                // Log the error for debugging
+                error_log('Error adding exemplaire: ' . $e->getMessage());
+            }
+        }
+        
+        return $this->render('admin/book/add_exemplaire.html.twig', [
+            'book' => $book,
+            'form' => $form->createView()
+        ]);
     }
 } 

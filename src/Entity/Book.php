@@ -44,11 +44,18 @@ class Book
     #[ORM\ManyToMany(targetEntity: Publisher::class, mappedBy: 'books')]
     private Collection $publishers;
 
+    #[ORM\Column(type: 'integer')]
+    private $quantity = 0;
+
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: Exemplaire::class, orphanRemoval: true)]
+    private Collection $exemplaires;
+
     public function __construct()
     {
         $this->carts = new ArrayCollection();
         $this->authors = new ArrayCollection();
         $this->publishers = new ArrayCollection();
+        $this->exemplaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -242,5 +249,43 @@ class Book
         }
         
         return implode(', ', $publisherNames);
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): self
+    {
+        $this->quantity = $quantity;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Exemplaire>
+     */
+    public function getExemplaires(): Collection
+    {
+        return $this->exemplaires;
+    }
+
+    public function addExemplaire(Exemplaire $exemplaire): self
+    {
+        if (!$this->exemplaires->contains($exemplaire)) {
+            $this->exemplaires->add($exemplaire);
+            $exemplaire->setBook($this);
+        }
+        return $this;
+    }
+
+    public function removeExemplaire(Exemplaire $exemplaire): self
+    {
+        if ($this->exemplaires->removeElement($exemplaire)) {
+            if ($exemplaire->getBook() === $this) {
+                $exemplaire->setBook(null);
+            }
+        }
+        return $this;
     }
 }

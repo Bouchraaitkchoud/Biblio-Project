@@ -9,38 +9,53 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 #[IsGranted('ROLE_USER')]
 class ReceiptController extends AbstractController
 {
     private $logger;
+    private $pdf;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
+        $this->pdf = new Pdf('"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"');
     }
 
     #[Route('/receipt/{id}', name: 'receipt_show')]
-    public function show(Receipt $receipt, Pdf $knpSnappyPdf): Response
+    public function show(Receipt $receipt): Response
     {
-        // Check if the user is allowed to view this receipt
-        // Allow ROLE_ADMIN to view any receipt
-        $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles()) && $receipt->getCart()->getUser() !== $user) {
-            throw $this->createAccessDeniedException('You are not authorized to view this receipt.');
-        }
-        
         try {
-            // Log the request
-            $this->logger->info('Generating receipt PDF for receipt ID: ' . $receipt->getId());
+            // Log the receipt ID being accessed
+            $this->logger->info('Accessing receipt with ID: ' . $receipt->getId());
+            
+            // Check if the user is allowed to view this receipt
+            $user = $this->getUser();
+            if (!in_array('ROLE_ADMIN', $user->getRoles()) && $receipt->getCart()->getUser() !== $user) {
+                throw $this->createAccessDeniedException('You are not authorized to view this receipt.');
+            }
+            
+            // Generate barcode
+            $generator = new BarcodeGeneratorPNG();
+            $barcode = base64_encode($generator->getBarcode($receipt->getCode(), $generator::TYPE_CODE_128));
             
             // Render the HTML for the PDF
             $html = $this->renderView('receipt/pdf.html.twig', [
-                'receipt' => $receipt
+                'receipt' => $receipt,
+                'barcode' => $barcode
             ]);
             
             // Generate the PDF
-            $pdfContent = $knpSnappyPdf->getOutputFromHtml($html);
+            $pdfContent = $this->pdf->getOutputFromHtml($html, [
+                'page-size' => 'A4',
+                'margin-top' => 0,
+                'margin-right' => 0,
+                'margin-bottom' => 0,
+                'margin-left' => 0,
+                'encoding' => 'UTF-8',
+                'enable-local-file-access' => true
+            ]);
             
             // Create the response with the PDF content
             $response = new Response(
@@ -53,18 +68,15 @@ class ReceiptController extends AbstractController
             );
             
             return $response;
+            
         } catch (\Exception $e) {
-            // Log the detailed error
-            $this->logger->error('PDF generation failed: ' . $e->getMessage(), [
-                'receipt_id' => $receipt->getId(),
-                'exception' => $e,
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Log the error
+            $this->logger->error('Error generating PDF: ' . $e->getMessage());
             
-            // Show friendly error message to the user
-            $this->addFlash('error', 'Failed to generate PDF. Please try again or contact support.');
+            // Show error message
+            $this->addFlash('error', 'Failed to generate PDF. Please try again.');
             
-            // If admin, redirect to admin orders page, otherwise go to home
+            // Redirect back to appropriate page
             if (in_array('ROLE_ADMIN', $user->getRoles())) {
                 return $this->redirectToRoute('admin_orders_index');
             } else {

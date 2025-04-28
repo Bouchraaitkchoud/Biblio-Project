@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Psr\Log\LoggerInterface;
 
 #[Route('/admin/orders')]
 #[IsGranted('ROLE_ADMIN')]
@@ -20,7 +22,9 @@ class OrderController extends AbstractController
 {
     public function __construct(
         private CartRepository $cartRepository,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private UrlGeneratorInterface $urlGenerator,
+        private LoggerInterface $logger
     ) {}
 
     #[Route('/', name: 'admin_orders_index')]
@@ -105,18 +109,17 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}/receipt', name: 'admin_order_receipt', methods: ['GET'])]
-    public function viewReceipt(Cart $cart, EntityManagerInterface $em): Response
+    public function viewReceipt(Cart $cart): Response
     {
         // Find the receipt for this cart
-        $receipt = $em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
+        $receipt = $this->em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
         
         if (!$receipt) {
             $this->addFlash('error', 'No receipt found for this order.');
             return $this->redirectToRoute('admin_orders_index');
         }
         
-        // Redirect to the receipt controller with absolute URL
-        $url = $this->generateUrl('receipt_show', ['id' => $receipt->getId()], 0);
-        return $this->redirect($url);
+        // Redirect to the receipt controller
+        return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
     }
 }

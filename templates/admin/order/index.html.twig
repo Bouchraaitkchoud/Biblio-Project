@@ -358,7 +358,7 @@
 
                             <div class="action-buttons">
                                 {% if cart.status == 'approved' %}
-                                    <a href="{{ path('admin_order_receipt', {'id': cart.id}) }}" class="btn btn-info" target="_blank">
+                                    <a href="{{ path('admin_order_receipt', {'id': cart.id}) }}" class="btn btn-info" target="_blank" rel="noopener noreferrer">
                                         <i class="fas fa-file-pdf"></i> View Receipt
                                     </a>
                                 {% elseif cart.status == 'pending' %}
