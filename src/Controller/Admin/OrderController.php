@@ -68,11 +68,21 @@ class OrderController extends AbstractController
                 // Start transaction
                 $em->beginTransaction();
 
-                // Update exemplaire statuses
+                // Update exemplaire statuses and book quantities
                 foreach ($cart->getItems() as $item) {
                     $exemplaire = $item->getExemplaire();
+                    $book = $exemplaire->getBook();
+                    
+                    // Update exemplaire status
                     $exemplaire->setStatus('borrowed');
                     $em->persist($exemplaire);
+                    
+                    // Update book quantity
+                    $currentQuantity = $book->getQuantity();
+                    if ($currentQuantity > 0) {
+                        $book->setQuantity($currentQuantity - 1);
+                        $em->persist($book);
+                    }
                 }
 
                 // Generate receipt

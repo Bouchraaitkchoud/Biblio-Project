@@ -168,76 +168,43 @@
             </div>
             
             <div class="exemplaires-table">
-                <h3 class="mb-4">Exemplaires</h3>
-                {% if exemplaires|length > 0 %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Barcode</th>
-                                    <th>Section</th>
-                                    <th>Status</th>
-                                    <th>Location</th>
-                                    <th>Call Number</th>
-                                    <th>Acquisition Date</th>
-                                    <th>Return Date</th>
-                                    <th>Price</th>
-                                    <th>Comment</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for exemplaire in exemplaires %}
-                                    <tr>
-                                        <td>{{ exemplaire.id }}</td>
-                                        <td>{{ exemplaire.barcode }}</td>
-                                        <td>{{ exemplaire.sectionId }}</td>
-                                        <td>
-                                            {% if exemplaire.statusId is defined %}
-                                                <span class="status-{{ exemplaire.statusId }}">
-                                                    {{ exemplaire.statusId }}
-                                                </span>
-                                            {% else %}
-                                                <span>-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ exemplaire.locationId }}</td>
-                                        <td>{{ exemplaire.callNumber }}</td>
-                                        <td>
-                                            {% if exemplaire.acquisitionDate %}
-                                                {{ exemplaire.acquisitionDate|date('Y-m-d') }}
-                                            {% else %}
-                                                <span>-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if exemplaire.returnDate %}
-                                                {{ exemplaire.returnDate|date('Y-m-d') }}
-                                            {% else %}
-                                                <span>-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ exemplaire.price }}</td>
-                                        <td>{{ exemplaire.comment }}</td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="#" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        No exemplaires found for this book.
-                    </div>
-                {% endif %}
+                <h3>Exemplaires</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Barcode</th>
+                            <th>Status</th>
+                            <th>Location</th>
+                            <th>Call Number</th>
+                            <th>Acquisition Date</th>
+                            <th>Return Date</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exemplaire in exemplaires %}
+                            <tr>
+                                <td>{{ exemplaire.barcode }}</td>
+                                <td>
+                                    <span class="badge {% if exemplaire.status == 'available' %}bg-success{% elseif exemplaire.status == 'borrowed' %}bg-danger{% else %}bg-warning{% endif %}">
+                                        {{ exemplaire.status|upper }}
+                                    </span>
+                                </td>
+                                <td>{{ exemplaire.locationId }}</td>
+                                <td>{{ exemplaire.callNumber }}</td>
+                                <td>{{ exemplaire.acquisitionDate ? exemplaire.acquisitionDate|date('Y-m-d') : '-' }}</td>
+                                <td>{{ exemplaire.returnDate ? exemplaire.returnDate|date('Y-m-d') : '-' }}</td>
+                                <td>{{ exemplaire.price ? exemplaire.price|number_format(2) : '-' }}</td>
+                                <td>
+                                    <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             
             <div class="d-flex justify-content-end mt-4">
