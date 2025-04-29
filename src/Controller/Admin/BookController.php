@@ -219,9 +219,20 @@ class BookController extends AbstractController
     public function delete(Request $request, Book $book): Response
     {
         if ($this->isCsrfTokenValid('delete'.$book->getId(), $request->request->get('_token'))) {
-            // Check if it's in any cart
-            if (!$book->getCarts()->isEmpty()) {
-                $this->addFlash('error', 'Cannot delete book that is in carts.');
+            // Check if any exemplaires are in active carts
+            $hasActiveCartItems = $this->entityManager->getRepository('App\Entity\CartItem')
+                ->createQueryBuilder('ci')
+                ->join('ci.exemplaire', 'e')
+                ->join('ci.cart', 'c')
+                ->where('e.book = :book')
+                ->andWhere('c.status = :status')
+                ->setParameter('book', $book)
+                ->setParameter('status', 'pending')
+                ->getQuery()
+                ->getOneOrNullResult() !== null;
+
+            if ($hasActiveCartItems) {
+                $this->addFlash('error', 'Cannot delete book that has items in active carts.');
                 return $this->redirectToRoute('admin_books_index');
             }
             

@@ -197,6 +197,14 @@
                                 <td>{{ exemplaire.returnDate ? exemplaire.returnDate|date('Y-m-d') : '-' }}</td>
                                 <td>{{ exemplaire.price ? exemplaire.price|number_format(2) : '-' }}</td>
                                 <td>
+                                    {% if exemplaire.status == 'borrowed' %}
+                                        <form method="post" action="{{ path('admin_exemplaire_return', {'id': exemplaire.id}) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('return' ~ exemplaire.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to mark this book as returned?')">
+                                                <i class="fas fa-undo"></i> Return
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                     <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>

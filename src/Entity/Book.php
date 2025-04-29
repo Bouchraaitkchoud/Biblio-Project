@@ -15,9 +15,6 @@ class Book
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToMany(targetEntity: Cart::class, mappedBy: 'books')]
-    private Collection $carts;
-
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
@@ -52,7 +49,6 @@ class Book
 
     public function __construct()
     {
-        $this->carts = new ArrayCollection();
         $this->authors = new ArrayCollection();
         $this->publishers = new ArrayCollection();
         $this->exemplaires = new ArrayCollection();
@@ -185,35 +181,6 @@ class Book
         return $this;
     }
 
-    public function getCarts(): Collection
-    {
-        return $this->carts;
-    }
-
-    public function addCart(Cart $cart): self
-    {
-        if (!$this->carts->contains($cart)) {
-            $this->carts[] = $cart;
-            $cartItem = new CartItem();
-            $cartItem->setCart($cart);
-            $cartItem->setExemplaire($this->getExemplaires()->first());
-            $cart->addItem($cartItem);
-        }
-        return $this;
-    }
-
-    public function removeCart(Cart $cart): self
-    {
-        if ($this->carts->removeElement($cart)) {
-            foreach ($cart->getItems() as $item) {
-                if ($item->getExemplaire()->getBook() === $this) {
-                    $cart->removeItem($item);
-                }
-            }
-        }
-        return $this;
-    }
-    
     /**
      * @return Collection<int, Publisher>
      */

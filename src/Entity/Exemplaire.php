@@ -13,7 +13,7 @@ class Exemplaire
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Book::class)]
+    #[ORM\ManyToOne(targetEntity: Book::class, inversedBy: 'exemplaires')]
     #[ORM\JoinColumn(name: 'book_id', referencedColumnName: 'id', nullable: false)]
     private ?Book $book = null;
 
@@ -36,7 +36,7 @@ class Exemplaire
     private ?\DateTimeInterface $acquisition_date = null;
 
     #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $return_date = null;
+    private ?\DateTimeInterface $returnDate = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $price = null;
@@ -128,12 +128,12 @@ class Exemplaire
 
     public function getReturnDate(): ?\DateTimeInterface
     {
-        return $this->return_date;
+        return $this->returnDate;
     }
 
-    public function setReturnDate(?\DateTimeInterface $return_date): self
+    public function setReturnDate(?\DateTimeInterface $returnDate): self
     {
-        $this->return_date = $return_date;
+        $this->returnDate = $returnDate;
         return $this;
     }
 

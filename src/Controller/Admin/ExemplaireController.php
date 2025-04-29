@@ -41,4 +41,39 @@ class ExemplaireController extends AbstractController
             'book' => $exemplaire->getBook()
         ]);
     }
+
+    #[Route('/{id}/return', name: 'admin_exemplaire_return', methods: ['POST'])]
+    public function returnBook(Request $request, Exemplaire $exemplaire): Response
+    {
+        if ($this->isCsrfTokenValid('return'.$exemplaire->getId(), $request->request->get('_token'))) {
+            try {
+                // Start transaction
+                $this->entityManager->beginTransaction();
+
+                // Update exemplaire status
+                $exemplaire->setStatus('available');
+                $exemplaire->setReturnDate(new \DateTime());
+
+                // Update book quantity
+                $book = $exemplaire->getBook();
+                $currentQuantity = $book->getQuantity();
+                $book->setQuantity($currentQuantity + 1);
+
+                $this->entityManager->persist($exemplaire);
+                $this->entityManager->persist($book);
+                $this->entityManager->flush();
+
+                // Commit transaction
+                $this->entityManager->commit();
+
+                $this->addFlash('success', 'Book returned successfully.');
+            } catch (\Exception $e) {
+                // Rollback transaction on error
+                $this->entityManager->rollback();
+                $this->addFlash('error', 'An error occurred while processing the return.');
+            }
+        }
+
+        return $this->redirectToRoute('admin_books_show', ['id' => $exemplaire->getBook()->getId()]);
+    }
 } 

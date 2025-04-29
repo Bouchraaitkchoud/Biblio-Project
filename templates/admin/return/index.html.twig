@@ -1,0 +1,284 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Process Returns{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <style>
+        .return-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .scanner-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .barcode-input {
+            font-size: 1.2em;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .book-details {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .book-details.show {
+            display: block;
+        }
+        .return-history {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .return-item {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .return-item:last-child {
+            border-bottom: none;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-error {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link active">Returns</a>
+                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+            </div>
+        </div>
+
+        <div class="return-container">
+            <h1 class="text-center mb-4">Process Returns</h1>
+
+            <div class="scanner-section">
+                <h3>Scan Barcode</h3>
+                <div class="input-group mb-3">
+                    <input type="text" id="barcodeInput" class="form-control" placeholder="Scan or enter barcode" autofocus>
+                    <button type="button" id="scanButton" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Scan
+                    </button>
+                    <button type="button" id="manualEntryButton" class="btn btn-secondary">
+                        <i class="fas fa-keyboard"></i> Manual Entry
+                    </button>
+                </div>
+                <div id="scanMessage" class="alert" style="display: none;"></div>
+            </div>
+
+            <div id="bookDetails" class="book-details">
+                <h3>Book Details</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Title:</strong> <span id="bookTitle"></span></p>
+                        <p><strong>Barcode:</strong> <span id="bookBarcode"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Borrowed by:</strong> <span id="borrowedBy"></span></p>
+                        <p><strong>Borrowed date:</strong> <span id="borrowedDate"></span></p>
+                    </div>
+                </div>
+                <button id="processReturn" class="btn btn-success">
+                    <i class="fas fa-check"></i> Process Return
+                </button>
+            </div>
+
+            <div class="return-history">
+                <h3>Today's Returns</h3>
+                <div id="returnHistory"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const barcodeInput = document.getElementById('barcodeInput');
+            const scanButton = document.getElementById('scanButton');
+            const manualEntryButton = document.getElementById('manualEntryButton');
+            const scanMessage = document.getElementById('scanMessage');
+            const bookDetails = document.getElementById('bookDetails');
+            const processReturnBtn = document.getElementById('processReturn');
+            const returnHistory = document.getElementById('returnHistory');
+            let currentExemplaireId = null;
+
+            // Handle barcode input
+            barcodeInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    scanBarcodeIfValid();
+                }
+            });
+
+            // Handle scan button click
+            scanButton.addEventListener('click', function() {
+                scanBarcodeIfValid();
+            });
+
+            // Handle manual entry button click
+            manualEntryButton.addEventListener('click', function() {
+                const barcode = prompt('Please enter the barcode number:');
+                if (barcode) {
+                    barcodeInput.value = barcode;
+                    scanBarcodeIfValid();
+                }
+            });
+
+            function scanBarcodeIfValid() {
+                const barcode = barcodeInput.value.trim();
+                if (barcode) {
+                    scanBarcode(barcode);
+                }
+            }
+
+            // Process return button
+            processReturnBtn.addEventListener('click', function() {
+                if (currentExemplaireId) {
+                    processReturn(currentExemplaireId);
+                }
+            });
+
+            function scanBarcode(barcode) {
+                console.log('Scanning barcode:', barcode);
+                const formData = new FormData();
+                formData.append('barcode', barcode);
+
+                fetch('{{ path('admin_returns_scan') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        showBookDetails(data.exemplaire);
+                        currentExemplaireId = data.exemplaire.id;
+                        showMessage('Book found!', 'success');
+                    } else {
+                        showMessage(data.message || 'Error scanning barcode', 'error');
+                        hideBookDetails();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error scanning barcode: ' + error.message, 'error');
+                    hideBookDetails();
+                });
+            }
+
+            function processReturn(exemplaireId) {
+                const formData = new FormData();
+                formData.append('exemplaire_id', exemplaireId);
+
+                fetch('{{ path('admin_returns_process') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Book returned successfully!', 'success');
+                        addToReturnHistory(data.exemplaire);
+                        resetForm();
+                    } else {
+                        showMessage(data.message || 'Error processing return', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error processing return: ' + error.message, 'error');
+                });
+            }
+
+            function showBookDetails(exemplaire) {
+                console.log('Showing book details:', exemplaire);
+                document.getElementById('bookTitle').textContent = exemplaire.book_title;
+                document.getElementById('bookBarcode').textContent = exemplaire.barcode;
+                document.getElementById('borrowedBy').textContent = exemplaire.borrowed_by;
+                document.getElementById('borrowedDate').textContent = exemplaire.borrowed_date;
+                bookDetails.classList.add('show');
+            }
+
+            function hideBookDetails() {
+                bookDetails.classList.remove('show');
+                currentExemplaireId = null;
+            }
+
+            function showMessage(message, type) {
+                console.log('Showing message:', message, 'Type:', type);
+                scanMessage.textContent = message;
+                scanMessage.className = 'alert alert-' + (type === 'success' ? 'success' : 'danger');
+                scanMessage.style.display = 'block';
+                setTimeout(() => {
+                    scanMessage.style.display = 'none';
+                }, 3000);
+            }
+
+            function addToReturnHistory(exemplaire) {
+                const returnItem = document.createElement('div');
+                returnItem.className = 'return-item';
+                returnItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${exemplaire.book_title}</strong>
+                            <br>
+                            <small>Barcode: ${exemplaire.barcode}</small>
+                        </div>
+                        <span class="status-badge status-success">Returned</span>
+                    </div>
+                `;
+                returnHistory.insertBefore(returnItem, returnHistory.firstChild);
+            }
+
+            function resetForm() {
+                barcodeInput.value = '';
+                hideBookDetails();
+                barcodeInput.focus();
+            }
+        });
+    </script>
+{% endblock %} 
