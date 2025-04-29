@@ -32,15 +32,12 @@ class Cart
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $processedAt = null;
 
- 
-
-    #[ORM\ManyToMany(targetEntity: Book::class, inversedBy: 'carts', cascade: ['persist', 'remove'])]
-    #[ORM\JoinTable(name: 'cart_book')]
-    private Collection $books;
+    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class, cascade: ['persist', 'remove'])]
+    private Collection $items;
     
     public function __construct()
     {
-        $this->books = new ArrayCollection();
+        $this->items = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
 
@@ -60,28 +57,34 @@ class Cart
         $this->user = $user;
         return $this;
     }
+
     /**
-     * @return Collection<int, Book>
+     * @return Collection<int, CartItem>
      */
-    public function getBooks(): Collection
+    public function getItems(): Collection
     {
-        return $this->books;
+        return $this->items;
     }
 
-    public function addBook(Book $book): self
+    public function addItem(CartItem $item): self
     {
-        if (!$this->books->contains($book)) {
-            $this->books[] = $book;
-            $book->addCart($this); // Ensure bidirectional relationship is set
+        if (!$this->items->contains($item)) {
+            $this->items->add($item);
+            $item->setCart($this);
         }
         return $this;
     }
     
-    public function removeBook(Book $book): self
+    public function removeItem(CartItem $item): self
     {
-        $this->books->removeElement($book);
+        if ($this->items->removeElement($item)) {
+            if ($item->getCart() === $this) {
+                $item->setCart(null);
+            }
+        }
         return $this;
     }
+
     public function getStatus(): string
     {
         return $this->status;
@@ -105,25 +108,24 @@ class Cart
     }
 
     public function getProcessedBy(): ?User
-{
-    return $this->processedBy;
-}
-public function setProcessedBy(?User $processedBy): self
-{
-    $this->processedBy = $processedBy;
-    return $this;
-}
+    {
+        return $this->processedBy;
+    }
 
-public function getProcessedAt(): ?\DateTimeInterface
-{
-    return $this->processedAt;
-}
-public function setProcessedAt(?\DateTimeInterface $processedAt): self
-{
-    $this->processedAt = $processedAt;
-    return $this;
-}
+    public function setProcessedBy(?User $processedBy): self
+    {
+        $this->processedBy = $processedBy;
+        return $this;
+    }
 
-  
-  
+    public function getProcessedAt(): ?\DateTimeInterface
+    {
+        return $this->processedAt;
+    }
+
+    public function setProcessedAt(?\DateTimeInterface $processedAt): self
+    {
+        $this->processedAt = $processedAt;
+        return $this;
+    }
 }

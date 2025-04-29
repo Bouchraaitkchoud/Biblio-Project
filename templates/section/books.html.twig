@@ -59,6 +59,19 @@
             color: #555;
         }
 
+        .book-availability {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .availability-label {
+            font-weight: bold;
+        }
+
+        .availability-count {
+            margin-left: 10px;
+        }
+
         .book-actions {
             display: flex;
             justify-content: space-between;
@@ -162,6 +175,12 @@
                         <div class="book-title">{{ book.title }}</div>
                     </a>
                     <div class="book-author">by {{ book.authorName }}</div>
+                    <div class="book-availability">
+                        <span class="availability-label">Available Copies:</span>
+                        <span class="availability-count {% if book.availableCopies == 0 %}text-danger{% else %}text-success{% endif %}">
+                            {{ book.availableCopies }}
+                        </span>
+                    </div>
                     <div class="book-actions">
                         <a href="{{ path('book_show', {'id': book.id}) }}" class="view-details">
                             <i class="fas fa-eye"></i> Details

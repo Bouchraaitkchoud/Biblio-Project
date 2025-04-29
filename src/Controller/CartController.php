@@ -16,16 +16,22 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\ReceiptGeneratorService;
 
 class CartController extends AbstractController
 {
     private LoggerInterface $logger;
     private CartService $cartService;
+    private ReceiptGeneratorService $receiptGenerator;
 
-    public function __construct(LoggerInterface $logger, CartService $cartService)
-    {
+    public function __construct(
+        LoggerInterface $logger, 
+        CartService $cartService,
+        ReceiptGeneratorService $receiptGenerator
+    ) {
         $this->logger = $logger;
         $this->cartService = $cartService;
+        $this->receiptGenerator = $receiptGenerator;
     }
 
     #[Route('/add-to-cart/{id}', name: 'add_to_cart', methods: ['POST'])]
@@ -46,21 +52,28 @@ class CartController extends AbstractController
                 return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
             }
 
-            // Add book to cookie cart
-            $cookie = $this->cartService->addBookToDraftCart($book);
-            
-            $response = new JsonResponse([
-                'success' => true,
-                'message' => 'Book added to cart'
-            ]);
-            
-            $response->headers->setCookie($cookie);
-            
-            $this->logger->info('Book {bookId} added to draft cart', [
-                'bookId' => $book->getId()
-            ]);
+            try {
+                // Add book to cookie cart
+                $cookie = $this->cartService->addBookToDraftCart($book);
                 
-            return $response;
+                $response = new JsonResponse([
+                    'success' => true,
+                    'message' => 'Book added to cart'
+                ]);
+                
+                $response->headers->setCookie($cookie);
+                
+                $this->logger->info('Book {bookId} added to draft cart', [
+                    'bookId' => $book->getId()
+                ]);
+                    
+                return $response;
+            } catch (\Exception $e) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 400);
+            }
 
         } catch (\Exception $e) {
             $this->logger->error('Cart addition failed: {error}', [
@@ -85,23 +98,50 @@ class CartController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
         }
         
-        // Convert cookie cart to database entity
-        $cart = $this->cartService->convertCookieCartToEntity($user);
-        
-        if (!$cart) {
-            return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
+        try {
+            // Convert cookie cart to database entity
+            $cart = $this->cartService->convertCookieCartToEntity($user);
+            
+            if (!$cart) {
+                return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
+            }
+
+            try {
+                // Generate request receipt
+                $pdfContent = $this->receiptGenerator->generateRequestReceipt($cart);
+                
+                // Clear the cookie cart
+                $response = new Response($pdfContent, 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="request_receipt.pdf"'
+                ]);
+                
+                $response->headers->setCookie($this->cartService->clearDraftCart());
+                
+                return $response;
+            } catch (\Exception $e) {
+                $this->logger->error('Error generating PDF receipt: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'cart_id' => $cart->getId(),
+                    'user_id' => $user->getId()
+                ]);
+                
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Failed to generate receipt. Please try again.'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error submitting cart: ' . $e->getMessage(), [
+                'exception' => $e,
+                'user_id' => $user->getId()
+            ]);
+            
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
         }
-        
-        // Clear the cookie cart
-        $response = new JsonResponse([
-            'success' => true,
-            'message' => 'Cart submitted for approval',
-            'cart_id' => $cart->getId()
-        ]);
-        
-        $response->headers->setCookie($this->cartService->clearDraftCart());
-        
-        return $response;
     }
 
     #[Route('/admin/approve-cart/{id}', name: 'approve_cart', methods: ['POST'])]
@@ -119,21 +159,44 @@ class CartController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
         }
 
-        // Generate receipt
-        $receipt = new Receipt();
-        $receipt->setCart($cart);
-        $receipt->setCode('RCPT-' . date('Ymd') . '-' . strtoupper(uniqid()));
-        $receipt->setGeneratedAt(new \DateTime());
-        
-        // Update cart with approval info
-        $cart->setStatus('approved');
-        $cart->setProcessedBy($this->getUser());
-        $cart->setProcessedAt(new \DateTime());
-        
-        $em->persist($receipt);
-        $em->flush();
+        try {
+            // Start transaction
+            $em->beginTransaction();
 
-        return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+            // Update exemplaire statuses
+            foreach ($cart->getItems() as $item) {
+                $exemplaire = $item->getExemplaire();
+                $exemplaire->setStatus('borrowed');
+                $em->persist($exemplaire);
+            }
+
+            // Generate receipt
+            $receipt = new Receipt();
+            $receipt->setCart($cart);
+            $receipt->setCode('RCPT-' . date('Ymd') . '-' . strtoupper(uniqid()));
+            $receipt->setGeneratedAt(new \DateTime());
+            
+            // Update cart with approval info
+            $cart->setStatus('approved');
+            $cart->setProcessedBy($this->getUser());
+            $cart->setProcessedAt(new \DateTime());
+            
+            $em->persist($receipt);
+            $em->flush();
+
+            // Commit transaction
+            $em->commit();
+
+            return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            $em->rollback();
+            
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'An error occurred while approving the cart'
+            ], 500);
+        }
     }
 
     #[Route('/admin/reject-cart/{id}', name: 'reject_cart', methods: ['POST'])]
@@ -170,19 +233,19 @@ class CartController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
-        // Load books from cookie cart
-        $books = $this->cartService->getCartBooks();
+        // Load exemplaires from cookie cart
+        $items = $this->cartService->getCartItems();
         
         // Get a valid section (first book in cart)
         $section = null;
-        if (!empty($books)) {
-            $section = $books[0]->getSection();
+        if (!empty($items)) {
+            $section = $items[0]->getBook()->getSection();
         }
     
         return $this->render('cart/cartView.html.twig', [
             'cart' => null, // No database cart for draft
-            'books' => $books,
-            'total' => count($books),
+            'items' => $items,
+            'total' => count($items),
             'section' => $section,
         ]);
     }

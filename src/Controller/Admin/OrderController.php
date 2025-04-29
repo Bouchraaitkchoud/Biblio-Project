@@ -64,29 +64,56 @@ class OrderController extends AbstractController
     public function approve(Request $request, Cart $cart, EntityManagerInterface $em): Response 
     {
         if ($this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
-            // Generate receipt
-            $receipt = new Receipt();
-            $receipt->setCart($cart);
-            $receipt->setCode('REC-'.date('Ymd').'-'.strtoupper(uniqid()));
-            $receipt->setGeneratedAt(new \DateTime());
-            
-            $cart->setStatus('approved');
-            $cart->setProcessedBy($this->getUser());
-            $cart->setProcessedAt(new \DateTime());
-            
-            $em->persist($receipt);
-            $em->flush();
+            try {
+                // Start transaction
+                $em->beginTransaction();
 
-            // Check if it's an AJAX request
-            if ($request->isXmlHttpRequest()) {
-                return new Response('Order approved', Response::HTTP_OK);
+                // Update exemplaire statuses
+                foreach ($cart->getItems() as $item) {
+                    $exemplaire = $item->getExemplaire();
+                    $exemplaire->setStatus('borrowed');
+                    $em->persist($exemplaire);
+                }
+
+                // Generate receipt
+                $receipt = new Receipt();
+                $receipt->setCart($cart);
+                $receipt->setCode('REC-'.date('Ymd').'-'.strtoupper(uniqid()));
+                $receipt->setGeneratedAt(new \DateTime());
+                
+                // Update cart with approval info
+                $cart->setStatus('approved');
+                $cart->setProcessedBy($this->getUser());
+                $cart->setProcessedAt(new \DateTime());
+                
+                $em->persist($receipt);
+                $em->flush();
+
+                // Commit transaction
+                $em->commit();
+
+                // Check if it's an AJAX request
+                if ($request->isXmlHttpRequest()) {
+                    return new Response('Order approved', Response::HTTP_OK);
+                }
+
+                // Add a flash message
+                $this->addFlash('success', 'Order approved successfully.');
+                
+                // For normal POST requests, redirect to the order list - let the receipt be viewed separately
+                return $this->redirectToRoute('admin_orders_index', ['status' => 'approved']);
+            } catch (\Exception $e) {
+                // Rollback transaction on error
+                $em->rollback();
+                
+                $this->logger->error('Error approving order: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'cart_id' => $cart->getId()
+                ]);
+                
+                $this->addFlash('error', 'Failed to approve order. Please try again.');
+                return $this->redirectToRoute('admin_orders_index');
             }
-
-            // Add a flash message
-            $this->addFlash('success', 'Order approved successfully.');
-            
-            // For normal POST requests, redirect to the order list - let the receipt be viewed separately
-            return $this->redirectToRoute('admin_orders_index', ['status' => 'approved']);
         }
 
         return $this->redirectToRoute('admin_orders_index');
@@ -111,15 +138,32 @@ class OrderController extends AbstractController
     #[Route('/{id}/receipt', name: 'admin_order_receipt', methods: ['GET'])]
     public function viewReceipt(Cart $cart): Response
     {
-        // Find the receipt for this cart
-        $receipt = $this->em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
-        
-        if (!$receipt) {
-            $this->addFlash('error', 'No receipt found for this order.');
+        try {
+            // Find the receipt for this cart
+            $receipt = $this->em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
+            
+            if (!$receipt) {
+                $this->logger->error('No receipt found for cart', [
+                    'cart_id' => $cart->getId(),
+                    'cart_status' => $cart->getStatus()
+                ]);
+                
+                $this->addFlash('error', 'No receipt found for this order. Please try approving the order again.');
+                return $this->redirectToRoute('admin_orders_index');
+            }
+            
+            // Generate the receipt PDF using the ReceiptController
+            return $this->forward('App\Controller\ReceiptController::show', [
+                'receipt' => $receipt
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Error viewing receipt: ' . $e->getMessage(), [
+                'exception' => $e,
+                'cart_id' => $cart->getId()
+            ]);
+            
+            $this->addFlash('error', 'Failed to view receipt. Please try again.');
             return $this->redirectToRoute('admin_orders_index');
         }
-        
-        // Redirect to the receipt controller
-        return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
     }
 }

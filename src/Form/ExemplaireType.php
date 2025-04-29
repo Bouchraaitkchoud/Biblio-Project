@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -31,11 +32,15 @@ class ExemplaireType extends AbstractType
                     'class' => 'form-control'
                 ]
             ])
-            ->add('status_id', NumberType::class, [
-                'label' => 'Status ID',
-                'required' => false,
+            ->add('status', ChoiceType::class, [
+                'label' => 'Status',
+                'required' => true,
+                'choices' => [
+                    'Available' => 'available',
+                    'Borrowed' => 'borrowed',
+                    'Maintenance' => 'maintenance'
+                ],
                 'attr' => [
-                    'placeholder' => 'Enter status ID',
                     'class' => 'form-control'
                 ]
             ])

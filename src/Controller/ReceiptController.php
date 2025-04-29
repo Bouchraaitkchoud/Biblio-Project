@@ -17,10 +17,10 @@ class ReceiptController extends AbstractController
     private $logger;
     private $pdf;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, Pdf $pdf)
     {
         $this->logger = $logger;
-        $this->pdf = new Pdf('"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"');
+        $this->pdf = $pdf;
     }
 
     #[Route('/receipt/{id}', name: 'receipt_show')]
@@ -47,15 +47,7 @@ class ReceiptController extends AbstractController
             ]);
             
             // Generate the PDF
-            $pdfContent = $this->pdf->getOutputFromHtml($html, [
-                'page-size' => 'A4',
-                'margin-top' => 0,
-                'margin-right' => 0,
-                'margin-bottom' => 0,
-                'margin-left' => 0,
-                'encoding' => 'UTF-8',
-                'enable-local-file-access' => true
-            ]);
+            $pdfContent = $this->pdf->getOutputFromHtml($html);
             
             // Create the response with the PDF content
             $response = new Response(
@@ -68,13 +60,16 @@ class ReceiptController extends AbstractController
             );
             
             return $response;
-            
         } catch (\Exception $e) {
-            // Log the error
-            $this->logger->error('Error generating PDF: ' . $e->getMessage());
+            // Log the error with more details
+            $this->logger->error('Error generating PDF: ' . $e->getMessage(), [
+                'exception' => $e,
+                'receipt_id' => $receipt->getId(),
+                'trace' => $e->getTraceAsString()
+            ]);
             
             // Show error message
-            $this->addFlash('error', 'Failed to generate PDF. Please try again.');
+            $this->addFlash('error', 'Failed to generate PDF. Please make sure wkhtmltopdf is installed correctly.');
             
             // Redirect back to appropriate page
             if (in_array('ROLE_ADMIN', $user->getRoles())) {

@@ -5,6 +5,8 @@ namespace App\Service;
 use App\Entity\Book;
 use App\Entity\Cart;
 use App\Entity\User;
+use App\Entity\Exemplaire;
+use App\Entity\CartItem;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -24,7 +26,7 @@ class CartService
     /**
      * Get the draft cart from cookies
      * 
-     * @return array The cart items (book IDs)
+     * @return array The cart items (exemplaire IDs)
      */
     public function getDraftCart(): array
     {
@@ -40,7 +42,7 @@ class CartService
 
         try {
             $cartData = json_decode($cookie, true);
-            return $cartData['books'] ?? [];
+            return $cartData['items'] ?? [];
         } catch (\Exception $e) {
             return [];
         }
@@ -51,17 +53,36 @@ class CartService
      * 
      * @param Book $book The book to add
      * @return Cookie The updated cookie
+     * @throws \Exception If no available exemplaires
      */
     public function addBookToDraftCart(Book $book): Cookie
     {
-        $bookIds = $this->getDraftCart();
-        
-        // Check if the book is already in the cart
-        if (!in_array($book->getId(), $bookIds)) {
-            $bookIds[] = $book->getId();
+        // Find an available exemplaire
+        $exemplaire = $this->findAvailableExemplaire($book);
+        if (!$exemplaire) {
+            throw new \Exception('No available copies of this book');
         }
 
-        return $this->createCartCookie($bookIds);
+        $itemIds = $this->getDraftCart();
+        
+        // Check if the exemplaire is already in the cart
+        if (!in_array($exemplaire->getId(), $itemIds)) {
+            $itemIds[] = $exemplaire->getId();
+        }
+
+        return $this->createCartCookie($itemIds);
+    }
+
+    /**
+     * Find an available exemplaire for a book
+     */
+    private function findAvailableExemplaire(Book $book): ?Exemplaire
+    {
+        return $this->entityManager->getRepository(Exemplaire::class)
+            ->findOneBy([
+                'book' => $book,
+                'status' => 'available'
+            ]);
     }
 
     /**
@@ -72,27 +93,31 @@ class CartService
      */
     public function removeBookFromDraftCart(Book $book): Cookie
     {
-        $bookIds = $this->getDraftCart();
+        $itemIds = $this->getDraftCart();
         
-        $key = array_search($book->getId(), $bookIds);
-        if ($key !== false) {
-            unset($bookIds[$key]);
-            $bookIds = array_values($bookIds); // Re-index array
+        // Find the exemplaire ID for this book
+        $exemplaire = $this->findAvailableExemplaire($book);
+        if ($exemplaire) {
+            $key = array_search($exemplaire->getId(), $itemIds);
+            if ($key !== false) {
+                unset($itemIds[$key]);
+                $itemIds = array_values($itemIds); // Re-index array
+            }
         }
 
-        return $this->createCartCookie($bookIds);
+        return $this->createCartCookie($itemIds);
     }
 
     /**
      * Create a cookie with the cart data
      * 
-     * @param array $bookIds Array of book IDs
+     * @param array $itemIds Array of exemplaire IDs
      * @return Cookie The cart cookie
      */
-    private function createCartCookie(array $bookIds): Cookie
+    private function createCartCookie(array $itemIds): Cookie
     {
         $cartData = [
-            'books' => $bookIds,
+            'items' => $itemIds,
             'timestamp' => time()
         ];
 
@@ -130,19 +155,19 @@ class CartService
     }
 
     /**
-     * Load books from draft cart cookie
+     * Load exemplaires from draft cart cookie
      * 
-     * @return array Array of Book entities
+     * @return array Array of Exemplaire entities
      */
-    public function getCartBooks(): array
+    public function getCartItems(): array
     {
-        $bookIds = $this->getDraftCart();
-        if (empty($bookIds)) {
+        $itemIds = $this->getDraftCart();
+        if (empty($itemIds)) {
             return [];
         }
 
-        return $this->entityManager->getRepository(Book::class)
-            ->findBy(['id' => $bookIds]);
+        return $this->entityManager->getRepository(Exemplaire::class)
+            ->findBy(['id' => $itemIds]);
     }
 
     /**
@@ -153,8 +178,8 @@ class CartService
      */
     public function convertCookieCartToEntity(User $user): ?Cart
     {
-        $books = $this->getCartBooks();
-        if (empty($books)) {
+        $exemplaires = $this->getCartItems();
+        if (empty($exemplaires)) {
             return null;
         }
 
@@ -163,8 +188,10 @@ class CartService
         $cart->setCreatedAt(new \DateTime());
         $cart->setStatus('pending');
 
-        foreach ($books as $book) {
-            $cart->addBook($book);
+        foreach ($exemplaires as $exemplaire) {
+            $item = new CartItem();
+            $item->setExemplaire($exemplaire);
+            $cart->addItem($item);
         }
 
         $this->entityManager->persist($cart);

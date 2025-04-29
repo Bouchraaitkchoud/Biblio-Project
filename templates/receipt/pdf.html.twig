@@ -89,10 +89,10 @@
     
     <div class="items">
         <h3>Borrowed Books:</h3>
-        {% for book in receipt.cart.books %}
+        {% for item in receipt.cart.items %}
         <div class="item">
-            <span>{{ book.title }}</span>
-            <span>by {{ book.authorName }}</span>
+            <span>{{ item.exemplaire.book.title }}</span>
+            <span>by {{ item.exemplaire.book.authorName }}</span>
         </div>
         {% endfor %}
     </div>

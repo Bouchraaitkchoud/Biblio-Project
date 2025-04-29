@@ -194,9 +194,10 @@ class Book
     {
         if (!$this->carts->contains($cart)) {
             $this->carts[] = $cart;
-            if (!$cart->getBooks()->contains($this)) {
-                $cart->addBook($this);
-            }
+            $cartItem = new CartItem();
+            $cartItem->setCart($cart);
+            $cartItem->setExemplaire($this->getExemplaires()->first());
+            $cart->addItem($cartItem);
         }
         return $this;
     }
@@ -204,8 +205,10 @@ class Book
     public function removeCart(Cart $cart): self
     {
         if ($this->carts->removeElement($cart)) {
-            if ($cart->getBooks()->contains($this)) {
-                $cart->removeBook($this);
+            foreach ($cart->getItems() as $item) {
+                if ($item->getExemplaire()->getBook() === $this) {
+                    $cart->removeItem($item);
+                }
             }
         }
         return $this;
@@ -287,5 +290,15 @@ class Book
             }
         }
         return $this;
+    }
+
+    /**
+     * Get the number of available copies (exemplaires with status = 'available')
+     */
+    public function getAvailableCopies(): int
+    {
+        return $this->exemplaires->filter(function(Exemplaire $exemplaire) {
+            return $exemplaire->getStatus() === 'available';
+        })->count();
     }
 }

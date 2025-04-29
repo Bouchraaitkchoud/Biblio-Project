@@ -249,8 +249,8 @@ class BookController extends AbstractController
                 $this->entityManager->beginTransaction();
                 
                 // Set default status if not provided
-                if (!$exemplaire->getStatusId()) {
-                    $exemplaire->setStatusId(1); // Assuming 1 is the default "Available" status
+                if (!$exemplaire->getStatus()) {
+                    $exemplaire->setStatus('available');
                 }
                 
                 // Set default section if not provided

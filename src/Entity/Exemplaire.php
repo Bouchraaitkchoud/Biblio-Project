@@ -23,8 +23,8 @@ class Exemplaire
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $section_id = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $status_id = null;
+    #[ORM\Column(type: 'string', length: 20, nullable: false)]
+    private string $status = 'available';
 
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $location_id = null;
@@ -82,14 +82,14 @@ class Exemplaire
         return $this;
     }
 
-    public function getStatusId(): ?int
+    public function getStatus(): string
     {
-        return $this->status_id;
+        return $this->status;
     }
 
-    public function setStatusId(?int $status_id): self
+    public function setStatus(string $status): self
     {
-        $this->status_id = $status_id;
+        $this->status = $status;
         return $this;
     }
 
