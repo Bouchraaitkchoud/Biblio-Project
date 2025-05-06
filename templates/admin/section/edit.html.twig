@@ -4,81 +4,60 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
     <style>
-        .admin-nav {
-            background-color: #117986;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
+            min-height: 100vh;
+        }
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2rem 0 1.5rem 0;
+            color: #1a2e4f;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .admin-nav-links {
-            display: flex;
-            gap: 20px;
-        }
-        .admin-nav-link {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        .admin-nav-link:hover, .admin-nav-link.active {
-            background-color: rgba(255,255,255,0.2);
-        }
-        .admin-user-info {
-            color: white;
-        }
         .form-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .btn-container {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 2rem;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
         }
         .btn-primary {
-            background-color: #117986;
+            background: #1a2e4f;
+            color: #fff;
             border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
         }
         .btn-primary:hover {
-            background-color: #0d6974;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #b2903e;
+            color: #fff;
         }
         .btn-secondary {
-            background-color: #6c757d;
+            background: #6c757d;
+            color: #fff;
             border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
         }
         .btn-secondary:hover {
-            background-color: #5a6268;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #b2903e;
+            color: #fff;
+        }
+        .back-link {
+            margin-top: 1.5rem;
+            display: inline-block;
         }
         .alert {
             border-radius: 8px;
@@ -88,21 +67,6 @@
 
 {% block body %}
     <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
-                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
-                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link active">Sections</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
-        
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show">
@@ -111,16 +75,20 @@
                 </div>
             {% endfor %}
         {% endfor %}
-        
-        <h1>Edit Section</h1>
-        
+
+        <div class="page-header">
+            <span>Edit Section: {{ section.name }}</span>
+            <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
         <div class="form-container">
             <form method="post">
                 <div class="mb-3">
                     <label for="name" class="form-label">Section Name</label>
                     <input type="text" id="name" name="name" class="form-control" value="{{ section.name }}" required>
                 </div>
-
                 <div class="mb-3">
                     <label for="domain" class="form-label">Domain</label>
                     <select id="domain" name="domain" class="form-control" required>
@@ -132,14 +100,11 @@
                         {% endfor %}
                     </select>
                 </div>
-                
-                <div class="btn-container">
-                    <button type="submit" class="btn-primary">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Update Section
                     </button>
-                    <a href="{{ path('admin_sections_index') }}" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
+                    <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary back-link">Cancel</a>
                 </div>
             </form>
         </div>

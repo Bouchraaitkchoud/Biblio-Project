@@ -4,28 +4,115 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <style>
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
+            min-height: 100vh;
+        }
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2rem 0 1.5rem 0;
+            color: #1a2e4f;
+        }
+        .publisher-detail-card {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 2rem;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .publisher-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 0.5rem;
+        }
+        .publisher-meta {
+            color: #7a6b52;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .publisher-info-table {
+            margin-bottom: 1.5rem;
+        }
+        .publisher-info-table th {
+            width: 30%;
+            color: #7a6b52;
+            font-weight: normal;
+        }
+        .btn-primary {
+            background: #1a2e4f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .btn-edit {
+            background: #f7e7c1;
+            color: #b2903e;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            margin-right: 0.5rem;
+        }
+        .btn-edit:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .btn-delete {
+            background: #f8d7da;
+            color: #dc3545;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+        }
+        .btn-delete:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .back-link {
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+        .count-badge {
+            font-weight: normal;
+            font-size: 0.95rem;
+            color: #7a6b52;
+        }
+        .alert {
+            border-radius: 8px;
+        }
+        .books-list {
+            margin-bottom: 1.5rem;
+        }
+        .books-list li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
     <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
-                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
-                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
-                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link active">Publishers</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
-        
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show">
@@ -34,133 +121,72 @@
                 </div>
             {% endfor %}
         {% endfor %}
-        
-        <div class="page-header">
-            <h1>Publisher Details</h1>
-            <div>
-                <a href="{{ path('admin_publisher_edit', {'id': publisher.id}) }}" class="btn btn-edit">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <a href="{{ path('admin_publishers_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3>Publisher Information</h3>
-                    </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <th style="width: 30%">ID</th>
-                                    <td>{{ publisher.id }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Name</th>
-                                    <td>{{ publisher.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Address</th>
-                                    <td>{{ publisher.address|default('Not specified') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>City</th>
-                                    <td>{{ publisher.city|default('Not specified') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Country</th>
-                                    <td>{{ publisher.country|default('Not specified') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Website</th>
-                                    <td>
-                                        {% if publisher.website %}
-                                            <a href="{{ publisher.website }}" target="_blank">{{ publisher.website }}</a>
-                                        {% else %}
-                                            Not specified
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                {% if publisher.comment %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3>Comments</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>{{ publisher.comment|nl2br }}</p>
-                    </div>
-                </div>
+
+        <div class="page-header">Publisher Details</div>
+
+        <div class="publisher-detail-card">
+            <div class="publisher-name">{{ publisher.name }}</div>
+            <div class="publisher-meta">
+                {% if publisher.city or publisher.country %}
+                    {{ [publisher.city, publisher.country]|filter(v => v)|join(', ') }}
+                {% else %}
+                    <span class="text-muted">Location not specified</span>
                 {% endif %}
             </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3>Books ({{ publisher.books|length }})</h3>
-                        <a href="{{ path('admin_books_index') }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-book"></i> Manage Books
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        {% if publisher.books|length > 0 %}
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Title</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for book in publisher.books %}
-                                            <tr>
-                                                <td>{{ book.id }}</td>
-                                                <td>{{ book.title }}</td>
-                                                <td>
-                                                    <a href="{{ path('admin_books_show', {'id': book.id}) }}" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% else %}
-                            <p class="text-muted">No books associated with this publisher.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mt-4 d-flex justify-content-between">
-            <form method="post" action="{{ path('admin_publisher_delete', {'id': publisher.id}) }}" onsubmit="return confirm('Are you sure you want to delete this publisher?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ publisher.id) }}">
-                <button class="btn btn-danger" {% if publisher.books is not empty %}disabled title="Cannot delete publisher with books"{% endif %}>
-                    <i class="fas fa-trash-alt"></i> Delete
-                </button>
-            </form>
-            
-            <div>
-                <a href="{{ path('admin_publisher_edit', {'id': publisher.id}) }}" class="btn btn-edit">
+            <div class="btn-group">
+                <a href="{{ path('admin_publisher_edit', {'id': publisher.id}) }}" class="btn btn-edit" title="Edit publisher">
                     <i class="fas fa-edit"></i> Edit
                 </a>
-                <a href="{{ path('admin_publishers_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
+                <form method="post" action="{{ path('admin_publisher_delete', {'id': publisher.id}) }}" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this publisher?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ publisher.id) }}">
+                    <button class="btn btn-delete" {% if publisher.books is not empty %}disabled title="Cannot delete publisher with books"{% endif %}>
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                </form>
             </div>
+            <table class="table publisher-info-table">
+                <tbody>
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ publisher.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address</th>
+                        <td>{{ publisher.address|default('Not specified') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Website</th>
+                        <td>
+                            {% if publisher.website %}
+                                <a href="{{ publisher.website }}" target="_blank">{{ publisher.website }}</a>
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Comments</th>
+                        <td>{{ publisher.comment|default('No comments')|nl2br }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="books-list">
+                <strong>Books ({{ publisher.books|length }}):</strong>
+                {% if publisher.books|length > 0 %}
+                    <ul>
+                        {% for book in publisher.books %}
+                            <li>
+                                <a href="{{ path('admin_books_show', {'id': book.id}) }}">{{ book.title }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-muted">No books associated with this publisher.</div>
+                {% endif %}
+            </div>
+            <a href="{{ path('admin_publishers_index') }}" class="btn btn-primary back-link">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
         </div>
     </div>
 {% endblock %} 
