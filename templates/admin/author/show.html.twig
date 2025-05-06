@@ -4,60 +4,107 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
+            min-height: 100vh;
+        }
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2rem 0 1.5rem 0;
+            color: #1a2e4f;
+        }
+        .author-detail-card {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 2rem;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
         .author-name {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #212529;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 0.5rem;
         }
-        .author-info {
-            margin-bottom: 30px;
-        }
-        .author-info h3 {
-            font-size: 1.2rem;
-            color: #117986;
-            margin-bottom: 15px;
+        .author-bio {
+            color: #7a6b52;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
         }
         .books-list {
-            list-style: none;
-            padding-left: 0;
+            margin-bottom: 1.5rem;
         }
         .books-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 0.5rem;
         }
-        .books-list li:last-child {
-            border-bottom: none;
+        .btn-primary {
+            background: #1a2e4f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
         }
-        .content-container {
-            background-color: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+        .btn-primary:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .btn-edit {
+            background: #f7e7c1;
+            color: #b2903e;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            margin-right: 0.5rem;
+        }
+        .btn-edit:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .btn-delete {
+            background: #f8d7da;
+            color: #dc3545;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+        }
+        .btn-delete:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .back-link {
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+        .count-badge {
+            font-weight: normal;
+            font-size: 0.95rem;
+            color: #7a6b52;
+        }
+        .alert {
+            border-radius: 8px;
         }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
-                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
-                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link active">Authors</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
-        
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show">
@@ -66,53 +113,46 @@
                 </div>
             {% endfor %}
         {% endfor %}
-        
-        <div class="page-header">
-            <h1>Author Details</h1>
-            <div class="actions">
-                <a href="{{ path('admin_author_edit', {'id': author.id}) }}" class="btn btn-edit">
+
+        <div class="page-header">Author Details</div>
+
+        <div class="author-detail-card">
+            <div class="author-name">{{ author.name }}</div>
+            {% if author.bio is defined and author.bio %}
+                <div class="author-bio">{{ author.bio }}</div>
+            {% endif %}
+
+            <div class="btn-group">
+                <a href="{{ path('admin_author_edit', {'id': author.id}) }}" class="btn btn-edit" title="Edit author">
                     <i class="fas fa-edit"></i> Edit
                 </a>
-                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="fas fa-trash"></i> Delete
+                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete author">
+                    <i class="fas fa-trash-alt"></i> Delete
                 </button>
             </div>
-        </div>
-        
-        <div class="content-container">
-            <div class="author-name">{{ author.name }}</div>
-            
-            {% if author.bio is defined and author.bio %}
-            <div class="author-info">
-                <h3>Biography</h3>
-                <p>{{ author.bio }}</p>
-            </div>
-            {% endif %}
-            
-            <div class="author-info">
-                <h3>Books by this Author ({{ author.books|length }})</h3>
+
+            <div class="books-list">
+                <strong>Books by this Author ({{ author.books|length }}):</strong>
                 {% if author.books|length > 0 %}
-                    <ul class="books-list">
+                    <ul>
                         {% for book in author.books %}
                             <li>
                                 <a href="{{ path('book_show', {'id': book.id}) }}">{{ book.title }}</a>
-                                ({{ book.section.name }})
+                                <span class="count-badge">({{ book.section.name }})</span>
                             </li>
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p>No books found for this author.</p>
+                    <div class="text-muted">No books found for this author.</div>
                 {% endif %}
             </div>
-            
-            <div class="d-flex justify-content-end mt-4">
-                <a href="{{ path('admin_authors_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
-            </div>
+
+            <a href="{{ path('admin_authors_index') }}" class="btn btn-primary back-link">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
         </div>
     </div>
-    
+
     <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -123,7 +163,6 @@
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete the author "{{ author.name }}"?
-                    
                     {% if author.books|length > 0 %}
                         <div class="alert alert-warning mt-3">
                             <strong>Warning:</strong> This author has {{ author.books|length }} books. Deleting this author may affect these books.
@@ -134,7 +173,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <form method="post" action="{{ path('admin_author_delete', {'id': author.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
-                        <button type="submit" class="btn btn-delete">Delete</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
             </div>

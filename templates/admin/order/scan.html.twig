@@ -265,8 +265,13 @@
                 <button id="approveOrder" class="btn-approve">
                     <i class="fas fa-check"></i> Approve Order
                 </button>
+                <button id="rejectOrder" class="btn-reject">
+                    <i class="fas fa-times"></i> Reject Order
+                </button>
             </div>
         </div>
+
+        <div id="scanError" style="display:none; color:#dc3545; font-weight:bold; margin-bottom:20px;"></div>
 
         <div class="scan-history">
             <h3>Today's Scans</h3>
@@ -279,12 +284,18 @@
             const barcodeInput = document.getElementById('barcodeInput');
             const orderDetails = document.getElementById('orderDetails');
             const scanHistory = document.getElementById('scanHistory');
+            const scanError = document.getElementById('scanError');
             let currentOrderId = null;
+            let currentCsrfToken = null;
 
-            // Focus the barcode input on page load
             barcodeInput.focus();
 
-            // Handle barcode input
+            function resetOrderDetails() {
+                orderDetails.classList.remove('show');
+                currentOrderId = null;
+                currentCsrfToken = null;
+            }
+
             barcodeInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     const orderId = this.value.trim();
@@ -295,14 +306,6 @@
                 }
             });
 
-            // Handle approve button
-            document.getElementById('approveOrder').addEventListener('click', function() {
-                if (currentOrderId) {
-                    approveOrder(currentOrderId);
-                }
-            });
-
-            // Add scan button functionality
             document.getElementById('scanButton').addEventListener('click', function() {
                 const orderId = barcodeInput.value.trim();
                 if (orderId) {
@@ -311,63 +314,96 @@
                 }
             });
 
+            document.getElementById('approveOrder').addEventListener('click', function() {
+                if (currentOrderId && currentCsrfToken) {
+                    processOrderAction('approve', currentOrderId, currentCsrfToken);
+                }
+            });
+
+            document.getElementById('rejectOrder').addEventListener('click', function() {
+                if (currentOrderId && currentCsrfToken) {
+                    processOrderAction('reject', currentOrderId, currentCsrfToken);
+                }
+            });
+
             function fetchOrderDetails(orderId) {
-                fetch(`/admin/orders/${orderId}/details`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            displayOrderDetails(data.order);
-                            addScanHistory('success', `Order #${orderId} found`);
-                        } else {
-                            addScanHistory('error', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        addScanHistory('error', 'Error fetching order details');
-                    });
-            }
-
-            function displayOrderDetails(order) {
-                currentOrderId = order.id;
-                document.getElementById('orderId').textContent = order.id;
-                document.getElementById('studentEmail').textContent = order.user.email;
-                document.getElementById('requestDate').textContent = new Date(order.createdAt).toLocaleString();
-
-                const booksList = document.getElementById('booksList');
-                booksList.innerHTML = order.items.map(item => `
-                    <div class="book-item">
-                        <div class="book-info">
-                            <div class="book-title">${item.book.title}</div>
-                            <div class="book-author">by ${item.book.authorName}</div>
-                        </div>
-                        <div class="book-quantity">Qty: 1</div>
-                    </div>
-                `).join('');
-
-                orderDetails.classList.add('show');
-            }
-
-            function approveOrder(orderId) {
-                fetch(`/admin/scan/approve/${orderId}`, {
+                resetOrderDetails();
+                scanError.style.display = 'none';
+                fetch('/admin/scan/barcode', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-                    }
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'barcode=' + encodeURIComponent(orderId)
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        addScanHistory('success', `Order #${orderId} approved`);
-                        orderDetails.classList.remove('show');
-                        currentOrderId = null;
+                        displayOrderDetails(data);
+                        addScanHistory('success', `Order #${data.cart_id} found`);
                     } else {
+                        scanError.textContent = data.message;
+                        scanError.style.display = 'block';
                         addScanHistory('error', data.message);
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    addScanHistory('error', 'Error approving order');
+                    scanError.textContent = 'Error fetching order details';
+                    scanError.style.display = 'block';
+                    addScanHistory('error', 'Error fetching order details');
+                });
+            }
+
+            function displayOrderDetails(data) {
+                currentOrderId = data.cart_id;
+                currentCsrfToken = data.csrf_token;
+                document.getElementById('orderId').textContent = data.cart_id;
+                document.getElementById('studentEmail').textContent = data.student;
+                document.getElementById('requestDate').textContent = data.request_date;
+                const booksList = document.getElementById('booksList');
+                booksList.innerHTML = data.items.map(item => `
+                    <div class="book-item">
+                        <div class="book-info">
+                            <div class="book-title">${item.book_title}</div>
+                            <div class="book-author">Barcode: ${item.barcode}</div>
+                        </div>
+                        <div class="book-quantity">Qty: 1</div>
+                    </div>
+                `).join('');
+                orderDetails.classList.add('show');
+            }
+
+            function processOrderAction(action, orderId, csrfToken) {
+                let url = '';
+                if (action === 'approve') {
+                    url = `/admin/scan/approve/${orderId}`;
+                } else if (action === 'reject') {
+                    url = `/admin/orders/${orderId}/reject`;
+                }
+                fetch(url, {
+                    method: 'POST',
+                    body: ''
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let msg = `Order #${orderId} ${action}d`;
+                        if (data.receipt_url) {
+                            msg += ` - <a href='${data.receipt_url}' target='_blank'>Download Receipt</a>`;
+                            window.open(data.receipt_url, '_blank');
+                        }
+                        addScanHistory('success', msg);
+                        resetOrderDetails();
+                    } else {
+                        scanError.textContent = data.message;
+                        scanError.style.display = 'block';
+                        addScanHistory('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    scanError.textContent = `Error trying to ${action} order`;
+                    scanError.style.display = 'block';
+                    addScanHistory('error', `Error trying to ${action} order`);
                 });
             }
 

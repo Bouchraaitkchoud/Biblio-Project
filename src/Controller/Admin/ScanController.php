@@ -37,7 +37,8 @@ class ScanController extends AbstractController
     public function scanOrderBarcode(Request $request): Response
     {
         try {
-            $orderId = $request->request->get('barcode'); // This is the order/cart ID from the receipt
+            // Accept both 'barcode' and 'order_id' parameters
+            $orderId = $request->request->get('barcode') ?? $request->request->get('order_id');
             if (!$orderId) {
                 return new JsonResponse([
                     'success' => false,
@@ -46,7 +47,8 @@ class ScanController extends AbstractController
             }
             $orderId = trim($orderId);
             $this->logger->info('Processing order scan request', [
-                'order_id' => $orderId
+                'order_id' => $orderId,
+                'received_params' => $request->request->all()
             ]);
             // Find cart by ID and status pending
             $cart = $this->entityManager->getRepository(Cart::class)->find($orderId);
@@ -143,7 +145,14 @@ class ScanController extends AbstractController
     {
         try {
             $cart = $this->entityManager->getRepository(Cart::class)->find($id);
-            
+
+            // Add debug logging
+            $this->logger->info('Approve attempt', [
+                'cart_id' => $id,
+                'cart_found' => $cart ? 'yes' : 'no',
+                'cart_status' => $cart ? $cart->getStatus() : 'n/a'
+            ]);
+
             if (!$cart || $cart->getStatus() !== 'pending') {
                 return new JsonResponse([
                     'success' => false,
@@ -178,16 +187,26 @@ class ScanController extends AbstractController
             
             $this->entityManager->flush();
 
-            // Generate approval receipt
+            // Create and persist Receipt entity
+            $receipt = new \App\Entity\Receipt();
+            $receipt->setCart($cart);
+            $receipt->setCode('REC-'.date('Ymd').'-'.strtoupper(uniqid()));
+            $receipt->setGeneratedAt(new \DateTime());
+            $this->entityManager->persist($receipt);
+            $this->entityManager->flush();
+
+            // Generate approval receipt PDF (optional, for download)
             $pdfContent = $this->receiptGenerator->generateApprovalReceipt($cart);
 
             // Commit transaction
             $this->entityManager->commit();
 
-            // Return PDF
-            return new Response($pdfContent, 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="approval_receipt.pdf"'
+            // Fetch the Receipt entity for this cart (now guaranteed to exist)
+            $receiptUrl = $this->generateUrl('receipt_show', ['id' => $receipt->getId()]);
+            return $this->json([
+                'success' => true,
+                'message' => 'Order approved and receipt generated.',
+                'receipt_url' => $receiptUrl
             ]);
 
         } catch (\Exception $e) {

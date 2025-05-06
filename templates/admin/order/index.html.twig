@@ -298,11 +298,13 @@
 
 {% block body %}
     <div class="container mt-4">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success mt-3">{{ message|raw }}</div>
+        {% endfor %}
         <div class="admin-nav">
             <div class="admin-nav-links">
                 <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
                 <a href="{{ path('admin_orders_index') }}" class="admin-nav-link active">Orders</a>
-                <a href="{{ path('admin_scan_index') }}" class="admin-nav-link" style="background-color: #b2903e; color: #fff; font-weight: bold;">Scan Orders</a>
                 <a href="{{ path('admin_returns_index') }}" class="admin-nav-link">Returns</a>
                 <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
                 <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
@@ -317,6 +319,12 @@
         </div>
 
         <h1 class="mb-4">Orders Management</h1>
+
+        <div class="mb-3" style="text-align:right;">
+            <a href="{{ path('admin_scan_index') }}" class="btn btn-warning" style="font-weight:bold; color:#fff;">
+                <i class="fas fa-barcode"></i> Scan Order
+            </a>
+        </div>
 
         <div class="filters-container">
             <div class="filter-buttons">
@@ -379,7 +387,7 @@
                         <div class="action-buttons">
                             {% if cart.status == 'pending' %}
                                 <form action="{{ path('admin_order_approve', {'id': cart.id}) }}" method="POST" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('approve_order') }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
                                     <button type="submit" class="btn-approve">
                                         <i class="fas fa-check"></i> Approve
                                     </button>

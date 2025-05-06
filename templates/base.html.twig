@@ -93,6 +93,71 @@
                 border-left: 5px solid #9b7e46;
                 color: #4e442f;
             }
+
+            .admin-layout {
+                display: flex;
+            }
+            .admin-sidebar {
+                width: 230px;
+                min-height: 100vh;
+                background: #1a2e4f;
+                color: #fff;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                box-shadow: 2px 0 8px rgba(0,0,0,0.07);
+            }
+            .sidebar-links {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 30px;
+            }
+            .admin-nav-link {
+                color: #fff;
+                text-decoration: none;
+                font-weight: bold;
+                padding: 12px 24px;
+                border-radius: 6px;
+                transition: background 0.2s, color 0.2s;
+                font-family: 'Georgia', serif;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .admin-nav-link.active, .admin-nav-link:hover {
+                background-color: #b2903e;
+                color: #fff;
+            }
+            .sidebar-user {
+                margin: 30px 0 20px 0;
+                padding: 0 24px;
+                font-family: 'Georgia', serif;
+                font-size: 1em;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .logout-link {
+                color: #b2903e;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 0.95em;
+                transition: color 0.2s;
+            }
+            .logout-link:hover {
+                color: #fff;
+            }
+            .dashboard-main-content {
+                margin-left: 250px;
+                width: 100%;
+                padding: 30px 30px 30px 0;
+            }
         </style>
     {% endblock %}
 </head>
@@ -104,15 +169,38 @@
     </div>
 
     {% block body %}
-        <header class="library-header">
-            <img src="/library-logo.svg" alt="Library Logo" class="library-logo"/>
-            <span class="library-title">Bibliothèque UIASS</span>
-        </header>
-
-        <main class="library-main">
-            {% block content %}{% endblock %}
-        </main>
-
+        {% if app.request.get('_route') is defined and app.request.get('_route') starts with 'admin_' %}
+            <div class="admin-layout">
+                <nav class="admin-sidebar">
+                    <div class="sidebar-links">
+                        <a href="{{ path('admin_dashboard') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_dashboard' %} active{% endif %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <a href="{{ path('admin_orders_index') }}" class="admin-nav-link"><i class="fas fa-clipboard-list"></i> Orders</a>
+                        <a href="{{ path('admin_returns_index') }}" class="admin-nav-link"><i class="fas fa-undo"></i> Returns</a>
+                        <a href="{{ path('admin_domains_index') }}" class="admin-nav-link"><i class="fas fa-book-open"></i> Domains</a>
+                        <a href="{{ path('admin_sections_index') }}" class="admin-nav-link"><i class="fas fa-folder"></i> Sections</a>
+                        <a href="{{ path('admin_authors_index') }}" class="admin-nav-link"><i class="fas fa-user-edit"></i> Authors</a>
+                        <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link"><i class="fas fa-building"></i> Publishers</a>
+                        <a href="{{ path('admin_books_index') }}" class="admin-nav-link"><i class="fas fa-book"></i> Books</a>
+                        <a href="{{ path('app_domains') }}" class="admin-nav-link"><i class="fas fa-globe"></i> Main Site</a>
+                    </div>
+                    <div class="sidebar-user">
+                        <span>Welcome, Admin</span>
+                        <a href="{{ path('app_logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </nav>
+                <div class="dashboard-main-content">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        {% else %}
+            <header class="library-header">
+                <img src="/library-logo.svg" alt="Library Logo" class="library-logo"/>
+                <span class="library-title">Bibliothèque UIASS</span>
+            </header>
+            <main class="library-main">
+                {{ block('content') }}
+            </main>
+        {% endif %}
         <footer class="library-footer">
             &copy; {{ "now"|date("Y") }} Bibliothèque UIASS. Tous droits réservés.
         </footer>

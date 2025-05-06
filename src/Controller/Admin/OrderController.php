@@ -102,15 +102,12 @@ class OrderController extends AbstractController
                 // Commit transaction
                 $em->commit();
 
-                // Check if it's an AJAX request
-                if ($request->isXmlHttpRequest()) {
-                    return new Response('Order approved', Response::HTTP_OK);
+                // Redirect directly to the receipt PDF if it exists
+                $receipt = $em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
+                if ($receipt) {
+                    return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
                 }
-
-                // Add a flash message
-                $this->addFlash('success', 'Order approved successfully.');
-                
-                // For normal POST requests, redirect to the order list - let the receipt be viewed separately
+                // Fallback: redirect to orders list
                 return $this->redirectToRoute('admin_orders_index', ['status' => 'approved']);
             } catch (\Exception $e) {
                 // Rollback transaction on error
@@ -163,9 +160,7 @@ class OrderController extends AbstractController
             }
             
             // Generate the receipt PDF using the ReceiptController
-            return $this->forward('App\Controller\ReceiptController::show', [
-                'receipt' => $receipt
-            ]);
+            return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
         } catch (\Exception $e) {
             $this->logger->error('Error viewing receipt: ' . $e->getMessage(), [
                 'exception' => $e,

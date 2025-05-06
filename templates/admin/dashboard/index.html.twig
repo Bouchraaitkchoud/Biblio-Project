@@ -8,6 +8,70 @@
         html, body {
             background: #fdfaf5 !important;
         }
+        .admin-layout {
+            display: flex;
+        }
+        .admin-sidebar {
+            width: 230px;
+            min-height: 100vh;
+            background: #1a2e4f;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.07);
+        }
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .admin-nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+            font-family: 'Georgia', serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .admin-nav-link.active, .admin-nav-link:hover {
+            background-color: #b2903e;
+            color: #fff;
+        }
+        .sidebar-user {
+            margin: 30px 0 20px 0;
+            padding: 0 24px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .logout-link {
+            color: #b2903e;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+        .logout-link:hover {
+            color: #fff;
+        }
+        .dashboard-main-content {
+            margin-left: 250px;
+            width: 100%;
+            padding: 30px 30px 30px 0;
+        }
         .dashboard-container {
             padding: 20px;
         }
@@ -18,34 +82,6 @@
             font-weight: bold;
             border-bottom: 2px solid #b2903e;
             padding-bottom: 10px;
-        }
-        .admin-nav {
-            background-color: #1a2e4f;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .admin-nav-links {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .admin-nav-link {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 8px 15px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
-        }
-        .admin-nav-link:hover, .admin-nav-link.active {
-            background-color: #b2903e;
-            color: #fff;
         }
         .admin-user-info {
             color: #fff;
@@ -248,27 +284,9 @@
     </style>
 {% endblock %}
 
-{% block body %}
+{% block content %}
     <div class="container dashboard-container">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link active">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
-                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link">Returns</a>
-                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
-                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
-                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link">Publishers</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}">Logout</a>
-            </div>
-        </div>
-        
         <h1 class="dashboard-header">Admin Dashboard</h1>
-        
         <!-- Library Management Section -->
         <h2>Library Management</h2>
         <div class="admin-management">
@@ -314,6 +332,17 @@
                     Add and manage book publishers
                 </div>
                 <a href="{{ path('admin_publishers_index') }}" class="btn-manage">Manage Publishers</a>
+            </div>
+            
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="management-title">Manage Books</div>
+                <div class="management-description">
+                    Add, edit, and manage all books in the library
+                </div>
+                <a href="{{ path('admin_books_index') }}" class="btn-manage">Manage Books</a>
             </div>
         </div>
 
