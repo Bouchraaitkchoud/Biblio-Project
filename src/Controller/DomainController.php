@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Cart;
 
 class DomainController extends AbstractController
 {
@@ -43,14 +45,17 @@ class DomainController extends AbstractController
     }
 
     #[Route('/domains/search', name: 'app_domains_search', methods: ['GET'])]
-    public function search(Request $request, DomainRepository $domainRepository, SectionRepository $sectionRepository, BookRepository $bookRepository, AuthorRepository $authorRepository): JsonResponse
+    public function search(Request $request, DomainRepository $domainRepository, SectionRepository $sectionRepository, BookRepository $bookRepository, AuthorRepository $authorRepository): Response
     {
-        // Get the search term from the query parameters
+        // Get the search term and filter from the query parameters
         $searchTerm = $request->query->get('q', '');
+        $filter = $request->query->get('filter', 'all');
         
         // Return empty results if search term is empty or too short
         if (empty($searchTerm) || strlen($searchTerm) < 2) {
-            return $this->json([
+            return $this->render('search/results.html.twig', [
+                'searchTerm' => $searchTerm,
+                'filter' => $filter,
                 'domains' => [],
                 'sections' => [],
                 'books' => [],
@@ -58,28 +63,56 @@ class DomainController extends AbstractController
             ]);
         }
 
-        // Search for domains, sections, books, and authors
-        $domains = $domainRepository->createQueryBuilder('d')
-            ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->orderBy('d.name', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult();
-        
-        $sections = $sectionRepository->createQueryBuilder('s')
-            ->where('LOWER(s.name) LIKE LOWER(:searchTerm)')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->orderBy('s.name', 'ASC') 
-            ->setMaxResults(15)
-            ->getQuery()
-            ->getResult();
-        
-        $books = $bookRepository->findByTitleOrAuthor($searchTerm);
-        
-        $authors = $authorRepository->findByName($searchTerm);
+        // Initialize empty arrays for results
+        $domains = [];
+        $sections = [];
+        $books = [];
+        $authors = [];
 
-        // Format the domain results for better display
+        // Search based on the selected filter
+        switch ($filter) {
+            case 'domain':
+                $domains = $domainRepository->createQueryBuilder('d')
+                    ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
+                    ->setParameter('searchTerm', '%' . $searchTerm . '%')
+                    ->orderBy('d.name', 'ASC')
+                    ->setMaxResults(10)
+                    ->getQuery()
+                    ->getResult();
+                break;
+            
+            case 'book':
+                $books = $bookRepository->findByTitleOrAuthor($searchTerm);
+                break;
+            
+            case 'author':
+                $authors = $authorRepository->findByName($searchTerm);
+                break;
+            
+            case 'all':
+            default:
+                $domains = $domainRepository->createQueryBuilder('d')
+                    ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
+                    ->setParameter('searchTerm', '%' . $searchTerm . '%')
+                    ->orderBy('d.name', 'ASC')
+                    ->setMaxResults(10)
+                    ->getQuery()
+                    ->getResult();
+                
+                $sections = $sectionRepository->createQueryBuilder('s')
+                    ->where('LOWER(s.name) LIKE LOWER(:searchTerm)')
+                    ->setParameter('searchTerm', '%' . $searchTerm . '%')
+                    ->orderBy('s.name', 'ASC') 
+                    ->setMaxResults(15)
+                    ->getQuery()
+                    ->getResult();
+                
+                $books = $bookRepository->findByTitleOrAuthor($searchTerm);
+                $authors = $authorRepository->findByName($searchTerm);
+                break;
+        }
+
+        // Format the domain results
         $formattedDomains = [];
         foreach ($domains as $domain) {
             $formattedDomains[] = [
@@ -88,7 +121,7 @@ class DomainController extends AbstractController
             ];
         }
 
-        // Format the section results for better display
+        // Format the section results
         $formattedSections = [];
         foreach ($sections as $section) {
             $formattedSections[] = [
@@ -99,7 +132,7 @@ class DomainController extends AbstractController
             ];
         }
 
-        // Format the book results for better display
+        // Format the book results
         $formattedBooks = [];
         foreach ($books as $book) {
             // Get author names
@@ -134,12 +167,79 @@ class DomainController extends AbstractController
             ];
         }
 
-        // Return the optimized search results as JSON
-        return $this->json([
+        // Render the search results template
+        return $this->render('search/results.html.twig', [
+            'searchTerm' => $searchTerm,
+            'filter' => $filter,
             'domains' => $formattedDomains,
             'sections' => $formattedSections,
             'books' => $formattedBooks,
             'authors' => $formattedAuthors,
+        ]);
+    }
+
+    #[Route('/domain/{id}/books', name: 'domain_books', methods: ['GET'])]
+    public function getDomainBooks(Domain $domain, BookRepository $bookRepository, EntityManagerInterface $entityManager): Response
+    {
+        // Get the current user
+        $user = $this->getUser();
+        
+        // Get all books from all sections in this domain
+        $books = $bookRepository->createQueryBuilder('b')
+            ->join('b.section', 's')
+            ->join('s.domain', 'd')
+            ->where('d.id = :domainId')
+            ->setParameter('domainId', $domain->getId())
+            ->orderBy('b.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Format the books for display
+        $formattedBooks = [];
+        foreach ($books as $book) {
+            // Get author names
+            $authorNames = [];
+            foreach ($book->getAuthors() as $author) {
+                $authorNames[] = $author->getName();
+            }
+            
+            // Convert image BLOB to base64 if exists
+            $coverImageBase64 = null;
+            $coverImage = $book->getCoverImage();
+            if ($coverImage) {
+                $coverImageBase64 = 'data:image/jpeg;base64,' . base64_encode($coverImage);
+            }
+            
+            // Check if book is in user's cart by checking its exemplaires
+            $inCart = false;
+            if ($user) {
+                $cartRepository = $entityManager->getRepository(Cart::class);
+                $cart = $cartRepository->findOneBy(['user' => $user, 'status' => 'draft']);
+                
+                if ($cart) {
+                    foreach ($cart->getItems() as $item) {
+                        if ($item->getExemplaire()->getBook()->getId() === $book->getId()) {
+                            $inCart = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            $formattedBooks[] = [
+                'id' => $book->getId(),
+                'title' => $book->getTitle(),
+                'author' => !empty($authorNames) ? implode(', ', $authorNames) : 'Unknown',
+                'coverImageBase64' => $coverImageBase64,
+                'publicationYear' => $book->getPublicationYear(),
+                'section' => $book->getSection() ? $book->getSection()->getName() : null,
+                'inCart' => $inCart
+            ];
+        }
+
+        return $this->render('domain/books.html.twig', [
+            'domain' => $domain,
+            'books' => $formattedBooks
         ]);
     }
 }

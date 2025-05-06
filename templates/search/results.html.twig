@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            background: #fdfaf5 !important;
+        }
+        .search-results {
+            padding: 2rem;
+        }
+        .result-section {
+            margin-bottom: 2rem;
+        }
+        .result-item {
+            padding: 1.2rem 1rem;
+            margin-bottom: 1.2rem;
+            border: 1.5px solid #e8e4db;
+            border-left: 4px solid #b2903e;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .result-item:hover {
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+        }
+        .result-link {
+            color: inherit;
+            text-decoration: none;
+        }
+        .result-link:hover {
+            text-decoration: none;
+        }
+        .book-cover {
+            max-width: 90px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 0.7rem;
+            border: 1px solid #e8e4db;
+        }
+        .active-filter {
+            background-color: #b2903e;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+        }
+        h2, h3, h4 {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+        }
+        .text-muted, small.text-muted {
+            color: #7a6b52 !important;
+        }
+        .alert-info {
+            background: #fff;
+            color: #1a2e4f;
+            border: 1.5px solid #b2903e;
+            font-family: 'Georgia', serif;
+        }
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        .col-md-4 {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container search-results">
+        {% if searchTerm %}
+            <h2 class="mb-4">Search Results for "{{ searchTerm }}"</h2>
+            <div class="active-filter">
+                {% if filter == 'all' %}
+                    Showing all results
+                {% elseif filter == 'domain' %}
+                    Showing domain results only
+                {% elseif filter == 'book' %}
+                    Showing book results only
+                {% elseif filter == 'author' %}
+                    Showing author results only
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if filter == 'all' or filter == 'domain' %}
+            {% if domains|length > 0 %}
+                <div class="result-section">
+                    <h3>Domains</h3>
+                    <div class="row">
+                        {% for domain in domains %}
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('domain_books', {'id': domain.id}) }}" class="result-link">
+                                    <div class="result-item">
+                                        <h4>{{ domain.name }}</h4>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if filter == 'all' %}
+            {% if sections|length > 0 %}
+                <div class="result-section">
+                    <h3>Sections</h3>
+                    <div class="row">
+                        {% for section in sections %}
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('section_books', {'id': section.id}) }}" class="result-link">
+                                    <div class="result-item">
+                                        <h4>{{ section.name }}</h4>
+                                        {% if section.domainName %}
+                                            <p class="text-muted">Domain: {{ section.domainName }}</p>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if filter == 'all' or filter == 'book' %}
+            {% if books|length > 0 %}
+                <div class="result-section">
+                    <h3>Books</h3>
+                    <div class="row">
+                        {% for book in books %}
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('book_show', {'id': book.id}) }}" class="result-link">
+                                    <div class="result-item">
+                                        {% if book.coverImageBase64 %}
+                                            <img src="{{ book.coverImageBase64 }}" alt="{{ book.title }}" class="book-cover mb-2">
+                                        {% endif %}
+                                        <h4>{{ book.title }}</h4>
+                                        <p class="text-muted">{{ book.author }}</p>
+                                        {% if book.publicationYear %}
+                                            <small class="text-muted">Published: {{ book.publicationYear }}</small>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if filter == 'all' or filter == 'author' %}
+            {% if authors|length > 0 %}
+                <div class="result-section">
+                    <h3>Authors</h3>
+                    <div class="row">
+                        {% for author in authors %}
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('author_show', {'id': author.id}) }}" class="result-link">
+                                    <div class="result-item">
+                                        <h4>{{ author.name }}</h4>
+                                        <p class="text-muted">{{ author.bookCount }} books</p>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if domains|length == 0 and sections|length == 0 and books|length == 0 and authors|length == 0 %}
+            <div class="alert alert-info">
+                No results found for "{{ searchTerm }}". Try a different search term or filter.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %} 

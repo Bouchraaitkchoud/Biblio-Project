@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Books in {{ domain.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            background: #fdfaf5 !important;
+        }
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            color: #4e4a45;
+        }
+
+        .domain-books {
+            padding: 2rem;
+        }
+
+        .domain-header {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .domain-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 0.5rem;
+        }
+
+        .domain-header p {
+            font-size: 1.2rem;
+            color: #7a6b52;
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 2rem;
+        }
+
+        .book-card {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-bottom: 1px solid #e8e4db;
+        }
+
+        .book-info {
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        .book-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 0.3rem;
+        }
+
+        .book-author, .book-section, .book-year {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            color: #4e4a45;
+        }
+
+        .book-section {
+            color: #7a6b52;
+        }
+
+        .book-actions {
+            padding: 1rem;
+            border-top: 1px solid #f2eee6;
+            background-color: #f9f6f1;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            background-color: #b2903e;
+            color: white;
+            border: none;
+            padding: 0.6rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-to-cart-btn:hover:not(:disabled) {
+            background-color: #a07d33;
+        }
+
+        .add-to-cart-btn:disabled {
+            background-color: #d6c3a5;
+            cursor: not-allowed;
+        }
+
+        .details-btn {
+            background-color: #1a2e4f;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            margin-right: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .details-btn:hover {
+            background-color: #13203a;
+        }
+
+        .no-books {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+            color: #1a2e4f;
+            font-size: 1.3rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .book-link {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="domain-books">
+    <div class="domain-header">
+        <h1 class="domain-title">{{ domain.name }}</h1>
+        <p>Browse all books in this domain</p>
+    </div>
+
+    {% if books|length > 0 %}
+        <div class="book-grid">
+            {% for book in books %}
+                <div class="book-card">
+                    <a href="{{ path('book_show', {'id': book.id}) }}" class="book-link">
+                        {% if book.coverImageBase64 %}
+                            <img src="{{ book.coverImageBase64 }}" alt="{{ book.title }}" class="book-cover">
+                        {% else %}
+                            <div class="book-cover" style="display: flex; align-items: center; justify-content: center; background-color: #f0f0f0;">
+                                <i class="fas fa-book fa-3x" style="color: #ccc;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="book-info">
+                            <h3 class="book-title">{{ book.title }}</h3>
+                            <p class="book-author">{{ book.author }}</p>
+                            {% if book.section %}
+                                <p class="book-section">Section: {{ book.section }}</p>
+                            {% endif %}
+                            {% if book.publicationYear %}
+                                <p class="book-year">Published: {{ book.publicationYear }}</p>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <div class="book-actions">
+                        <button 
+                            class="add-to-cart-btn"
+                            data-book-id="{{ book.id }}"
+                            onclick="addToCart({{ book.id }})"
+                            {% if book.inCart %}disabled{% endif %}
+                        >
+                            {% if book.inCart %}
+                                Added to Cart
+                            {% else %}
+                                Add to Cart
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-books">
+            <h3>No Books Found</h3>
+            <p>There are no books available in this domain yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function addToCart(bookId) {
+        fetch(`/add-to-cart/${bookId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const button = document.querySelector(`button[data-book-id="${bookId}"]`);
+                button.textContent = 'Added to Cart';
+                button.disabled = true;
+                alert('Book added to cart successfully!');
+            } else {
+                alert(data.message || 'Failed to add book to cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the book to cart');
+        });
+    }
+</script>
+{% endblock %}

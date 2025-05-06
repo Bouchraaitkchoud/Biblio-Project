@@ -1,0 +1,388 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Barcode Scanner{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        html, body {
+            background: #fdfaf5 !important;
+        }
+        .scanner-container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .barcode-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2em;
+            border: 2px solid #b2903e;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: 'Georgia', serif;
+            color: #1a2e4f;
+        }
+        .barcode-input:focus {
+            outline: none;
+            border-color: #1a2e4f;
+            box-shadow: 0 0 0 3px rgba(26, 46, 79, 0.1);
+        }
+        .order-details {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .order-details.show {
+            display: block;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #b2903e;
+        }
+        .order-id {
+            color: #1a2e4f;
+            font-weight: bold;
+            font-size: 1.2em;
+            font-family: 'Georgia', serif;
+        }
+        .order-date {
+            color: #7a6b52;
+            font-size: 0.9em;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+        }
+        .user-info i {
+            margin-right: 10px;
+            font-size: 1.2em;
+            color: #b2903e;
+        }
+        .books-list {
+            margin-bottom: 20px;
+        }
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #fdfaf5;
+            border-radius: 8px;
+            border-left: 3px solid #b2903e;
+        }
+        .book-info {
+            flex: 1;
+        }
+        .book-title {
+            font-weight: bold;
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+        }
+        .book-author {
+            color: #7a6b52;
+            font-size: 0.9em;
+        }
+        .book-quantity {
+            background: #1a2e4f;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-approve {
+            background-color: #1a2e4f;
+            border-color: #1a2e4f;
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-approve:hover {
+            background-color: #b2903e;
+            border-color: #b2903e;
+            transform: translateY(-2px);
+        }
+        .scan-history {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 20px;
+        }
+        .scan-history h3 {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #b2903e;
+        }
+        .scan-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #fdfaf5;
+            border-radius: 8px;
+            border-left: 3px solid #b2903e;
+        }
+        .scan-item:last-child {
+            margin-bottom: 0;
+        }
+        .scan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .scan-time {
+            color: #7a6b52;
+            font-size: 0.9em;
+        }
+        .scan-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Georgia', serif;
+        }
+        .status-success {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        .scan-message {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+        }
+        .admin-nav {
+            background-color: #1a2e4f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .admin-nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .admin-nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+        .admin-nav-link:hover, .admin-nav-link.active {
+            background-color: #b2903e;
+            color: #fff;
+        }
+        .admin-user-info {
+            color: #fff;
+            font-family: 'Georgia', serif;
+        }
+        .admin-user-info a {
+            color: #b2903e;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .admin-user-info a:hover {
+            color: #fff;
+        }
+        h1, h2, h3 {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
+                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link">Returns</a>
+                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
+                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
+                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
+                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link">Publishers</a>
+                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
+                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}">Logout</a>
+            </div>
+        </div>
+
+        <h1 class="mb-4">Barcode Scanner</h1>
+
+        <div class="scanner-container" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="barcodeInput" class="barcode-input" placeholder="Scan barcode or enter order ID..." autofocus>
+            <button id="scanButton" class="btn-approve" style="height: 48px;">Scan</button>
+        </div>
+
+        <div id="orderDetails" class="order-details">
+            <div class="order-header">
+                <div class="order-id">Order #<span id="orderId"></span></div>
+                <div class="order-date" id="requestDate"></div>
+            </div>
+            <div class="user-info">
+                <i class="fas fa-user"></i>
+                <span id="studentEmail"></span>
+            </div>
+            <div class="books-list" id="booksList"></div>
+            <div class="action-buttons">
+                <button id="approveOrder" class="btn-approve">
+                    <i class="fas fa-check"></i> Approve Order
+                </button>
+            </div>
+        </div>
+
+        <div class="scan-history">
+            <h3>Today's Scans</h3>
+            <div id="scanHistory"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const barcodeInput = document.getElementById('barcodeInput');
+            const orderDetails = document.getElementById('orderDetails');
+            const scanHistory = document.getElementById('scanHistory');
+            let currentOrderId = null;
+
+            // Focus the barcode input on page load
+            barcodeInput.focus();
+
+            // Handle barcode input
+            barcodeInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const orderId = this.value.trim();
+                    if (orderId) {
+                        fetchOrderDetails(orderId);
+                        this.value = '';
+                    }
+                }
+            });
+
+            // Handle approve button
+            document.getElementById('approveOrder').addEventListener('click', function() {
+                if (currentOrderId) {
+                    approveOrder(currentOrderId);
+                }
+            });
+
+            // Add scan button functionality
+            document.getElementById('scanButton').addEventListener('click', function() {
+                const orderId = barcodeInput.value.trim();
+                if (orderId) {
+                    fetchOrderDetails(orderId);
+                    barcodeInput.value = '';
+                }
+            });
+
+            function fetchOrderDetails(orderId) {
+                fetch(`/admin/orders/${orderId}/details`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            displayOrderDetails(data.order);
+                            addScanHistory('success', `Order #${orderId} found`);
+                        } else {
+                            addScanHistory('error', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        addScanHistory('error', 'Error fetching order details');
+                    });
+            }
+
+            function displayOrderDetails(order) {
+                currentOrderId = order.id;
+                document.getElementById('orderId').textContent = order.id;
+                document.getElementById('studentEmail').textContent = order.user.email;
+                document.getElementById('requestDate').textContent = new Date(order.createdAt).toLocaleString();
+
+                const booksList = document.getElementById('booksList');
+                booksList.innerHTML = order.items.map(item => `
+                    <div class="book-item">
+                        <div class="book-info">
+                            <div class="book-title">${item.book.title}</div>
+                            <div class="book-author">by ${item.book.authorName}</div>
+                        </div>
+                        <div class="book-quantity">Qty: 1</div>
+                    </div>
+                `).join('');
+
+                orderDetails.classList.add('show');
+            }
+
+            function approveOrder(orderId) {
+                fetch(`/admin/scan/approve/${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addScanHistory('success', `Order #${orderId} approved`);
+                        orderDetails.classList.remove('show');
+                        currentOrderId = null;
+                    } else {
+                        addScanHistory('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addScanHistory('error', 'Error approving order');
+                });
+            }
+
+            function addScanHistory(status, message) {
+                const scanItem = document.createElement('div');
+                scanItem.className = 'scan-item';
+                scanItem.innerHTML = `
+                    <div class="scan-header">
+                        <span class="scan-time">${new Date().toLocaleTimeString()}</span>
+                        <span class="scan-status status-${status}">${status.toUpperCase()}</span>
+                    </div>
+                    <div class="scan-message">${message}</div>
+                `;
+                scanHistory.insertBefore(scanItem, scanHistory.firstChild);
+            }
+        });
+    </script>
+{% endblock %} 

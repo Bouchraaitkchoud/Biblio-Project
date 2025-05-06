@@ -2,71 +2,115 @@
 
 {% block stylesheets %}
     <style>
-        :root {
-            --primary: #117986;
-            --light: #ffffff;
-            --dark: #000000;
+        html, body {
+            background: #fdfaf5 !important;
         }
-
-        /* Button Styles */
-        .btn-primary-custom {
-            background-color: var(--primary);
-            color: var(--light);
-            border: none;
-        }
-
-        .btn-primary-custom:hover {
-            background-color: #0e606d;
-        }
-
-        .btn-outline-primary-custom {
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            background-color: var(--light);
-        }
-
-        .btn-outline-primary-custom:hover {
-            background-color: var(--primary);
-            color: var(--light);
-        }
-
-        /* Card Styles */
-        .card-custom {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .text-primary-custom {
-            color: var(--primary);
-        }
-
-        .empty-cart {
-            height: 65vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-
-        .empty-cart-icon {
-            font-size: 4rem;
-        }
-
-        /* Ensure a consistent layout */
         .cart-container {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .cart-content {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
         }
-
-        .hidden {
-            display: none;
+        .cart-title {
+            font-size: 2.5rem;
+            font-family: 'Georgia', serif;
+            color: #1a2e4f;
+            font-weight: bold;
+            margin-bottom: 2.2rem;
+            text-align: center;
+        }
+        .cart-card {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-book-info {
+            flex: 1;
+        }
+        .cart-book-title {
+            font-size: 1.25rem;
+            font-family: 'Georgia', serif;
+            color: #1a2e4f;
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+        }
+        .cart-book-author {
+            color: #7a6b52;
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+        .cart-book-barcode {
+            color: #4e4a45;
+            font-size: 0.95rem;
+        }
+        .remove-btn {
+            background: #fff;
+            color: #b2903e;
+            border: 1.5px solid #b2903e;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s, color 0.2s;
+        }
+        .remove-btn:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .submit-btn {
+            background: #b2903e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7rem 2.2rem;
+            font-size: 1.15rem;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover {
+            background: #a07d33;
+        }
+        .empty-cart {
+            min-height: 50vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .empty-cart-icon {
+            font-size: 4rem;
+            color: #b2903e;
+            margin-bottom: 1rem;
+        }
+        .empty-cart-text {
+            color: #7a6b52;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Georgia', serif;
+        }
+        .browse-btn {
+            background: #1a2e4f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1.1rem;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
+        }
+        .browse-btn:hover {
+            background: #13203a;
         }
     </style>
 {% endblock %}
@@ -75,44 +119,39 @@
 
 {% block body %}
     <div class="container py-5 cart-container">
-        <h1 class="mb-4 text-center text-primary-custom">🛒 My Cart</h1>
+        <div class="cart-title">🛒 My Cart</div>
         <div class="cart-content">
             {% if items|length > 0 %}
-                <div class="row g-3 mb-4">
-                    {% for item in items %}
-                        <div class="col-12">
-                            <div class="card card-custom p-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="book-info">
-                                        <h5 class="book-title">{{ item.getBook().getTitle() }}</h5>
-                                        <p class="book-author mb-0">by {{ item.getBook().getAuthorName() }}</p>
-                                        <p class="book-barcode mb-0">Barcode: {{ item.getBarcode() }}</p>
-                                    </div>
-                                    <div class="book-actions">
-                                        <form action="{{ path('remove_from_cart', {'id': item.getBook().getId()}) }}" method="POST" class="d-inline">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('remove_from_cart') }}">
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash"></i> Remove
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+                {% for item in items %}
+                    <div class="cart-card">
+                        <div class="cart-book-info">
+                            <div class="cart-book-title">{{ item.getBook().getTitle() }}</div>
+                            <div class="cart-book-author">by {{ item.getBook().getAuthorName() }}</div>
+                            <div class="cart-book-barcode">Barcode: {{ item.getBarcode() }}</div>
                         </div>
-                    {% endfor %}
-                </div>
+                        <div class="book-actions">
+                            <form action="{{ path('remove_from_cart', {'id': item.getBook().getId()}) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('remove_from_cart') }}">
+                                <button type="submit" class="remove-btn">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
                 <div class="text-center">
                     <form action="{{ path('submit_cart') }}" method="POST" class="d-inline">
                         <input type="hidden" name="_token" value="{{ csrf_token('submit_cart') }}">
-                        <button type="submit" class="btn btn-primary btn-lg">
+                        <button type="submit" class="submit-btn">
                             <i class="fas fa-check"></i> Submit Request
                         </button>
                     </form>
                 </div>
             {% else %}
-                <div class="text-center">
-                    <p class="text-muted">Your cart is empty</p>
-                    <a href="{{ path('book_index') }}" class="btn btn-primary">
+                <div class="empty-cart">
+                    <div class="empty-cart-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="empty-cart-text">Your cart is empty</div>
+                    <a href="{{ path('app_domains') }}" class="browse-btn">
                         <i class="fas fa-book"></i> Browse Books
                     </a>
                 </div>

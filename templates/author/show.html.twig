@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ author.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .author-header {
+            background: linear-gradient(135deg, #117986, #0d5c66);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .author-name {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .book-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .book-card:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .book-cover {
+            max-width: 120px;
+            height: auto;
+            margin-right: 1rem;
+        }
+        .book-info {
+            flex: 1;
+        }
+        .book-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #117986;
+        }
+        .book-meta {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="author-header">
+            <h1 class="author-name">{{ author.name }}</h1>
+            <p class="mb-0">{{ author.books|length }} book(s) in the library</p>
+        </div>
+
+        <div class="books-section">
+            <h2 class="mb-4">Books by {{ author.name }}</h2>
+            
+            {% if author.books|length > 0 %}
+                <div class="row">
+                    {% for book in author.books %}
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ path('book_show', {'id': book.id}) }}" class="text-decoration-none">
+                                <div class="book-card">
+                                    <div class="d-flex">
+                                        {% if book.coverImage %}
+                                            <img src="data:image/jpeg;base64,{{ book.coverImage|base64_encode }}" 
+                                                 alt="{{ book.title }}" 
+                                                 class="book-cover">
+                                        {% endif %}
+                                        <div class="book-info">
+                                            <h3 class="book-title">{{ book.title }}</h3>
+                                            <div class="book-meta">
+                                                {% if book.publicationYear %}
+                                                    <p class="mb-1">Published: {{ book.publicationYear }}</p>
+                                                {% endif %}
+                                                {% if book.section %}
+                                                    <p class="mb-1">Section: {{ book.section.name }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No books found for this author.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %} 

@@ -5,554 +5,238 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        :root {
-            --primary-color: #117986;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-        }
-
-        .btn-primary-custom {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary-custom:hover {
-            background-color: #0d5c66;
-            border-color: #0d5c66;
-        }
-
-        .btn-outline-primary-custom {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-outline-primary-custom:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .card-custom {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            transition: transform 0.2s;
-        }
-
-        .card-custom:hover {
-            transform: translateY(-5px);
-        }
-
-        .text-primary-custom {
-            color: var(--primary-color) !important;
-        }
-
-        .search-container {
-            background-color: var(--light-color);
-            padding: 2rem;
-            border-radius: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .search-input {
-            border-radius: 0.25rem;
-            border: 1px solid #ced4da;
-            padding: 0.5rem 1rem;
-        }
-
-        .search-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(17, 121, 134, 0.25);
-        }
-
-        .search-button {
-            border-radius: 0.25rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .results-container {
-            margin-top: 2rem;
-        }
-
-        .result-card {
-            margin-bottom: 1rem;
-        }
-
-        .result-title {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-description {
-            color: #6c757d;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 2rem;
-            color: #6c757d;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--dark-color);
-        }
-
-        .book-card {
-            height: 100%;
-        }
-
-        .book-image {
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .book-title {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .book-author {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .book-description {
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .book-actions {
-            margin-top: auto;
-        }
-
-        .pagination {
-            margin-top: 2rem;
-        }
-
-        .page-link {
-            color: var(--primary-color);
-        }
-
-        .page-item.active .page-link {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        /* Library Theme Colors */
-        :root {
-            --primary: #117986;
-            --secondary: #0d5c66;
-            --accent: #117986;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-            --success: #27ae60;
-        }
-
-        /* Main Container */
-        .library-container {
-            padding: 2rem 0;
-            background-color: #f5f6fa;
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
             min-height: 100vh;
         }
 
-        /* Header Styles */
-        .library-header {
+        main, .search-results {
+            background-color: #ffffff !important;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+            padding: 2rem;
+        }
+
+        .page-header {
             text-align: center;
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 2rem 0;
+            color: #1a2e4f;
+        }
+
+        .search-wrapper {
+            display: flex;
+            justify-content: center;
             margin-bottom: 3rem;
-            padding: 2rem 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .library-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            letter-spacing: 1px;
+        .search-box {
+            background: #ffffff;
+            padding: 2rem;
+            border: 1px solid #e4ddd1;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            max-width: 720px;
+            width: 100%;
         }
 
-        .library-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
+        .search-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.2rem;
+            color: #1a2e4f;
+            text-align: center;
         }
 
-        /* Search Section */
-        .search-section {
-            max-width: 600px;
-            margin: 0 auto 3rem;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        .filter-options {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
-        .search-container {
+        .filter-options label {
+            font-size: 0.95rem;
+            color: #4e4a45;
             display: flex;
             align-items: center;
-            background: var(--light);
-            border-radius: 30px;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
+            gap: 0.3rem;
         }
 
-        .search-container:focus-within {
-            box-shadow: 0 0 0 2px var(--accent);
+        .filter-options input[type="radio"] {
+            accent-color: #b2903e;
         }
 
-        .search-input {
-            border: none;
-            background: transparent;
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #d8d2c4;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .input-group input {
             flex: 1;
-            padding: 0.5rem;
+            border: none;
+            padding: 0.75rem 1rem;
             font-size: 1rem;
+        }
+
+        .input-group input:focus {
             outline: none;
         }
 
-        .search-button {
-            background: transparent;
+        .search-btn {
+            background-color: #b2903e;
             border: none;
-            padding: 0.5rem;
-            cursor: pointer;
-            color: var(--primary);
-        }
-
-        .search-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Domains Grid */
-        .domains-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .domain-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .domain-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .domain-header {
-            background: var(--primary);
             color: white;
-            padding: 1.5rem;
-            position: relative;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
 
-        .domain-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0;
+        .search-btn:hover {
+            background-color: #967a2b;
         }
 
-        .domain-icon {
-            position: absolute;
-            right: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
+        .domain-entry {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .domain-name {
             font-size: 1.5rem;
-            opacity: 0.8;
+            font-weight: bold;
+            color: #1a2e4f;
         }
 
         .sections-list {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .domain-card.expanded .sections-list {
-            max-height: 500px;
+            margin-top: 0.5rem;
         }
 
         .section-item {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--light);
-            transition: all 0.2s ease;
-        }
-
-        .section-item:last-child {
-            border-bottom: none;
-        }
-
-        .section-item:hover {
-            background-color: var(--light);
+            margin-left: 2rem;
+            padding: 0.3rem 0;
         }
 
         .section-link {
-            color: var(--dark);
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            font-size: 1.1rem;
+            color: #4e4a45;
         }
 
         .section-link i {
-            margin-right: 0.5rem;
-            color: var(--accent);
-        }
-
-        /* Search Results */
-        .search-results {
-            display: none;
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            margin-top: 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            color: #b2903e;
         }
 
         .search-results-title {
-            color: var(--primary);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--light);
+            color: #1a2e4f;
         }
 
-        .result-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--light);
+        .text-center.w-100 {
+            font-family: 'Georgia', serif;
+            font-size: 1.2rem;
+            color: #7a6b52;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
+        .btn-outline-secondary {
+            border-color: #b2903e;
+            color: #1a2e4f;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .domains-grid {
-                grid-template-columns: 1fr;
-                padding: 1rem;
-            }
-
-            .library-title {
-                font-size: 2rem;
-            }
-
-            .search-section {
-                margin: 0 1rem 2rem;
-            }
+        .btn-outline-secondary:hover {
+            background-color: #b2903e;
+            color: #fff;
         }
 
-        .book-thumbnail {
-            width: 60px;
-            height: 90px;
-            object-fit: cover;
-            margin-right: 10px;
-            float: left;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        }
-
-        .book-result {
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .book-result h4 {
-            margin-top: 0;
+        .form-control {
+            border: 1px solid #d8d2c4;
         }
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="library-container">
-        <div class="container">
-            <div class="library-header">
-                <h1 class="library-title">Bibliothèque Universitaire</h1>
-                <p class="library-subtitle">Explorez notre collection de domaines et de sections</p>
-            </div>
+    {% block content %}
+    <div class="page-header">UIASS BIBLIOTHÈQUE</div>
 
-            <div class="search-section">
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Rechercher des domaines, sections, livres..." 
-                        class="form-control search-input">
-                    <button id="search-button" class="btn search-button" type="submit">
-                        <i class="fas fa-search search-icon"></i>
-                    </button>
-                </div>
+    <div class="search-wrapper">
+        <div class="search-box">
+            <h2 class="search-title">Recherche avancée</h2>
+            <div class="filter-options">
+                <label><input type="radio" name="searchFilter" id="filterAll" value="all" checked> Tous</label>
+                <label><input type="radio" name="searchFilter" id="filterDomain" value="domain"> Domaine</label>
+                <label><input type="radio" name="searchFilter" id="filterBook" value="book"> Livre</label>
+                <label><input type="radio" name="searchFilter" id="filterAuthor" value="author"> Auteur</label>
             </div>
-
-            <div id="search-results" class="search-results">
-                <h2 class="search-results-title">Résultats de la recherche</h2>
-                <div id="domains-results" class="mb-4"></div>
-                <div id="sections-results" class="mb-4"></div>
-                <div id="books-results" class="mb-4"></div>
-                <div id="authors-results" class="mb-4"></div>
-            </div>
-
-            <div class="domains-grid">
-                {% if domains is empty %}
-                    <div class="text-center w-100">
-                        <p>Aucun domaine trouvé.</p>
-                    </div>
-                {% else %}
-                    {% for domain in domains %}
-                        <div class="domain-card" data-domain-id="{{ domain.id }}">
-                            <div class="domain-header">
-                                <h3 class="domain-title">{{ domain.name }}</h3>
-                                <i class="fas fa-book-open domain-icon"></i>
-                            </div>
-                            <div class="sections-list">
-                                {% for section in domain.sections %}
-                                    <div class="section-item">
-                                        <a href="{{ path('section_books', {'id': section.id}) }}" class="section-link">
-                                            <i class="fas fa-folder"></i>
-                                            {{ section.name }}
-                                        </a>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+            <div class="input-group">
+                <input type="text" id="search-input" placeholder="Ex. : Chimie, mathématiques..." class="form-control">
+                <button id="search-button" class="search-btn" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add click event listeners to domain cards
-            document.querySelectorAll('.domain-card').forEach(function(card) {
-                card.addEventListener('click', function(event) {
-                    if (!event.target.classList.contains('section-link')) {
-                        // First, collapse all other domain cards
-                        document.querySelectorAll('.domain-card').forEach(function(otherCard) {
-                            if (otherCard !== card) {
-                                otherCard.classList.remove('expanded');
-                            }
-                        });
-                        
-                        // Toggle the clicked card
-                        this.classList.toggle('expanded');
-                    }
-                });
-            });
+    <div id="search-results" class="search-results">
+        <h2 class="search-results-title"></h2>
+        <div id="domains-results" class="mb-4"></div>
+        <div id="sections-results" class="mb-4"></div>
+        <div id="books-results" class="mb-4"></div>
+        <div id="authors-results" class="mb-4"></div>
+    </div>
 
-            // Search functionality
-            const searchInput = document.getElementById('search-input');
-            const searchButton = document.getElementById('search-button');
-            const searchResults = document.getElementById('search-results');
-            const domainsResults = document.getElementById('domains-results');
-            const sectionsResults = document.getElementById('sections-results');
-            const booksResults = document.getElementById('books-results');
-            const authorsResults = document.getElementById('authors-results');
+    {% if domains is empty %}
+        <div class="text-center w-100">
+            <p>Aucun domaine trouvé.</p>
+        </div>
+    {% else %}
+        {% for domain in domains %}
+            <div class="domain-entry">
+                <div class="domain-name">{{ domain.name }}</div>
+                <div class="sections-list">
+                    {% for section in domain.sections %}
+                        <div class="section-item">
+                            <a href="{{ path('section_books', {'id': section.id}) }}" class="section-link">
+                                <i class="fas fa-folder-open me-1"></i> {{ section.name }}
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endblock %}
+{% endblock %}
 
-            // Debounce function to prevent too many requests
-            function debounce(func, delay) {
-                let timer;
-                return function() {
-                    const context = this;
-                    const args = arguments;
-                    clearTimeout(timer);
-                    timer = setTimeout(() => func.apply(context, args), delay);
-                };
-            }
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
 
-            // Function to perform search
-            function performSearch() {
-                const searchTerm = searchInput.value.trim();
-                if (searchTerm.length < 2) {
-                    searchResults.style.display = 'none';
-                    return;
-                }
-                
-                // Show loading state
-                searchResults.style.display = 'block';
-                domainsResults.innerHTML = '<p>Recherche en cours...</p>';
-                sectionsResults.innerHTML = '';
-                booksResults.innerHTML = '';
-                authorsResults.innerHTML = '';
-                
-                fetch(`/domains/search?q=${encodeURIComponent(searchTerm)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        domainsResults.innerHTML = data.domains.length > 0
-                            ? `<h3 class="search-results-title">Domaines</h3>${data.domains.map(domain => `
-                                <div class="result-item domain-result" data-id="${domain.id}">
-                                    <h4>${domain.name}</h4>
-                                </div>`).join('')}`
-                            : '<p>Aucun domaine trouvé.</p>';
+    function performSearch() {
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm.length < 2) {
+            return;
+        }
+        const selectedFilter = document.querySelector('input[name="searchFilter"]:checked').value;
+        window.location.href = `/domains/search?q=${encodeURIComponent(searchTerm)}&filter=${selectedFilter}`;
+    }
 
-                        sectionsResults.innerHTML = data.sections.length > 0
-                            ? `<h3 class="search-results-title">Sections</h3>${data.sections.map(section => `
-                                <div class="result-item section-result" data-id="${section.id}">
-                                    <h4>${section.name}</h4>
-                                    ${section.domainName ? `<p class="text-muted">Domain: ${section.domainName}</p>` : ''}
-                                </div>`).join('')}`
-                            : '<p>Aucune section trouvée.</p>';
-
-                        booksResults.innerHTML = data.books.length > 0
-                            ? `<h3 class="search-results-title">Livres</h3>${data.books.map(book => `
-                                <div class="result-item book-result" data-id="${book.id}">
-                                    ${book.coverImageBase64 ? `<img src="${book.coverImageBase64}" alt="${book.title}" class="book-thumbnail">` : ''}
-                                    <h4>${book.title}</h4>
-                                    <p class="text-muted">${book.author}</p>
-                                    ${book.publicationYear ? `<p class="text-muted">Année: ${book.publicationYear}</p>` : ''}
-                                </div>`).join('')}`
-                            : '<p>Aucun livre trouvé.</p>';
-                            
-                        authorsResults.innerHTML = data.authors && data.authors.length > 0
-                            ? `<h3 class="search-results-title">Auteurs</h3>${data.authors.map(author => `
-                                <div class="result-item author-result" data-id="${author.id}">
-                                    <h4>${author.name}</h4>
-                                    <p class="text-muted">Livres: ${author.bookCount}</p>
-                                </div>`).join('')}`
-                            : '<p>Aucun auteur trouvé.</p>';
-                            
-                        // Add click handlers for search results
-                        document.querySelectorAll('.domain-result').forEach(item => {
-                            item.addEventListener('click', function() {
-                                const domainId = this.getAttribute('data-id');
-                                const domainCard = document.querySelector(`.domain-card[data-domain-id="${domainId}"]`);
-                                if (domainCard) {
-                                    // Collapse other domains and expand this one
-                                    document.querySelectorAll('.domain-card').forEach(otherCard => {
-                                        otherCard.classList.remove('expanded');
-                                    });
-                                    domainCard.classList.add('expanded');
-                                    // Scroll to the domain card
-                                    domainCard.scrollIntoView({behavior: 'smooth'});
-                                    // Hide search results
-                                    searchResults.style.display = 'none';
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error searching:', error);
-                        searchResults.innerHTML = '<p>Une erreur est survenue pendant la recherche.</p>';
-                    });
-            }
-            
-            // Debounced search for input typing
-            const debouncedSearch = debounce(performSearch, 300);
-            
-            // Add event listeners
-            searchInput.addEventListener('input', debouncedSearch);
-            searchButton.addEventListener('click', performSearch);
-            
-            // Also trigger search on Enter key
-            searchInput.addEventListener('keyup', function(event) {
-                if (event.key === 'Enter') {
-                    performSearch();
-                }
-            });
-        });
-    </script>
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
+    });
+});
+</script>
 {% endblock %}

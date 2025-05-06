@@ -5,24 +5,27 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
     <style>
+        html, body {
+            background: #fdfaf5 !important;
+        }
         .orders-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             padding: 20px;
         }
         .order-item {
-            border-left: 4px solid #117986;
+            border-left: 4px solid #b2903e;
             margin-bottom: 15px;
             transition: all 0.3s ease;
-            background: #f8f9fa;
+            background: #fff;
             border-radius: 8px;
             padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .order-item.status-pending {
-            border-left-color: #fd7e14;
+            border-left-color: #b2903e;
         }
         .order-item.status-approved {
             border-left-color: #28a745;
@@ -40,26 +43,29 @@
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid #b2903e;
         }
         .order-id {
-            color: #117986;
+            color: #1a2e4f;
             font-weight: bold;
             font-size: 1.1em;
+            font-family: 'Georgia', serif;
         }
         .order-date {
-            color: #6c757d;
+            color: #7a6b52;
             font-size: 0.9em;
         }
         .user-info {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            color: #117986;
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
         }
         .user-info i {
             margin-right: 10px;
             font-size: 1.2em;
+            color: #b2903e;
         }
         .books-list {
             margin-bottom: 15px;
@@ -70,24 +76,25 @@
             align-items: center;
             padding: 8px 15px;
             margin-bottom: 5px;
-            background: white;
-            border-radius: 4px;
-            border-left: 2px solid #117986;
+            background: #fdfaf5;
+            border-radius: 6px;
+            border-left: 2px solid #b2903e;
         }
         .book-info {
             flex: 1;
         }
         .book-title {
             font-weight: bold;
-            color: #212529;
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
         }
         .book-author {
-            color: #6c757d;
+            color: #7a6b52;
             font-size: 0.9em;
         }
         .book-quantity {
-            background: #117986;
-            color: white;
+            background: #1a2e4f;
+            color: #fff;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.8em;
@@ -99,25 +106,27 @@
             margin-top: 15px;
         }
         .btn-approve {
-            background-color: #117986;
-            border-color: #117986;
-            color: white;
+            background-color: #1a2e4f;
+            border-color: #1a2e4f;
+            color: #fff;
             padding: 8px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
         }
         .btn-approve:hover {
-            background-color: #0e6655;
-            border-color: #0e6655;
+            background-color: #b2903e;
+            border-color: #b2903e;
             transform: translateY(-2px);
         }
         .btn-reject {
             background-color: #dc3545;
             border-color: #dc3545;
-            color: white;
+            color: #fff;
             padding: 8px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
         }
         .btn-reject:hover {
             background-color: #c82333;
@@ -127,19 +136,15 @@
         .no-orders {
             text-align: center;
             padding: 40px 20px;
-            background: #f8f9fa;
+            background: #fff;
             border-radius: 8px;
-            color: #117986;
+            color: #7a6b52;
+            font-family: 'Georgia', serif;
         }
         .no-orders i {
             font-size: 3em;
             margin-bottom: 15px;
-            color: #117986;
-        }
-        .fade-out {
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: all 0.3s ease;
+            color: #b2903e;
         }
         .filters-container {
             display: flex;
@@ -147,8 +152,9 @@
             align-items: center;
             margin-bottom: 20px;
             padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         .filter-buttons {
             display: flex;
@@ -156,22 +162,23 @@
         }
         .filter-btn {
             padding: 8px 15px;
-            border-radius: 5px;
-            color: white;
+            border-radius: 6px;
+            color: #fff;
             font-weight: bold;
             cursor: pointer;
             border: none;
             transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
         }
         .filter-btn.active {
             transform: translateY(-3px);
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .filter-btn-all {
-            background-color: #117986;
+            background-color: #1a2e4f;
         }
         .filter-btn-pending {
-            background-color: #fd7e14;
+            background-color: #b2903e;
         }
         .filter-btn-approved {
             background-color: #28a745;
@@ -189,9 +196,10 @@
         .stat-value {
             font-size: 1.5em;
             font-weight: bold;
+            font-family: 'Georgia', serif;
         }
         .stat-pending {
-            color: #fd7e14;
+            color: #b2903e;
         }
         .stat-approved {
             color: #28a745;
@@ -201,7 +209,8 @@
         }
         .stat-label {
             font-size: 0.8em;
-            color: #6c757d;
+            color: #7a6b52;
+            font-family: 'Georgia', serif;
         }
         .sort-options {
             margin-left: auto;
@@ -210,13 +219,16 @@
             gap: 10px;
         }
         .sort-label {
-            color: #6c757d;
+            color: #7a6b52;
             font-size: 0.9em;
+            font-family: 'Georgia', serif;
         }
         .sort-select {
             padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            border: 1px solid #b2903e;
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
         }
         .status-badge {
             display: inline-block;
@@ -224,10 +236,11 @@
             border-radius: 15px;
             font-size: 0.8em;
             font-weight: bold;
-            color: white;
+            color: #fff;
+            font-family: 'Georgia', serif;
         }
         .badge-pending {
-            background-color: #fd7e14;
+            background-color: #b2903e;
         }
         .badge-approved {
             background-color: #28a745;
@@ -236,66 +249,82 @@
             background-color: #dc3545;
         }
         .admin-nav {
-            background-color: #117986;
+            background-color: #1a2e4f;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .admin-nav-links {
             display: flex;
             gap: 20px;
+            flex-wrap: wrap;
         }
         .admin-nav-link {
-            color: white;
+            color: #fff;
             text-decoration: none;
             font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 8px 15px;
+            border-radius: 6px;
             transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
         }
         .admin-nav-link:hover, .admin-nav-link.active {
-            background-color: rgba(255,255,255,0.2);
+            background-color: #b2903e;
+            color: #fff;
         }
         .admin-user-info {
-            color: white;
+            color: #fff;
+            font-family: 'Georgia', serif;
+        }
+        .admin-user-info a {
+            color: #b2903e;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .admin-user-info a:hover {
+            color: #fff;
+        }
+        h1, h2, h3 {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
         }
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
+    <div class="container mt-4">
         <div class="admin-nav">
             <div class="admin-nav-links">
                 <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
                 <a href="{{ path('admin_orders_index') }}" class="admin-nav-link active">Orders</a>
+                <a href="{{ path('admin_scan_index') }}" class="admin-nav-link" style="background-color: #b2903e; color: #fff; font-weight: bold;">Scan Orders</a>
+                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link">Returns</a>
+                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link">Domains</a>
+                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link">Sections</a>
+                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
+                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link">Publishers</a>
+                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
                 <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
             </div>
             <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+                Welcome, Admin | <a href="{{ path('app_logout') }}">Logout</a>
             </div>
         </div>
-        
-        <h1 class="text-center mb-4" style="color: #117986;">Orders Management</h1>
-        
+
+        <h1 class="mb-4">Orders Management</h1>
+
         <div class="filters-container">
             <div class="filter-buttons">
-                <a href="{{ path('admin_orders_index') }}" class="filter-btn filter-btn-all {{ currentStatus == '' ? 'active' : '' }}">
-                    All Orders
-                </a>
-                <a href="{{ path('admin_orders_index', {'status': 'pending'}) }}" class="filter-btn filter-btn-pending {{ currentStatus == 'pending' ? 'active' : '' }}">
-                    Pending
-                </a>
-                <a href="{{ path('admin_orders_index', {'status': 'approved'}) }}" class="filter-btn filter-btn-approved {{ currentStatus == 'approved' ? 'active' : '' }}">
-                    Approved
-                </a>
-                <a href="{{ path('admin_orders_index', {'status': 'rejected'}) }}" class="filter-btn filter-btn-rejected {{ currentStatus == 'rejected' ? 'active' : '' }}">
-                    Rejected
-                </a>
+                <button class="filter-btn filter-btn-all active" data-status="all">All Orders</button>
+                <button class="filter-btn filter-btn-pending" data-status="pending">Pending</button>
+                <button class="filter-btn filter-btn-approved" data-status="approved">Approved</button>
+                <button class="filter-btn filter-btn-rejected" data-status="rejected">Rejected</button>
             </div>
-            
             <div class="order-stats">
                 <div class="stat-item">
                     <div class="stat-value stat-pending">{{ pendingCount }}</div>
@@ -310,12 +339,11 @@
                     <div class="stat-label">Rejected</div>
                 </div>
             </div>
-            
             <div class="sort-options">
                 <span class="sort-label">Sort by:</span>
-                <select id="sortSelect" class="sort-select" onchange="updateSort(this.value)">
-                    <option value="createdAt-DESC" {{ currentOrderBy == 'createdAt' and currentOrder == 'DESC' ? 'selected' : '' }}>Newest First</option>
-                    <option value="createdAt-ASC" {{ currentOrderBy == 'createdAt' and currentOrder == 'ASC' ? 'selected' : '' }}>Oldest First</option>
+                <select class="sort-select" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
                 </select>
             </div>
         </div>
@@ -324,126 +352,96 @@
             {% if carts is empty %}
                 <div class="no-orders">
                     <i class="fas fa-inbox"></i>
-                    <h3>No orders found</h3>
-                    <p class="text-muted">Try a different filter</p>
+                    <p>No orders found</p>
                 </div>
             {% else %}
-                <div id="orders-list">
-                    {% for cart in carts %}
-                        <div class="order-item status-{{ cart.status }}" data-order-id="{{ cart.id }}">
-                            <div class="order-header">
-                                <span class="order-id">Order #{{ cart.id }}</span>
-                                <div>
-                                    <span class="status-badge badge-{{ cart.status }}">{{ cart.status|upper }}</span>
-                                    <span class="order-date ml-2">{{ cart.createdAt|date('Y-m-d H:i') }}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="user-info">
-                                <i class="fas fa-user"></i>
-                                <span>{{ cart.user.email }}</span>
-                            </div>
-
-                            <div class="books-list">
-                                {% for item in cart.items %}
-                                    <div class="book-item">
-                                        <div class="book-info">
-                                            <div class="book-title">{{ item.exemplaire.book.title }}</div>
-                                            <div class="book-author">by {{ item.exemplaire.book.authorName }}</div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-
-                            <div class="action-buttons">
-                                {% if cart.status == 'approved' %}
-                                    <a href="{{ path('admin_order_receipt', {'id': cart.id}) }}" class="btn btn-info" target="_blank" rel="noopener noreferrer">
-                                        <i class="fas fa-file-pdf"></i> View Receipt
-                                    </a>
-                                {% elseif cart.status == 'pending' %}
-                                    <form method="post" action="{{ path('admin_order_approve', {'id': cart.id}) }}" class="approve-form">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
-                                        <button type="submit" class="btn btn-approve">
-                                            <i class="fas fa-check"></i> Approve
-                                        </button>
-                                    </form>
-                                    <form method="post" action="{{ path('admin_order_reject', {'id': cart.id}) }}" class="reject-form">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ cart.id) }}">
-                                        <button type="submit" class="btn btn-reject">
-                                            <i class="fas fa-times"></i> Reject
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </div>
+                {% for cart in carts %}
+                    <div class="order-item status-{{ cart.status|lower }}" data-status="{{ cart.status|lower }}">
+                        <div class="order-header">
+                            <div class="order-id">Order #{{ cart.id }}</div>
+                            <div class="order-date">{{ cart.createdAt|date('M d, Y H:i') }}</div>
                         </div>
-                    {% endfor %}
-                </div>
+                        <div class="user-info">
+                            <i class="fas fa-user"></i>
+                            {{ cart.user.email }}
+                        </div>
+                        <div class="books-list">
+                            {% for item in cart.items %}
+                                <div class="book-item">
+                                    <div class="book-info">
+                                        <div class="book-title">{{ item.exemplaire.book.title }}</div>
+                                        <div class="book-author">by {{ item.exemplaire.book.authorName }}</div>
+                                    </div>
+                                    <div class="book-quantity">Qty: 1</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="action-buttons">
+                            {% if cart.status == 'pending' %}
+                                <form action="{{ path('admin_order_approve', {'id': cart.id}) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('approve_order') }}">
+                                    <button type="submit" class="btn-approve">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                </form>
+                                <form action="{{ path('admin_order_reject', {'id': cart.id}) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('reject_order') }}">
+                                    <button type="submit" class="btn-reject">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="status-badge badge-{{ cart.status|lower }}">
+                                    {{ cart.status|upper }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
             {% endif %}
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle approve and reject forms
-            document.querySelectorAll('.approve-form, .reject-form').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const orderItem = this.closest('.order-item');
-                    const orderId = orderItem.dataset.orderId;
-                    const formData = new FormData(this);
-                    
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            // Add fade-out class to the order item
-                            orderItem.classList.add('fade-out');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const orderItems = document.querySelectorAll('.order-item');
+            const sortSelect = document.getElementById('sortSelect');
 
-                            // Remove the order item after animation completes
-                            setTimeout(() => {
-                                // If we're filtering by pending, remove the item
-                                if (window.location.search.includes('status=pending')) {
-                                    orderItem.remove();
-                                    
-                                    // Check if there are any orders left
-                                    const remainingOrders = document.querySelectorAll('.order-item');
-                                    if (remainingOrders.length === 0) {
-                                        const ordersContainer = document.querySelector('.orders-container');
-                                        ordersContainer.innerHTML = `
-                                            <div class="no-orders">
-                                                <i class="fas fa-inbox"></i>
-                                                <h3>No orders found</h3>
-                                                <p class="text-muted">Try a different filter</p>
-                                            </div>
-                                        `;
-                                    }
-                                } else {
-                                    // Just refresh the page to show updated state
-                                    window.location.reload();
-                                }
-
-                                // Show success message
-                                alert('Order processed successfully!');
-                            }, 300);
+            // Filter functionality
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const status = this.dataset.status;
+                    
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filter orders
+                    orderItems.forEach(item => {
+                        if (status === 'all' || item.dataset.status === status) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
                         }
-                    })
-                    .catch(error => console.error('Error:', error));
+                    });
                 });
             });
+
+            // Sort functionality
+            sortSelect.addEventListener('change', function() {
+                const ordersContainer = document.querySelector('.orders-container');
+                const orders = Array.from(orderItems);
+                
+                orders.sort((a, b) => {
+                    const dateA = new Date(a.querySelector('.order-date').textContent);
+                    const dateB = new Date(b.querySelector('.order-date').textContent);
+                    
+                    return this.value === 'newest' ? dateB - dateA : dateA - dateB;
+                });
+                
+                orders.forEach(order => ordersContainer.appendChild(order));
+            });
         });
-        
-        function updateSort(value) {
-            const [orderBy, order] = value.split('-');
-            const url = new URL(window.location.href);
-            url.searchParams.set('orderBy', orderBy);
-            url.searchParams.set('order', order);
-            window.location.href = url.toString();
-        }
     </script>
 {% endblock %}
