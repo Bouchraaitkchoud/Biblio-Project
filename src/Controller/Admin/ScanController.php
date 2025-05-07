@@ -34,7 +34,7 @@ class ScanController extends AbstractController
     }
 
     #[Route('/barcode', name: 'admin_scan_barcode', methods: ['POST'])]
-    public function scanOrderBarcode(Request $request): Response
+    public function scanOrderBarcode(Request $request): JsonResponse
     {
         try {
             // Accept both 'barcode' and 'order_id' parameters
@@ -111,11 +111,11 @@ class ScanController extends AbstractController
             }
             $book = $exemplaire->getBook();
             if (!$book) {
-                $this->logger->error('Exemplaire found but associated book is missing', ['exemplaire_id' => $exemplaire->getId()]);
+                $this->logger->warning('Exemplaire found but associated book is missing', ['exemplaire_id' => $exemplaire->getId(), 'barcode' => $barcode]);
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Associated book not found for this exemplaire.'
-                ], 500);
+                ], 404);
             }
             // Return exemplaire details
             return new JsonResponse([

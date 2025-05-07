@@ -103,7 +103,7 @@ class PublisherController extends AbstractController
             $this->addFlash('success', 'Publisher updated successfully.');
             return $this->redirectToRoute('admin_publishers_index');
         }
-
+        
         return $this->render('admin/publisher/edit.html.twig', [
             'publisher' => $publisher,
             'form' => $form->createView(),

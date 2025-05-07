@@ -89,13 +89,13 @@ class AuthorController extends AbstractController
     {
         $form = $this->createForm(\App\Form\AuthorType::class, $author);
         $form->handleRequest($request);
-
+            
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
             $this->addFlash('success', 'Author updated successfully.');
             return $this->redirectToRoute('admin_authors_index');
         }
-
+        
         return $this->render('admin/author/edit.html.twig', [
             'author' => $author,
             'form' => $form->createView(),

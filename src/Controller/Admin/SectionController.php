@@ -112,7 +112,7 @@ class SectionController extends AbstractController
             $this->addFlash('success', 'Section updated successfully.');
             return $this->redirectToRoute('admin_sections_index');
         }
-
+        
         return $this->render('admin/section/edit.html.twig', [
             'section' => $section,
             'form' => $form->createView(),

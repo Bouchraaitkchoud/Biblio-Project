@@ -96,13 +96,13 @@ class DomainController extends AbstractController
     {
         $form = $this->createForm(\App\Form\DomainType::class, $domain);
         $form->handleRequest($request);
-
+            
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Domain updated successfully.');
-            return $this->redirectToRoute('admin_domains_index');
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Domain updated successfully.');
+                return $this->redirectToRoute('admin_domains_index');
         }
-
+        
         return $this->render('admin/domain/edit.html.twig', [
             'domain' => $domain,
             'form' => $form->createView(),
