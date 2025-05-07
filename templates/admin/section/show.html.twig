@@ -113,7 +113,7 @@
                 </div>
             {% endfor %}
         {% endfor %}
-
+        
         <div class="page-header">Section Details</div>
 
         <div class="section-detail-card">
@@ -127,8 +127,8 @@
                 <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete section">
                     <i class="fas fa-trash-alt"></i> Delete
                 </button>
-            </div>
-
+        </div>
+        
             <div class="books-list">
                 <strong>Books in this Section:</strong>
                 {% if section.books|length > 0 %}
@@ -144,13 +144,13 @@
                     <div class="text-muted">No books found in this section.</div>
                 {% endif %}
             </div>
-
+            
             <a href="{{ path('admin_sections_index') }}" class="btn btn-primary back-link">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
         </div>
     </div>
-
+    
     <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">

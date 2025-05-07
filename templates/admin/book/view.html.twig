@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin - Edit Section{% endblock %}
+{% block title %}Admin - View Book{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -75,38 +75,33 @@
                 </div>
             {% endfor %}
         {% endfor %}
-        
+
         <div class="page-header">
-            <span>Edit Section: {{ section.name }}</span>
-            <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary">
+            <span>View Book: {{ book.title }}</span>
+            <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to List
             </a>
         </div>
-        
+
         <div class="form-container">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Section Name</label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ section.name }}" required>
-                </div>
-                <div class="mb-3">
-                    <label for="domain" class="form-label">Domain</label>
-                    <select id="domain" name="domain" class="form-control" required>
-                        <option value="">Select Domain</option>
-                        {% for domain in domains %}
-                            <option value="{{ domain.id }}" {% if domain.id == section.domain.id %}selected{% endif %}>
-                                {{ domain.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Update Section
-                    </button>
-                    <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary back-link">Cancel</a>
-                </div>
-            </form>
+            <div class="mb-3">
+                <label for="title" class="form-label">Book Title</label>
+                <input type="text" id="title" class="form-control" value="{{ book.title }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="author" class="form-label">Author</label>
+                <input type="text" id="author" class="form-control" value="{{ book.author.name }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="section" class="form-label">Section</label>
+                <input type="text" id="section" class="form-control" value="{{ book.section.name }}" readonly>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="{{ path('admin_books_edit', {'id': book.id}) }}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Book
+                </a>
+                <a href="{{ path('admin_books_index') }}" class="btn btn-secondary back-link">Cancel</a>
+            </div>
         </div>
     </div>
 {% endblock %} 

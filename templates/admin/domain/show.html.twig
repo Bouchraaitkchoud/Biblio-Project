@@ -113,9 +113,9 @@
                 </div>
             {% endfor %}
         {% endfor %}
-
+        
         <div class="page-header">Domain Details</div>
-
+        
         <div class="domain-detail-card">
             <div class="domain-name">{{ domain.name }}</div>
             <div class="domain-sections">Sections: {{ domain.sections|length }}</div>
@@ -144,7 +144,7 @@
                     <div class="text-muted">No sections found in this domain.</div>
                 {% endif %}
             </div>
-
+            
             <div class="section-list">
                 <strong>Books in this Domain:</strong>
                 {% set bookCount = 0 %}
@@ -157,13 +157,13 @@
                     <div class="text-muted">No books found in this domain.</div>
                 {% endif %}
             </div>
-
+            
             <a href="{{ path('admin_domains_index') }}" class="btn btn-primary back-link">
                 <i class="fas fa-arrow-left"></i> Back to List
             </a>
         </div>
     </div>
-
+    
     <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">

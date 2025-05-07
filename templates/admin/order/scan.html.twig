@@ -336,22 +336,22 @@
                     },
                     body: 'barcode=' + encodeURIComponent(orderId)
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
                         displayOrderDetails(data);
                         addScanHistory('success', `Order #${data.cart_id} found`);
-                    } else {
+                        } else {
                         scanError.textContent = data.message;
                         scanError.style.display = 'block';
-                        addScanHistory('error', data.message);
-                    }
-                })
-                .catch(error => {
+                            addScanHistory('error', data.message);
+                        }
+                    })
+                    .catch(error => {
                     scanError.textContent = 'Error fetching order details';
                     scanError.style.display = 'block';
-                    addScanHistory('error', 'Error fetching order details');
-                });
+                        addScanHistory('error', 'Error fetching order details');
+                    });
             }
 
             function displayOrderDetails(data) {

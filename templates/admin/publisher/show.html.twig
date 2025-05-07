@@ -121,7 +121,7 @@
                 </div>
             {% endfor %}
         {% endfor %}
-
+        
         <div class="page-header">Publisher Details</div>
 
         <div class="publisher-detail-card">
@@ -145,31 +145,31 @@
                 </form>
             </div>
             <table class="table publisher-info-table">
-                <tbody>
-                    <tr>
+                            <tbody>
+                                <tr>
                         <th>ID</th>
-                        <td>{{ publisher.id }}</td>
-                    </tr>
-                    <tr>
-                        <th>Address</th>
-                        <td>{{ publisher.address|default('Not specified') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Website</th>
-                        <td>
-                            {% if publisher.website %}
-                                <a href="{{ publisher.website }}" target="_blank">{{ publisher.website }}</a>
-                            {% else %}
-                                Not specified
-                            {% endif %}
-                        </td>
-                    </tr>
+                                    <td>{{ publisher.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Address</th>
+                                    <td>{{ publisher.address|default('Not specified') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Website</th>
+                                    <td>
+                                        {% if publisher.website %}
+                                            <a href="{{ publisher.website }}" target="_blank">{{ publisher.website }}</a>
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </td>
+                                </tr>
                     <tr>
                         <th>Comments</th>
                         <td>{{ publisher.comment|default('No comments')|nl2br }}</td>
                     </tr>
-                </tbody>
-            </table>
+                            </tbody>
+                        </table>
             <div class="books-list">
                 <strong>Books ({{ publisher.books|length }}):</strong>
                 {% if publisher.books|length > 0 %}
@@ -185,8 +185,8 @@
                 {% endif %}
             </div>
             <a href="{{ path('admin_publishers_index') }}" class="btn btn-primary back-link">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
         </div>
     </div>
 {% endblock %} 

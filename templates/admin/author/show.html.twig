@@ -113,7 +113,7 @@
                 </div>
             {% endfor %}
         {% endfor %}
-
+        
         <div class="page-header">Author Details</div>
 
         <div class="author-detail-card">
@@ -129,8 +129,8 @@
                 <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete author">
                     <i class="fas fa-trash-alt"></i> Delete
                 </button>
-            </div>
-
+        </div>
+        
             <div class="books-list">
                 <strong>Books by this Author ({{ author.books|length }}):</strong>
                 {% if author.books|length > 0 %}
@@ -146,13 +146,13 @@
                     <div class="text-muted">No books found for this author.</div>
                 {% endif %}
             </div>
-
+            
             <a href="{{ path('admin_authors_index') }}" class="btn btn-primary back-link">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
         </div>
     </div>
-
+    
     <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">

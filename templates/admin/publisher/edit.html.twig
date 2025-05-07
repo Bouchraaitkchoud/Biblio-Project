@@ -89,7 +89,7 @@
                 </div>
             {% endfor %}
         {% endfor %}
-
+        
         <div class="page-header">
             <span>Edit Publisher: {{ publisher.name }}</span>
             <div>
@@ -101,7 +101,7 @@
                 </a>
             </div>
         </div>
-
+        
         <div class="form-container">
             <form method="post" action="{{ path('admin_publisher_edit', {'id': publisher.id}) }}">
                 <div class="mb-3">

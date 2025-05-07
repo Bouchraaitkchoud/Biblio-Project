@@ -286,9 +286,8 @@
 
 {% block content %}
     <div class="container dashboard-container">
-        <h1 class="dashboard-header">Admin Dashboard</h1>
+        <h1 class="dashboard-header">Administration</h1>
         <!-- Library Management Section -->
-        <h2>Library Management</h2>
         <div class="admin-management">
             <div class="management-card">
                 <div class="management-icon">
@@ -343,6 +342,26 @@
                     Add, edit, and manage all books in the library
                 </div>
                 <a href="{{ path('admin_books_index') }}" class="btn-manage">Manage Books</a>
+            </div>
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="management-title">Manage Orders</div>
+                <div class="management-description">
+                    View and manage all orders
+                </div>
+                <a href="{{ path('admin_orders_index') }}" class="btn-manage">Manage Orders</a>
+            </div>
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <div class="management-title">Manage Returns</div>
+                <div class="management-description">
+                    View and manage all returns
+                </div>
+                <a href="{{ path('admin_returns_index') }}" class="btn-manage">Manage Returns</a>
             </div>
         </div>
 

@@ -100,7 +100,7 @@
             .admin-sidebar {
                 width: 230px;
                 min-height: 100vh;
-                background: #1a2e4f;
+                background: #1a2e4f !important;
                 color: #fff;
                 display: flex;
                 flex-direction: column;
@@ -193,13 +193,13 @@
                 </div>
             </div>
         {% else %}
-            <header class="library-header">
-                <img src="/library-logo.svg" alt="Library Logo" class="library-logo"/>
-                <span class="library-title">Bibliothèque UIASS</span>
-            </header>
-            <main class="library-main">
+        <header class="library-header">
+            <img src="/library-logo.svg" alt="Library Logo" class="library-logo"/>
+            <span class="library-title">Bibliothèque UIASS</span>
+        </header>
+        <main class="library-main">
                 {{ block('content') }}
-            </main>
+        </main>
         {% endif %}
         <footer class="library-footer">
             &copy; {{ "now"|date("Y") }} Bibliothèque UIASS. Tous droits réservés.

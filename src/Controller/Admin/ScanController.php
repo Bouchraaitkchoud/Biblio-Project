@@ -152,7 +152,7 @@ class ScanController extends AbstractController
                 'cart_found' => $cart ? 'yes' : 'no',
                 'cart_status' => $cart ? $cart->getStatus() : 'n/a'
             ]);
-
+            
             if (!$cart || $cart->getStatus() !== 'pending') {
                 return new JsonResponse([
                     'success' => false,

@@ -4,44 +4,85 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
+            min-height: 100vh;
+        }
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2rem 0 1.5rem 0;
+            color: #1a2e4f;
+            text-align: center;
+        }
         .return-container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 0;
         }
-        .scanner-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .scanner-section, .return-history, .book-details {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
         }
-        .barcode-input {
-            font-size: 1.2em;
-            padding: 10px;
-            width: 100%;
-            margin-bottom: 10px;
+        .scanner-section h3 {
+            color: #1a2e4f;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .input-group .form-control {
+            border: 1px solid #d8d2c4;
+            border-radius: 6px 0 0 6px;
+            font-size: 1.1em;
+        }
+        .input-group .btn-primary {
+            background: #1a2e4f;
+            color: #fff;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
+        }
+        .input-group .btn-primary:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .input-group .btn-secondary {
+            background: #b2903e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            margin-left: 0.5rem;
+        }
+        .input-group .btn-secondary:hover {
+            background: #967a2b;
+            color: #fff;
         }
         .book-details {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
             display: none;
         }
         .book-details.show {
             display: block;
         }
-        .return-history {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
+        .return-history h3 {
+            color: #1a2e4f;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
         }
         .return-item {
-            padding: 10px;
-            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
         }
         .return-item:last-child {
             border-bottom: none;
@@ -61,25 +102,30 @@
             background-color: #dc3545;
             color: white;
         }
+        .btn-success {
+            background: #1a2e4f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
+        }
+        .btn-success:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .alert {
+            border-radius: 8px;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link active">Returns</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
-
+        <div class="page-header">Process Returns</div>
         <div class="return-container">
-            <h1 class="text-center mb-4">Process Returns</h1>
-
             <div class="scanner-section">
                 <h3>Scan Barcode</h3>
                 <div class="input-group mb-3">
@@ -87,13 +133,9 @@
                     <button type="button" id="scanButton" class="btn btn-primary">
                         <i class="fas fa-search"></i> Scan
                     </button>
-                    <button type="button" id="manualEntryButton" class="btn btn-secondary">
-                        <i class="fas fa-keyboard"></i> Manual Entry
-                    </button>
                 </div>
                 <div id="scanMessage" class="alert" style="display: none;"></div>
             </div>
-
             <div id="bookDetails" class="book-details">
                 <h3>Book Details</h3>
                 <div class="row">
@@ -110,19 +152,16 @@
                     <i class="fas fa-check"></i> Process Return
                 </button>
             </div>
-
             <div class="return-history">
                 <h3>Today's Returns</h3>
                 <div id="returnHistory"></div>
             </div>
         </div>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const barcodeInput = document.getElementById('barcodeInput');
             const scanButton = document.getElementById('scanButton');
-            const manualEntryButton = document.getElementById('manualEntryButton');
             const scanMessage = document.getElementById('scanMessage');
             const bookDetails = document.getElementById('bookDetails');
             const processReturnBtn = document.getElementById('processReturn');
@@ -140,15 +179,6 @@
             // Handle scan button click
             scanButton.addEventListener('click', function() {
                 scanBarcodeIfValid();
-            });
-
-            // Handle manual entry button click
-            manualEntryButton.addEventListener('click', function() {
-                const barcode = prompt('Please enter the barcode number:');
-                if (barcode) {
-                    barcodeInput.value = barcode;
-                    scanBarcodeIfValid();
-                }
             });
 
             function scanBarcodeIfValid() {
