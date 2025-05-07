@@ -1,122 +1,39 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - Edit Book{% endblock %}
+{% block title %}Edit Book{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        body {
-            background-color: #fdfaf5 !important;
-            font-family: 'Georgia', serif;
-            color: #4e4a45;
-            min-height: 100vh;
-        }
-        .page-header {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin: 2rem 0 1.5rem 0;
-            color: #1a2e4f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .form-container {
-            background: #fff;
-            border-left: 4px solid #b2903e;
-            margin-bottom: 2rem;
-            padding: 2rem 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-        .btn-primary {
-            background: #1a2e4f;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-            transition: background 0.2s;
-        }
-        .btn-primary:hover {
-            background: #b2903e;
-            color: #fff;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-        }
-        .btn-secondary:hover {
-            background: #b2903e;
-            color: #fff;
-        }
-        .back-link {
-            margin-top: 1.5rem;
-            display: inline-block;
-        }
-        .alert {
-            border-radius: 8px;
-        }
-    </style>
-{% endblock %}
-
-{% block body %}
-    <div class="container mt-4">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+{% block admin_content %}
+    <div class="page-header" style="margin-bottom: 1.5rem;">
+        Edit Book
+    </div>
+    <div class="form-container mt-4">
+        {{ form_start(form) }}
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_row(form.title) }}
+                    {{ form_row(form.section) }}
+                    {{ form_row(form.publicationYear) }}
+                    {{ form_row(form.isbn) }}
                 </div>
-            {% endfor %}
-        {% endfor %}
-
-        <div class="page-header">
-            <span>Edit Book: {{ book.title }}</span>
-            <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-        </div>
-
-        <div class="form-container">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="title" class="form-label">Book Title</label>
-                    <input type="text" id="title" name="title" class="form-control" value="{{ book.title }}" required>
+                <div class="col-md-6">
+                    {{ form_row(form.authors) }}
+                    {{ form_row(form.publishers) }}
+                    {{ form_row(form.coverImage) }}
                 </div>
-                <div class="mb-3">
-                    <label for="authors" class="form-label">Authors</label>
-                    <select id="authors" name="authors[]" class="form-control" multiple required>
-                        {% for author in authors %}
-                            <option value="{{ author.id }}" {% if book.authors is defined and author in book.authors %}selected{% endif %}>
-                                {{ author.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    {{ form_row(form.description) }}
                 </div>
-                <div class="mb-3">
-                    <label for="section" class="form-label">Section</label>
-                    <select id="section" name="section" class="form-control" required>
-                        <option value="">Select Section</option>
-                        {% for section in sections %}
-                            <option value="{{ section.id }}" {% if section.id == book.section.id %}selected{% endif %}>
-                                {{ section.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Update Book
-                    </button>
-                    <a href="{{ path('admin_books_index') }}" class="btn btn-secondary back-link">Cancel</a>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="form-actions mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Books
+                </a>
+            </div>
+        {{ form_end(form) }}
     </div>
 {% endblock %} 

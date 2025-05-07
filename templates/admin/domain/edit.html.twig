@@ -1,99 +1,26 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - Edit Domain{% endblock %}
+{% block title %}Edit Domain{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        body {
-            background-color: #fdfaf5 !important;
-            font-family: 'Georgia', serif;
-            color: #4e4a45;
-            min-height: 100vh;
-        }
-        .page-header {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin: 2rem 0 1.5rem 0;
-            color: #1a2e4f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .form-container {
-            background: #fff;
-            border-left: 4px solid #b2903e;
-            margin-bottom: 2rem;
-            padding: 2rem 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-        .btn-primary {
-            background: #1a2e4f;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-            transition: background 0.2s;
-        }
-        .btn-primary:hover {
-            background: #b2903e;
-            color: #fff;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-        }
-        .btn-secondary:hover {
-            background: #b2903e;
-            color: #fff;
-        }
-        .back-link {
-            margin-top: 1.5rem;
-            display: inline-block;
-        }
-        .alert {
-            border-radius: 8px;
-        }
-    </style>
-{% endblock %}
-
-{% block body %}
-    <div class="container mt-4">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+{% block admin_content %}
+    <div class="page-header">
+        <span>Edit Domain</span>
+    </div>
+    <div class="form-container mt-4">
+        {{ form_start(form) }}
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_row(form.name) }}
                 </div>
-            {% endfor %}
-        {% endfor %}
-        
-        <div class="page-header">
-            <span>Edit Domain: {{ domain.name }}</span>
-            <a href="{{ path('admin_domains_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-        </div>
-        
-        <div class="form-container">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Domain Name</label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ domain.name }}" required>
-                </div>
+            </div>
+            <div class="form-actions mt-4">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Update Domain
+                    <i class="fas fa-save"></i> Save Changes
                 </button>
-                <a href="{{ path('admin_domains_index') }}" class="btn btn-secondary back-link">Cancel</a>
-            </form>
-        </div>
+                <a href="{{ path('admin_domains_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Domains
+                </a>
+            </div>
+        {{ form_end(form) }}
     </div>
 {% endblock %}

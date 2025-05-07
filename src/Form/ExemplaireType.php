@@ -16,6 +16,14 @@ class ExemplaireType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('barcode', TextType::class, [
+                'label' => 'Barcode',
+                'required' => true
+            ])
+            ->add('section_id', NumberType::class, [
+                'label' => 'Section ID',
+                'required' => false
+            ])
             ->add('status', ChoiceType::class, [
                 'choices' => [
                     'Available' => 'available',
@@ -46,6 +54,10 @@ class ExemplaireType extends AbstractType
                 'label' => 'Price',
                 'required' => false,
                 'scale' => 2
+            ])
+            ->add('comment', TextType::class, [
+                'label' => 'Comment',
+                'required' => false
             ])
         ;
     }

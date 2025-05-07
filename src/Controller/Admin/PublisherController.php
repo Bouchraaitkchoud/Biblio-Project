@@ -95,36 +95,18 @@ class PublisherController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_publisher_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Publisher $publisher): Response
     {
-        if ($request->isMethod('POST')) {
-            $name = $request->request->get('name');
-            $address = $request->request->get('address');
-            $city = $request->request->get('city');
-            $country = $request->request->get('country');
-            $website = $request->request->get('website');
-            $comment = $request->request->get('comment');
-            
-            if (empty($name)) {
-                $this->addFlash('error', 'Publisher name cannot be empty.');
-                return $this->render('admin/publisher/edit.html.twig', [
-                    'publisher' => $publisher,
-                ]);
-            }
-            
-            $publisher->setName($name);
-            $publisher->setAddress($address);
-            $publisher->setCity($city);
-            $publisher->setCountry($country);
-            $publisher->setWebsite($website);
-            $publisher->setComment($comment);
-            
+        $form = $this->createForm(\App\Form\PublisherType::class, $publisher);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            
             $this->addFlash('success', 'Publisher updated successfully.');
             return $this->redirectToRoute('admin_publishers_index');
         }
-        
+
         return $this->render('admin/publisher/edit.html.twig', [
             'publisher' => $publisher,
+            'form' => $form->createView(),
         ]);
     }
     

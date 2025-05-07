@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 #[Route('/admin/domains')]
 #[IsGranted('ROLE_ADMIN')]
@@ -92,22 +94,18 @@ class DomainController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_domain_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Domain $domain): Response
     {
-        if ($request->isMethod('POST')) {
-            $name = $request->request->get('name');
-            
-            if (!empty($name)) {
-                $domain->setName($name);
-                $this->entityManager->flush();
-                
-                $this->addFlash('success', 'Domain updated successfully.');
-                return $this->redirectToRoute('admin_domains_index');
-            } else {
-                $this->addFlash('error', 'Domain name cannot be empty.');
-            }
+        $form = $this->createForm(\App\Form\DomainType::class, $domain);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Domain updated successfully.');
+            return $this->redirectToRoute('admin_domains_index');
         }
-        
+
         return $this->render('admin/domain/edit.html.twig', [
             'domain' => $domain,
+            'form' => $form->createView(),
         ]);
     }
     

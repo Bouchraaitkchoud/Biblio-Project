@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 #[Route('/admin/sections')]
 #[IsGranted('ROLE_ADMIN')]
@@ -102,49 +104,18 @@ class SectionController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_section_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Section $section): Response
     {
-        $domains = $this->domainRepository->findAll();
-        
-        if ($request->isMethod('POST')) {
-            $name = $request->request->get('name');
-            $domainId = $request->request->get('domain');
-            
-            if (empty($name)) {
-                $this->addFlash('error', 'Section name cannot be empty.');
-                return $this->render('admin/section/edit.html.twig', [
-                    'section' => $section,
-                    'domains' => $domains,
-                ]);
-            }
-            
-            if (empty($domainId)) {
-                $this->addFlash('error', 'Please select a domain.');
-                return $this->render('admin/section/edit.html.twig', [
-                    'section' => $section,
-                    'domains' => $domains,
-                ]);
-            }
-            
-            $domain = $this->domainRepository->find($domainId);
-            if (!$domain) {
-                $this->addFlash('error', 'Selected domain does not exist.');
-                return $this->render('admin/section/edit.html.twig', [
-                    'section' => $section,
-                    'domains' => $domains,
-                ]);
-            }
-            
-            $section->setName($name);
-            $section->setDomain($domain);
-            
+        $form = $this->createForm(\App\Form\SectionType::class, $section);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            
             $this->addFlash('success', 'Section updated successfully.');
             return $this->redirectToRoute('admin_sections_index');
         }
-        
+
         return $this->render('admin/section/edit.html.twig', [
             'section' => $section,
-            'domains' => $domains,
+            'form' => $form->createView(),
         ]);
     }
     

@@ -2,56 +2,162 @@
 
 {% block title %}Add Exemplaire - {{ book.title }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
+            min-height: 100vh;
+        }
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2rem 0 1.5rem 0;
+            color: #1a2e4f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-container {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 2rem;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-family: 'Georgia', serif;
+        }
+        .form-control:focus {
+            border-color: #b2903e;
+            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
+        }
+        .btn-primary {
+            background: #1a2e4f;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+        }
+        .btn-primary:hover {
+            background: #2a3e5f;
+        }
+        .btn-secondary {
+            background: #f7e7c1;
+            color: #b2903e;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+        }
+        .btn-secondary:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .alert {
+            border-radius: 8px;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="mb-0">Add Exemplaire to "{{ book.title }}"</h2>
+    <div class="container mt-4">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="page-header">
+            <span>Add Exemplaire to "{{ book.title }}"</span>
+        </div>
+
+        <div class="form-container">
+            {{ form_start(form) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.barcode, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
                     </div>
-                    <div class="card-body">
-                        {{ form_start(form) }}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    {{ form_row(form.barcode) }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form_row(form.section_id) }}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    {{ form_row(form.status_id) }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form_row(form.location_id) }}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    {{ form_row(form.call_number) }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form_row(form.acquisition_date) }}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    {{ form_row(form.price) }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form_row(form.comment) }}
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between mt-4">
-                                <a href="{{ path('admin_books_show', {'id': book.id}) }}" class="btn btn-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Add Exemplaire</button>
-                            </div>
-                        {{ form_end(form) }}
+                    <div class="col-md-6">
+                        {{ form_row(form.section_id, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
                     </div>
                 </div>
-            </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.status, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.locationId, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.callNumber, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.acquisitionDate, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.price, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.comment, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ path('admin_books_show', {'id': book.id}) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Exemplaire
+                    </button>
+                </div>
+            {{ form_end(form) }}
         </div>
     </div>
 {% endblock %} 

@@ -164,5 +164,60 @@
                 </a>
             </div>
         </div>
+        <!-- Exemplaires Table -->
+        <div class="book-detail-card" style="margin-top: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0; color: #1a2e4f;">Exemplaires</h3>
+                <a href="{{ path('admin_book_add_exemplaire', {'id': book.id}) }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Exemplaire
+                </a>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Call Number</th>
+                        <th>Acquisition Date</th>
+                        <th>Return Date</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exemplaire in exemplaires %}
+                        <tr>
+                            <td>{{ exemplaire.barcode }}</td>
+                            <td>
+                                <span class="badge {% if exemplaire.status == 'available' %}bg-success{% elseif exemplaire.status == 'borrowed' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    {{ exemplaire.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ exemplaire.locationId }}</td>
+                            <td>{{ exemplaire.callNumber }}</td>
+                            <td>{{ exemplaire.acquisitionDate ? exemplaire.acquisitionDate|date('Y-m-d') : '-' }}</td>
+                            <td>{{ exemplaire.returnDate ? exemplaire.returnDate|date('Y-m-d') : '-' }}</td>
+                            <td>{{ exemplaire.price ? exemplaire.price|number_format(2) : '-' }}</td>
+                            <td>
+                                {% if exemplaire.status == 'borrowed' %}
+                                    <form method="post" action="{{ path('admin_exemplaire_return', {'id': exemplaire.id}) }}" style="display:inline-block;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('return' ~ exemplaire.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark this exemplaire as returned?')">
+                                            <i class="fas fa-undo"></i> Mark Returned
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="8" class="text-center text-muted">No exemplaires found for this book.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %} 

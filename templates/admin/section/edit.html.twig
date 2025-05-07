@@ -1,112 +1,29 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - Edit Section{% endblock %}
+{% block title %}Edit Section{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        body {
-            background-color: #fdfaf5 !important;
-            font-family: 'Georgia', serif;
-            color: #4e4a45;
-            min-height: 100vh;
-        }
-        .page-header {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin: 2rem 0 1.5rem 0;
-            color: #1a2e4f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .form-container {
-            background: #fff;
-            border-left: 4px solid #b2903e;
-            margin-bottom: 2rem;
-            padding: 2rem 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-        .btn-primary {
-            background: #1a2e4f;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-            transition: background 0.2s;
-        }
-        .btn-primary:hover {
-            background: #b2903e;
-            color: #fff;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-        }
-        .btn-secondary:hover {
-            background: #b2903e;
-            color: #fff;
-        }
-        .back-link {
-            margin-top: 1.5rem;
-            display: inline-block;
-        }
-        .alert {
-            border-radius: 8px;
-        }
-    </style>
-{% endblock %}
-
-{% block body %}
-    <div class="container mt-4">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+{% block admin_content %}
+    <div class="page-header" style="margin-bottom: 1.5rem;">
+        Edit Section
+    </div>
+    <div class="form-container mt-4">
+        {{ form_start(form) }}
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_row(form.name) }}
                 </div>
-            {% endfor %}
-        {% endfor %}
-        
-        <div class="page-header">
-            <span>Edit Section: {{ section.name }}</span>
-            <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-        </div>
-        
-        <div class="form-container">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Section Name</label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ section.name }}" required>
+                <div class="col-md-6">
+                    {{ form_row(form.domain) }}
                 </div>
-                <div class="mb-3">
-                    <label for="domain" class="form-label">Domain</label>
-                    <select id="domain" name="domain" class="form-control" required>
-                        <option value="">Select Domain</option>
-                        {% for domain in domains %}
-                            <option value="{{ domain.id }}" {% if domain.id == section.domain.id %}selected{% endif %}>
-                                {{ domain.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Update Section
-                    </button>
-                    <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary back-link">Cancel</a>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="form-actions mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{{ path('admin_sections_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Sections
+                </a>
+            </div>
+        {{ form_end(form) }}
     </div>
 {% endblock %} 

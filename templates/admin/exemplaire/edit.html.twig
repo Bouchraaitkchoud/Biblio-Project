@@ -4,46 +4,158 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <style>
+        body {
+            background-color: #fdfaf5 !important;
+            font-family: 'Georgia', serif;
+            color: #4e4a45;
+            min-height: 100vh;
+        }
+        .page-header {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2rem 0 1.5rem 0;
+            color: #1a2e4f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .book-info {
+            font-size: 1.1rem;
+            color: #7a6b52;
+            margin-top: 0.5rem;
+        }
+        .form-container {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 2rem;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .form-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-family: 'Georgia', serif;
+        }
+        .form-control:focus {
+            border-color: #b2903e;
+            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
+        }
+        .btn-primary {
+            background: #1a2e4f;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+        }
+        .btn-primary:hover {
+            background: #2a3e5f;
+        }
+        .btn-secondary {
+            background: #f7e7c1;
+            color: #b2903e;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+        }
+        .btn-secondary:hover {
+            background: #b2903e;
+            color: #fff;
+        }
+        .alert {
+            border-radius: 8px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 0.7rem;
+            margin-top: 1.5rem;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
     <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
 
         <div class="page-header">
-            <h1>Edit Exemplaire</h1>
-            <div class="book-info">
-                <p><strong>Book:</strong> {{ book.title }}</p>
-                <p><strong>Barcode:</strong> {{ exemplaire.barcode }}</p>
-            </div>
+            <span>Edit Exemplaire</span>
+        </div>
+        <div class="book-info">
+            <span><strong>Book:</strong> {{ book.title }}</span> |
+            <span><strong>Barcode:</strong> {{ exemplaire.barcode }}</span>
         </div>
 
-        <div class="form-container">
+        <div class="form-container mt-4">
             {{ form_start(form) }}
                 <div class="row">
                     <div class="col-md-6">
-                        {{ form_row(form.status) }}
-                        {{ form_row(form.locationId) }}
-                        {{ form_row(form.callNumber) }}
+                        {{ form_row(form.status, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                        {{ form_row(form.locationId, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                        {{ form_row(form.callNumber, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
                     </div>
                     <div class="col-md-6">
-                        {{ form_row(form.acquisitionDate) }}
-                        {{ form_row(form.returnDate) }}
-                        {{ form_row(form.price) }}
+                        {{ form_row(form.acquisitionDate, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                        {{ form_row(form.returnDate, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                        {{ form_row(form.price, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
                     </div>
                 </div>
-
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        {{ form_row(form.barcode, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.section_id, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        {{ form_row(form.comment, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
+                    </div>
+                </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Save Changes

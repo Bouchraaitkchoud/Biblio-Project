@@ -135,83 +135,18 @@ class BookController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_book_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Book $book): Response
     {
-        $authors = $this->authorRepository->findAll();
-        $sections = $this->sectionRepository->findAll();
-        
-        if ($request->isMethod('POST')) {
-            $title = $request->request->get('title');
-            $description = $request->request->get('description');
-            $publicationYear = $request->request->get('publicationYear');
-            $isbn = $request->request->get('isbn');
-            $sectionId = $request->request->get('section');
-            $authorIds = $request->request->all('authors');
-            
-            // File upload
-            $coverImage = $request->files->get('coverImage');
-            
-            // Validation
-            if (empty($title)) {
-                $this->addFlash('error', 'Book title cannot be empty.');
-                return $this->redirectToRoute('admin_book_edit', ['id' => $book->getId()]);
-            }
-            
-            if (empty($sectionId)) {
-                $this->addFlash('error', 'Please select a section for the book.');
-                return $this->redirectToRoute('admin_book_edit', ['id' => $book->getId()]);
-            }
-            
-            if (empty($authorIds)) {
-                $this->addFlash('error', 'Please select at least one author.');
-                return $this->redirectToRoute('admin_book_edit', ['id' => $book->getId()]);
-            }
-            
-            $section = $this->sectionRepository->find($sectionId);
-            if (!$section) {
-                $this->addFlash('error', 'Selected section does not exist.');
-                return $this->redirectToRoute('admin_book_edit', ['id' => $book->getId()]);
-            }
-            
-            // Update book data
-            $book->setTitle($title);
-            $book->setDescription($description);
-            $book->setIsbn($isbn);
-            $book->setSection($section);
-            
-            if (!empty($publicationYear)) {
-                $book->setPublicationYear((int) $publicationYear);
-            } else {
-                $book->setPublicationYear(null);
-            }
-            
-            // Handle cover image
-            if ($coverImage && $coverImage->isValid()) {
-                $book->setCoverImage(file_get_contents($coverImage->getPathname()));
-            }
-            
-            // Update authors
-            // Remove all existing authors first
-            foreach ($book->getAuthors()->toArray() as $existingAuthor) {
-                $book->removeAuthor($existingAuthor);
-            }
-            
-            // Add selected authors
-            foreach ($authorIds as $authorId) {
-                $author = $this->authorRepository->find($authorId);
-                if ($author) {
-                    $book->addAuthor($author);
-                }
-            }
-            
+        $form = $this->createForm(\App\Form\BookType::class, $book);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            
             $this->addFlash('success', 'Book updated successfully.');
             return $this->redirectToRoute('admin_books_index');
         }
-        
+
         return $this->render('admin/book/edit.html.twig', [
             'book' => $book,
-            'authors' => $authors,
-            'sections' => $sections,
+            'form' => $form->createView(),
         ]);
     }
     

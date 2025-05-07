@@ -87,28 +87,18 @@ class AuthorController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_author_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Author $author): Response
     {
-        if ($request->isMethod('POST')) {
-            $name = $request->request->get('name');
-            $bio = $request->request->get('bio');
-            
-            if (empty($name)) {
-                $this->addFlash('error', 'Author name cannot be empty.');
-                return $this->render('admin/author/edit.html.twig', [
-                    'author' => $author,
-                ]);
-            }
-            
-            $author->setName($name);
-            $author->setBio($bio);
-            
+        $form = $this->createForm(\App\Form\AuthorType::class, $author);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            
             $this->addFlash('success', 'Author updated successfully.');
             return $this->redirectToRoute('admin_authors_index');
         }
-        
+
         return $this->render('admin/author/edit.html.twig', [
             'author' => $author,
+            'form' => $form->createView(),
         ]);
     }
     

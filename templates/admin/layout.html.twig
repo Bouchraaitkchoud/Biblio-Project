@@ -5,74 +5,29 @@
     <link rel="stylesheet" href="{{ asset('css/style1.css') }}?v={{ "now"|date('YmdHis') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ "now"|date('YmdHis') }}">
     <style>
-        /* Critical admin styles that should never be overridden */
-        .admin-nav {
-            background-color: #117986 !important;
-            padding: 15px !important;
-            border-radius: 10px !important;
-            margin-bottom: 25px !important;
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-        }
-        
-        .admin-nav-links {
-            display: flex !important;
-            gap: 20px !important;
-        }
-        
-        .admin-nav-link {
-            color: white !important;
-            text-decoration: none !important;
-            font-weight: bold !important;
-            padding: 5px 10px !important;
-            border-radius: 5px !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .admin-nav-link:hover,
-        .admin-nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-        }
-        
-        .admin-user-info {
-            color: white !important;
-        }
-        
-        .admin-user-info a {
-            color: white !important;
+        .admin-main-content {
+            margin: 0 auto;
+            max-width: 900px;
+            padding: 2.5rem 2rem 2rem 2rem;
+            min-height: 100vh;
+            background: #fdfaf5;
         }
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link {% if app.request.get('_route') == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_orders' %}active{% endif %}">Orders</a>
-                <a href="{{ path('admin_domains_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_domains' %}active{% endif %}">Domains</a>
-                <a href="{{ path('admin_sections_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_sections' %}active{% endif %}">Sections</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_authors' %}active{% endif %}">Authors</a>
-                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_publishers' %}active{% endif %}">Publishers</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link {% if app.request.get('_route') starts with 'admin_books' %}active{% endif %}">Books</a>
-                <a href="{{ path('app_domains') }}" class="admin-nav-link" data-turbo="false">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
-        
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+        <div class="admin-main-content">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-        
-        {% block admin_content %}{% endblock %}
+            {% block admin_content %}{% endblock %}
+        </div>
     </div>
 {% endblock %}
 
