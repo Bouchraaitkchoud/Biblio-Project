@@ -76,4 +76,108 @@ class ExemplaireController extends AbstractController
 
         return $this->redirectToRoute('admin_books_show', ['id' => $exemplaire->getBook()->getId()]);
     }
+
+    #[Route('/{id}/mark-returned', name: 'admin_exemplaire_mark_returned', methods: ['POST'])]
+    public function markReturned(Request $request, Exemplaire $exemplaire): Response
+    {
+        if ($exemplaire->getStatus() !== 'borrowed') {
+            $this->addFlash('error', 'This book is not currently borrowed.');
+            return $this->redirectToRoute('admin_borrowed_exemplaires');
+        }
+
+        // Process form fields
+        $condition = $request->request->get('condition');
+        $notes = $request->request->get('notes');
+        $dateReturned = $request->request->get('date_returned');
+        $flagLate = $request->request->get('flag_late');
+        $flagDamaged = $request->request->get('flag_damaged');
+        $fine = $request->request->get('fine');
+        $printReceipt = $request->request->get('print_receipt') === '1';
+        $emailReceipt = $request->request->get('email_receipt') === '1';
+        $photoFile = $request->files->get('photo');
+
+        // Update exemplaire status and return date
+        $exemplaire->setStatus('available');
+        $exemplaire->setReturnDate($dateReturned ? new \DateTime($dateReturned) : new \DateTime());
+        // Optionally, store condition, notes, flags, fine, and photo in your DB (requires schema update)
+        $this->entityManager->persist($exemplaire);
+        $this->entityManager->flush();
+
+        // Generate PDF receipt if requested
+        if ($printReceipt) {
+            $request->getSession()->set('return_receipt_data', [
+                'barcode' => $exemplaire->getBarcode(),
+                'book_title' => $exemplaire->getBook()->getTitle(),
+                'condition' => $condition,
+                'notes' => $notes,
+                'date_returned' => $dateReturned ?: (new \DateTime())->format('Y-m-d'),
+                'flag_late' => $flagLate,
+                'flag_damaged' => $flagDamaged,
+                'fine' => $fine,
+                'processed_by' => $this->getUser() instanceof \App\Entity\User ? $this->getUser()->getEmail() : '',
+            ]);
+            return $this->redirectToRoute('admin_exemplaire_return_receipt', ['id' => $exemplaire->getId()]);
+        }
+
+        $this->addFlash('success', 'Book return processed successfully.');
+        return $this->redirectToRoute('admin_borrowed_exemplaires');
+    }
+
+    #[Route('/{id}/return-details', name: 'admin_exemplaire_return_details', methods: ['GET'])]
+    public function returnDetailsForm(Exemplaire $exemplaire): Response
+    {
+        return $this->render('admin/exemplaire/return_details.html.twig', [
+            'exemplaire' => $exemplaire
+        ]);
+    }
+
+    #[Route('/{id}/return-receipt', name: 'admin_exemplaire_return_receipt', methods: ['GET'])]
+    public function returnReceipt(Request $request, Exemplaire $exemplaire): Response
+    {
+        $returnData = $request->getSession()->get('return_receipt_data');
+        if (!$returnData) {
+            $this->addFlash('error', 'No return data found for receipt.');
+            return $this->redirectToRoute('admin_borrowed_exemplaires');
+        }
+
+        // Find the latest CartItem for this exemplaire
+        $cartItem = $this->entityManager->getRepository(\App\Entity\CartItem::class)
+            ->createQueryBuilder('ci')
+            ->where('ci.exemplaire = :exemplaire')
+            ->setParameter('exemplaire', $exemplaire)
+            ->orderBy('ci.addedAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        $studentEmail = $cartItem && $cartItem->getCart() && $cartItem->getCart()->getUser()
+            ? $cartItem->getCart()->getUser()->getEmail()
+            : 'N/A';
+
+        $pdf = new \TCPDF();
+        $pdf->AddPage();
+        $pdf->SetFont('helvetica', '', 12);
+        $pdf->Cell(0, 10, 'Book Return Receipt', 0, 1, 'C');
+        $pdf->Ln(5);
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->MultiCell(0, 8, 'Student: ' . $studentEmail);
+        $pdf->MultiCell(0, 8, 'Barcode: ' . $returnData['barcode']);
+        $pdf->MultiCell(0, 8, 'Book Title: ' . $returnData['book_title']);
+        $pdf->MultiCell(0, 8, 'Condition: ' . $returnData['condition']);
+        $pdf->MultiCell(0, 8, 'Notes: ' . $returnData['notes']);
+        $pdf->MultiCell(0, 8, 'Date Returned: ' . $returnData['date_returned']);
+        $pdf->MultiCell(0, 8, 'Late: ' . ($returnData['flag_late'] ? 'Yes' : 'No'));
+        $pdf->MultiCell(0, 8, 'Damaged: ' . ($returnData['flag_damaged'] ? 'Yes' : 'No'));
+        $pdf->MultiCell(0, 8, 'Fine: ' . ($returnData['fine'] ? $returnData['fine'] : 'None'));
+        $pdf->Ln(5);
+        $pdf->MultiCell(0, 8, 'Processed by: ' . $returnData['processed_by']);
+        $pdf->Ln(5);
+        $pdf->Cell(0, 10, 'Thank you!', 0, 1, 'C');
+        // Clear session data after use
+        $request->getSession()->remove('return_receipt_data');
+        return new Response($pdf->Output('return_receipt.pdf', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="return_receipt.pdf"'
+        ]);
+    }
 } 

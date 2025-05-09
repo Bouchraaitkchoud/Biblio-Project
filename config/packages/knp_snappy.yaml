@@ -1,7 +1,7 @@
 knp_snappy:
   pdf:
     enabled: true
-    binary: '"C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"'
+    binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
     options:
       enable-local-file-access: true
       encoding: UTF-8
@@ -18,4 +18,4 @@ knp_snappy:
       window-status: 'ready'
   image:
     enabled: true
-    binary: 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe'
+    binary: 'C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe'

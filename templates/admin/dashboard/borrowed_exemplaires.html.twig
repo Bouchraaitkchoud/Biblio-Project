@@ -1,0 +1,169 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block body %}
+    <h2>Borrowed Books</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Barcode</th>
+                <th>Book Title</th>
+                <th>Student</th>
+                <th>Admin Approved</th>
+                <th>Borrowed At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in borrowedExemplaires %}
+            <tr data-exemplaire-id="{{ item.exemplaire.id }}" data-barcode="{{ item.exemplaire.barcode }}" data-title="{{ item.exemplaire.book.title }}">
+                <td>{{ item.exemplaire.barcode }}</td>
+                <td>{{ item.exemplaire.book.title }}</td>
+                <td>
+                    {% if item.student %}
+                        {{ item.student.email }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.admin %}
+                        {{ item.admin.email }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.borrowed_at %}
+                        {{ item.borrowed_at|date('Y-m-d H:i') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('admin_exemplaire_return_details', {id: item.exemplaire.id}) }}" class="btn btn-success btn-sm">Mark as Returned</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6">No borrowed books found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Return Details Modal -->
+    <div id="returnModal" class="modal" tabindex="-1" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3);">
+        <div class="modal-dialog" style="background:#fff; border-radius:8px; max-width:500px; margin:60px auto; padding:30px; position:relative;">
+            <button type="button" id="closeReturnModal" style="position:absolute; top:10px; right:15px; background:none; border:none; font-size:1.5em;">&times;</button>
+            <h4>Return Book</h4>
+            <form id="returnDetailsForm" enctype="multipart/form-data">
+                <input type="hidden" name="exemplaire_id" id="modalExemplaireId">
+                <div class="mb-2"><b>Barcode:</b> <span id="modalBarcode"></span></div>
+                <div class="mb-2"><b>Book Title:</b> <span id="modalBookTitle"></span></div>
+                <div class="mb-3">
+                    <label for="condition">Condition of Book</label>
+                    <select name="condition" id="condition" class="form-control" required>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Damaged">Damaged</option>
+                        <option value="Lost">Lost</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="photo">Upload Photo (optional)</label>
+                    <input type="file" name="photo" id="photo" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="date_returned">Date Returned</label>
+                    <input type="date" name="date_returned" id="date_returned" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>Flags</label><br>
+                    <input type="checkbox" name="flag_late" id="flag_late"> <label for="flag_late">Late Return</label>
+                    <input type="checkbox" name="flag_damaged" id="flag_damaged" style="margin-left:15px;"> <label for="flag_damaged">Damaged</label>
+                </div>
+                <div class="mb-3">
+                    <label for="fine">Suggest Fine (optional)</label>
+                    <input type="number" name="fine" id="fine" class="form-control" min="0" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <input type="checkbox" name="print_receipt" id="print_receipt"> <label for="print_receipt">Print Return Receipt</label><br>
+                    <input type="checkbox" name="email_receipt" id="email_receipt"> <label for="email_receipt">Email Return Receipt</label>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success">Submit Return</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal logic
+            const modal = document.getElementById('returnModal');
+            const closeModalBtn = document.getElementById('closeReturnModal');
+            const modalDialog = document.querySelector('.modal-dialog');
+            let currentRow = null;
+
+            // Open modal
+            document.querySelectorAll('.open-return-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentRow = btn.closest('tr');
+                    const id = currentRow.getAttribute('data-exemplaire-id');
+                    const barcode = currentRow.getAttribute('data-barcode');
+                    const title = currentRow.getAttribute('data-title');
+                    document.getElementById('modalExemplaireId').value = id;
+                    document.getElementById('modalBarcode').textContent = barcode;
+                    document.getElementById('modalBookTitle').textContent = title;
+                    document.getElementById('date_returned').valueAsDate = new Date();
+                    modal.style.display = 'block';
+                });
+            });
+
+            // Close modal on close button
+            closeModalBtn.onclick = function() { modal.style.display = 'none'; };
+
+            // Prevent modal from closing when clicking inside the dialog
+            modalDialog.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+
+            // Only close modal when clicking the background
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // AJAX form submit
+            document.getElementById('returnDetailsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
+                const id = formData.get('exemplaire_id');
+                fetch(`/admin/exemplaires/${id}/mark-returned`, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (currentRow) currentRow.remove();
+                        modal.style.display = 'none';
+                    } else {
+                        alert('Error: ' + (data.error || 'Could not mark as returned.'));
+                    }
+                })
+                .catch(() => alert('An error occurred.'));
+            });
+        });
+    </script>
+{% endblock %} 
