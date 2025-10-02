@@ -6,7 +6,7 @@ use App\Entity\Book;
 use App\Entity\Author;
 use App\Repository\BookRepository;
 use App\Repository\AuthorRepository;
-use App\Repository\SectionRepository;
+use App\Repository\DisciplineRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +23,7 @@ class BookController extends AbstractController
     public function __construct(
         private BookRepository $bookRepository,
         private AuthorRepository $authorRepository,
-        private SectionRepository $sectionRepository,
+        private DisciplineRepository $disciplineRepository,
         private EntityManagerInterface $entityManager
     ) {}
 
@@ -50,15 +50,14 @@ class BookController extends AbstractController
     #[Route('/new', name: 'admin_book_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
-        $authors = $this->authorRepository->findAll();
-        $sections = $this->sectionRepository->findAll();
+        $disciplines = $this->disciplineRepository->findAll();
         
         if ($request->isMethod('POST')) {
             $title = $request->request->get('title');
             $description = $request->request->get('description');
             $publicationYear = $request->request->get('publicationYear');
             $isbn = $request->request->get('isbn');
-            $sectionId = $request->request->get('section');
+            $disciplineId = $request->request->get('discipline');
             $authorIds = $request->request->all('authors');
             
             // File upload
@@ -70,8 +69,8 @@ class BookController extends AbstractController
                 return $this->redirectToRoute('admin_book_new');
             }
             
-            if (empty($sectionId)) {
-                $this->addFlash('error', 'Please select a section for the book.');
+            if (empty($disciplineId)) {
+                $this->addFlash('error', 'Please select a discipline for the book.');
                 return $this->redirectToRoute('admin_book_new');
             }
             
@@ -80,9 +79,9 @@ class BookController extends AbstractController
                 return $this->redirectToRoute('admin_book_new');
             }
             
-            $section = $this->sectionRepository->find($sectionId);
-            if (!$section) {
-                $this->addFlash('error', 'Selected section does not exist.');
+            $discipline = $this->disciplineRepository->find($disciplineId);
+            if (!$discipline) {
+                $this->addFlash('error', 'Selected discipline does not exist.');
                 return $this->redirectToRoute('admin_book_new');
             }
             
@@ -91,7 +90,7 @@ class BookController extends AbstractController
             $book->setTitle($title);
             $book->setDescription($description);
             $book->setIsbn($isbn);
-            $book->setSection($section);
+            $book->setDiscipline($discipline);
             
             if (!empty($publicationYear)) {
                 $book->setPublicationYear((int) $publicationYear);
@@ -117,9 +116,10 @@ class BookController extends AbstractController
             return $this->redirectToRoute('admin_books_index');
         }
         
+        $authors = $this->authorRepository->findAll();
         return $this->render('admin/book/new.html.twig', [
             'authors' => $authors,
-            'sections' => $sections,
+            'disciplines' => $disciplines,
         ]);
     }
     
@@ -200,8 +200,8 @@ class BookController extends AbstractController
                 }
                 
                 // Set default section if not provided
-                if (!$exemplaire->getSectionId()) {
-                    $exemplaire->setSectionId($book->getSection()->getId());
+                if (!$exemplaire->getDisciplineId()) {
+                    $exemplaire->setDisciplineId($book->getDiscipline()->getId());
                 }
                 
                 $this->entityManager->persist($exemplaire);

@@ -1,15 +1,10 @@
 controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
-
-section_books:
-    path: /section/{id}/books
-    controller: App\Controller\SectionController::showBooks
-    methods: [GET]
+  resource:
+    path: ../src/Controller/
+    namespace: App\Controller
+  type: attribute
 
 add_to_cart:
-    path: /add-to-cart/{id}
-    controller: App\Controller\CartController::addToCart
-    methods: [POST]
+  path: /add-to-cart/{id}
+  controller: App\Controller\CartController::addToCart
+  methods: [POST]

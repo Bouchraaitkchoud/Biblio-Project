@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Book;
-use App\Entity\Section;
+use App\Entity\Discipline;
 use App\Entity\Author;
 use App\Entity\Publisher;
 use Symfony\Component\Form\AbstractType;
@@ -23,10 +23,10 @@ class BookType extends AbstractType
                 'label' => 'Title',
                 'required' => true
             ])
-            ->add('section', EntityType::class, [
-                'class' => Section::class,
+            ->add('discipline', EntityType::class, [
+                'class' => Discipline::class,
                 'choice_label' => 'name',
-                'label' => 'Section',
+                'label' => 'Discipline',
                 'required' => true
             ])
             ->add('publicationYear', IntegerType::class, [

@@ -22,9 +22,9 @@ class Book
     #[ORM\JoinTable(name: 'book_author')]
     private Collection $authors;
 
-    #[ORM\ManyToOne(targetEntity: Section::class, inversedBy: 'books')]
+    #[ORM\ManyToOne(targetEntity: Discipline::class, inversedBy: 'books')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Section $section = null;
+    private ?Discipline $discipline = null;
 
     #[ORM\Column(type: "blob", nullable: true)]
     private $coverImage = null;
@@ -110,14 +110,14 @@ class Book
         return implode(', ', $authorNames);
     }
 
-    public function getSection(): ?Section
+    public function getDiscipline(): ?Discipline
     {
-        return $this->section;
+        return $this->discipline;
     }
 
-    public function setSection(?Section $section): self
+    public function setDiscipline(?Discipline $discipline): self
     {
-        $this->section = $section;
+        $this->discipline = $discipline;
         return $this;
     }
 

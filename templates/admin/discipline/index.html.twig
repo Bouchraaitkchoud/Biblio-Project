@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Disciplines{% endblock %}
+
+{% block body %}
+    <h1>Disciplines</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for discipline in disciplines %}
+            <tr>
+                <td>{{ discipline.id }}</td>
+                <td>{{ discipline.name }}</td>
+                <td>
+                    {# Add actions here if needed #}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

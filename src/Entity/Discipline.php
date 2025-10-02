@@ -1,14 +1,14 @@
 <?php
-
-// src/Entity/Domain.php
+// src/Entity/Discipline.php
 namespace App\Entity;
-use App\Repository\DomainRepository;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\DisciplineRepository;
 
-#[ORM\Entity(repositoryClass: DomainRepository::class)]
-class Domain
+#[ORM\Entity(repositoryClass: DisciplineRepository::class)]
+class Discipline
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,12 +18,12 @@ class Domain
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'domain', targetEntity: Section::class)]
-    private Collection $sections;
+    #[ORM\OneToMany(mappedBy: 'discipline', targetEntity: Book::class)]
+    private Collection $books;
 
     public function __construct()
     {
-        $this->sections = new ArrayCollection();
+        $this->books = new ArrayCollection();
     }
 
     // Getters and setters
@@ -43,25 +43,25 @@ class Domain
         return $this;
     }
 
-    public function getSections(): Collection
+    public function getBooks(): Collection
     {
-        return $this->sections;
+        return $this->books;
     }
 
-    public function addSection(Section $section): self
+    public function addBook(Book $book): self
     {
-        if (!$this->sections->contains($section)) {
-            $this->sections[] = $section;
-            $section->setDomain($this);
+        if (!$this->books->contains($book)) {
+            $this->books[] = $book;
+            $book->setDiscipline($this);
         }
         return $this;
     }
 
-    public function removeSection(Section $section): self
+    public function removeBook(Book $book): self
     {
-        if ($this->sections->removeElement($section)) {
-            if ($section->getDomain() === $this) {
-                $section->setDomain(null);
+        if ($this->books->removeElement($book)) {
+            if ($book->getDiscipline() === $this) {
+                $book->setDiscipline(null);
             }
         }
         return $this;

@@ -75,7 +75,7 @@ class ReceiptController extends AbstractController
             if (in_array('ROLE_ADMIN', $user->getRoles())) {
                 return $this->redirectToRoute('admin_orders_index');
             } else {
-                return $this->redirectToRoute('app_domains');
+                return $this->redirectToRoute('home');
             }
         }
     }

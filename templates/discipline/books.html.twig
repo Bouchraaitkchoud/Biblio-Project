@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Books in {{ section.name }}{% endblock %}
+{% block title %}Books in {{ discipline.name }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -154,7 +154,7 @@
 {% block body %}
     <div class="books-container">
         <div class="header-container">
-            <h1 class="books-title">Books in {{ section.name }}</h1>
+            <h1 class="books-title">Books in {{ discipline.name }}</h1>
             <a href="{{ path('view_cart') }}" class="btn btn-primary cart-btn">
                 <i class="fas fa-shopping-cart"></i>
                 {% if cart_count() > 0 %}
@@ -194,7 +194,7 @@
                     </div>
                 </div>
             {% else %}
-                <p class="no-books">No books found in this section.</p>
+                <p class="no-books">No books found in this discipline.</p>
             {% endfor %}
         </div>
     </div>

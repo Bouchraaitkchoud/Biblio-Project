@@ -291,24 +291,13 @@
         <div class="admin-management">
             <div class="management-card">
                 <div class="management-icon">
-                    <i class="fas fa-book-open"></i>
+                    <i class="fas fa-sitemap"></i>
                 </div>
-                <div class="management-title">Manage Domains</div>
+                <div class="management-title">Manage Disciplines</div>
                 <div class="management-description">
-                    Create, edit, and delete library domains
+                    Create, edit, and delete library disciplines
                 </div>
-                <a href="{{ path('admin_domains_index') }}" class="btn-manage">Manage Domains</a>
-            </div>
-            
-            <div class="management-card">
-                <div class="management-icon">
-                    <i class="fas fa-folder"></i>
-                </div>
-                <div class="management-title">Manage Sections</div>
-                <div class="management-description">
-                    Organize books into sections
-                </div>
-                <a href="{{ path('admin_sections_index') }}" class="btn-manage">Manage Sections</a>
+                <a href="{{ path('admin_disciplines_index') }}" class="btn-manage">Manage Disciplines</a>
             </div>
             
             <div class="management-card">
@@ -421,9 +410,9 @@
                 <div class="label">Total Users</div>
             </div>
             <div class="stat-card">
-                <div class="value">{{ total_domains }}</div>
-                <div class="label">Total Domains</div>
+                <div class="value">{{ total_disciplines }}</div>
+                <div class="label">Total Disciplines</div>
             </div>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

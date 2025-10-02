@@ -101,8 +101,32 @@ class AuthorController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-    
-    #[Route('/{id}/delete', name: 'admin_author_delete', methods: ['POST'])]
+
+    #[Route('/quick-create', name: 'admin_author_quick_create', methods: ['POST'])]
+    public function quickCreate(Request $request): JsonResponse
+    {
+        $name = $request->request->get('name');
+        $bio = $request->request->get('bio');
+
+        if (empty($name)) {
+            return new JsonResponse(['success' => false, 'error' => 'Author name cannot be empty.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $author = new Author();
+        $author->setName($name);
+        $author->setBio($bio);
+
+        $this->entityManager->persist($author);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'id' => $author->getId(),
+            'name' => $author->getName()
+        ]);
+    }
+
+    #[Route('/{id}', name: 'admin_author_delete', methods: ['POST'])]
     public function delete(Request $request, Author $author): Response
     {
         if ($this->isCsrfTokenValid('delete'.$author->getId(), $request->request->get('_token'))) {
@@ -121,31 +145,4 @@ class AuthorController extends AbstractController
         
         return $this->redirectToRoute('admin_authors_index');
     }
-    
-    #[Route('/quick-create', name: 'admin_author_quick_create', methods: ['POST'])]
-    public function quickCreate(Request $request): JsonResponse
-    {
-        $name = $request->request->get('name');
-        $bio = $request->request->get('bio', '');
-        
-        if (empty($name)) {
-            return new JsonResponse([
-                'success' => false,
-                'error' => 'Author name is required.'
-            ], 400);
-        }
-        
-        $author = new Author();
-        $author->setName($name);
-        $author->setBio($bio);
-        
-        $this->entityManager->persist($author);
-        $this->entityManager->flush();
-        
-        return new JsonResponse([
-            'success' => true,
-            'id' => $author->getId(),
-            'name' => $author->getName()
-        ]);
-    }
-} 
+}

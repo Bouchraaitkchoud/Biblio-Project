@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Repository\BookRepository;
 use App\Repository\CartRepository;
 use App\Repository\ExemplaireRepository;
-use App\Repository\DomainRepository;
+use App\Repository\DisciplineRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,7 +21,7 @@ class DashboardController extends AbstractController
         private BookRepository $bookRepository,
         private CartRepository $cartRepository,
         private ExemplaireRepository $exemplaireRepository,
-        private DomainRepository $domainRepository,
+        private DisciplineRepository $disciplineRepository,
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager
     ) {}
@@ -33,7 +33,7 @@ class DashboardController extends AbstractController
         $total_books = $this->bookRepository->count([]);
         $total_orders = $this->cartRepository->count([]);
         $total_users = $this->userRepository->count([]);
-        $total_domains = $this->domainRepository->count([]);
+        $total_disciplines = $this->disciplineRepository->count([]);
 
         // Get recent orders
         $recent_orders = $this->cartRepository->findBy(
@@ -46,7 +46,7 @@ class DashboardController extends AbstractController
             'total_books' => $total_books,
             'total_orders' => $total_orders,
             'total_users' => $total_users,
-            'total_domains' => $total_domains,
+            'total_disciplines' => $total_disciplines,
             'recent_orders' => $recent_orders
         ]);
     }

@@ -42,6 +42,6 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
         } 
         
         // Default redirect for regular users
-        return new RedirectResponse($this->urlGenerator->generate('app_domains'));
+        return new RedirectResponse($this->urlGenerator->generate('home'));
     }
 } 

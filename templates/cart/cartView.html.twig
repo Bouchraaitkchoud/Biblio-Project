@@ -151,7 +151,7 @@
                 <div class="empty-cart">
                     <div class="empty-cart-icon"><i class="fas fa-shopping-cart"></i></div>
                     <div class="empty-cart-text">Your cart is empty</div>
-                    <a href="{{ path('app_domains') }}" class="browse-btn">
+                    <a href="{{ path('home') }}" class="browse-btn">
                         <i class="fas fa-book"></i> Browse Books
                     </a>
                 </div>
@@ -194,7 +194,7 @@
                             a.remove();
                             
                             // Redirect to home page after download
-                            window.location.href = '{{ path('app_domains') }}';
+                            window.location.href = '{{ path('home') }}';
                         });
                     } else {
                         // Handle JSON response (error case)

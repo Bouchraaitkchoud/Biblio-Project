@@ -1,14 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBIB</title>
-</head>
-<body>
-    <h1>Welcome to UBIB app</h1>
-    <p>This is the homepage!</p>
-</body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}Welcome to UBIB{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Disciplines</h1>
+        <div class="row">
+            {% for discipline in disciplines %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ discipline.name }}</h5>
+                            <a href="{{ path('discipline_books', {'id': discipline.id}) }}" class="btn btn-primary">View Books</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>No disciplines found.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
 
 

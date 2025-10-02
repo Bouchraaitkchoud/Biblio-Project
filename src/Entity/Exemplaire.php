@@ -21,7 +21,7 @@ class Exemplaire
     private ?string $barcode = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $section_id = null;
+    private ?int $discipline_id = null;
 
     #[ORM\Column(type: 'string', length: 20, nullable: false)]
     private string $status = 'available';
@@ -71,14 +71,14 @@ class Exemplaire
         return $this;
     }
 
-    public function getSectionId(): ?int
+    public function getDisciplineId(): ?int
     {
-        return $this->section_id;
+        return $this->discipline_id;
     }
 
-    public function setSectionId(?int $section_id): self
+    public function setDisciplineId(?int $discipline_id): self
     {
-        $this->section_id = $section_id;
+        $this->discipline_id = $discipline_id;
         return $this;
     }
 

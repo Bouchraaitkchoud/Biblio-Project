@@ -72,7 +72,7 @@
         // Add cache-busting parameter to certain links
         document.addEventListener('DOMContentLoaded', function() {
             // For special navigation that requires full page reload (like admin to main site)
-            document.querySelectorAll('a[href*="app_domains"]').forEach(function(link) {
+            document.querySelectorAll('a[href*="home"]').forEach(function(link) {
                 if (!link.getAttribute('onclick')) {
                     link.addEventListener('click', function(e) {
                         e.preventDefault();

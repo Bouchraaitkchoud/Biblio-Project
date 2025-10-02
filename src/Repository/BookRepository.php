@@ -38,13 +38,14 @@ class BookRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('b')
             ->leftJoin('b.authors', 'a')
-            ->leftJoin('b.section', 's')
+            ->leftJoin('b.discipline', 'd')
             ->orderBy('b.title', 'ASC');
             
         if ($searchTerm) {
             $qb->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
                ->orWhere('LOWER(a.name) LIKE LOWER(:searchTerm)')
                ->orWhere('LOWER(b.isbn) LIKE LOWER(:searchTerm)')
+               ->orWhere('LOWER(d.name) LIKE LOWER(:searchTerm)')
                ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
         
