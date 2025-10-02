@@ -1,258 +1,33 @@
-{% extends 'base.html.twig' %}
+﻿{% extends "base.html.twig" %}
 
 {% block title %}Books in {{ discipline.name }}{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .books-container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-        }
-
-        .books-title {
-            text-align: center;
-            color: #117986;
-            margin-bottom: 30px;
-        }
-
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .book-card {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .book-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .book-cover {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .book-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-            color: #117986;
-            cursor: pointer;
-        }
-
-        .book-author {
-            font-size: 14px;
-            color: #555;
-        }
-
-        .book-availability {
-            margin-top: 5px;
-            margin-bottom: 10px;
-        }
-
-        .availability-label {
-            font-weight: bold;
-        }
-
-        .availability-count {
-            margin-left: 10px;
-        }
-
-        .book-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-        }
-
-        .view-details {
-            padding: 8px 12px;
-            background: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.3s ease-in-out;
-            flex: 1;
-            margin-right: 5px;
-            font-size: 14px;
-        }
-
-        .view-details:hover {
-            background: #2980b9;
-            color: #fff;
-        }
-
-        .add-to-cart-form {
-            flex: 1;
-            margin-left: 5px;
-        }
-
-        .add-to-cart-form button {
-            width: 100%;
-            padding: 8px 12px;
-            background: #117986;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease-in-out;
-            font-size: 14px;
-        }
-
-        .add-to-cart-form button:hover {
-            background: #0e6655;
-        }
-
-        .add-to-cart-form button i {
-            margin-right: 5px;
-        }
-
-        .cart-btn {
-            position: relative;
-            padding: 8px 15px;
-        }
-
-        .cart-count-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #dc3545;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-    </style>
-{% endblock %}
-
 {% block body %}
-    <div class="books-container">
-        <div class="header-container">
-            <h1 class="books-title">Books in {{ discipline.name }}</h1>
-            <a href="{{ path('view_cart') }}" class="btn btn-primary cart-btn">
-                <i class="fas fa-shopping-cart"></i>
-                {% if cart_count() > 0 %}
-                    <span class="cart-count-badge">
-                        {{ cart_count() }}
-                    </span>
-                {% endif %}
-            </a>
-        </div>
-
-        <div class="books-grid">
+<div class="container mt-4">
+    <h1>{{ discipline.name }}</h1>
+    <p>Browse all books in this discipline</p>
+    
+    {% if books|length > 0 %}
+        <div class="row">
             {% for book in books %}
-                <div class="book-card">
-                    <a href="{{ path('book_show', {'id': book.id}) }}">
-                        <img class="book-cover"
-                             src="{{ book.coverImage }}"
-                             alt="{{ book.title }}">
-                        <div class="book-title">{{ book.title }}</div>
-                    </a>
-                    <div class="book-author">by {{ book.authorName }}</div>
-                    <div class="book-availability">
-                        <span class="availability-label">Available Copies:</span>
-                        <span class="availability-count {% if book.availableCopies == 0 %}text-danger{% else %}text-success{% endif %}">
-                            {{ book.availableCopies }}
-                        </span>
-                    </div>
-                    <div class="book-actions">
-                        <a href="{{ path('book_show', {'id': book.id}) }}" class="view-details">
-                            <i class="fas fa-eye"></i> Details
-                        </a>
-                        <form action="{{ path('add_to_cart', {'id': book.id}) }}" method="POST" class="add-to-cart-form">
-                            <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart') }}">
-                            <button type="submit">
-                                <i class="fas fa-cart-plus"></i> Add
-                            </button>
-                        </form>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <p class="card-text">by {{ book.authorName }}</p>
+                            {% if book.publicationYear %}
+                                <small class="text-muted">Published: {{ book.publicationYear }}</small>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            {% else %}
-                <p class="no-books">No books found in this discipline.</p>
             {% endfor %}
         </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.add-to-cart-form').forEach(form => {
-                form.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-                    const button = this.querySelector('button');
-                    const originalHtml = button.innerHTML;
-
-                    try {
-                        button.disabled = true;
-                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-
-                        const response = await fetch(this.action, {
-                            method: 'POST',
-                            credentials: 'include',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            button.innerHTML = '<i class="fas fa-check"></i> Added!';
-                            updateCartCounter();
-                            setTimeout(() => {
-                                button.innerHTML = originalHtml;
-                                button.disabled = false;
-                            }, 2000);
-                        } else {
-                            button.innerHTML = originalHtml;
-                            button.disabled = false;
-                            alert('Error: ' + (result.message || 'Failed to add to cart'));
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        button.innerHTML = originalHtml;
-                        button.disabled = false;
-                        alert('Network error - please try again');
-                    }
-                });
-            });
-            
-            function updateCartCounter() {
-                const cartCountBadge = document.querySelector('.cart-count-badge');
-                if (cartCountBadge) {
-                    cartCountBadge.textContent = parseInt(cartCountBadge.textContent) + 1;
-                } else {
-                    const cartBtn = document.querySelector('.cart-btn');
-                    if (cartBtn) {
-                        cartBtn.innerHTML += '<span class="cart-count-badge">1</span>';
-                    }
-                }
-            }
-        });
-    </script>
-{% endblock %} 
+    {% else %}
+        <div class="alert alert-info">
+            <h4>No Books Found</h4>
+            <p>There are no books available in this discipline yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
