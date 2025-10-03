@@ -122,7 +122,7 @@
         <div class="book-detail-card">
             <div>
                 {% if book.coverImage %}
-                    <img src="{{ book.coverImage }}" alt="{{ book.title }}" class="book-cover mb-3">
+                    <img src="{{ book.coverImageUrl }}" alt="{{ book.title }}" class="book-cover mb-3">
                 {% else %}
                     <div class="book-cover d-flex align-items-center justify-content-center bg-light">
                         <i class="fas fa-image text-muted"></i>

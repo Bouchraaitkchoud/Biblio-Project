@@ -1,366 +1,1157 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}{% extends 'admin/layout.html.twig' %}{% extends 'base.html.twig' %}
 
-{% block title %}Admin - New Book{% endblock %}
 
-{% block stylesheets %}
+
+{% block title %}New Book{% endblock %}
+
+
+
+{% block stylesheets %}{% block title %}New Book{% endblock %}{% block title %}Admin - New Book{% endblock %}
+
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
-        .author-create-form, .discipline-create-form {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            margin-bottom: 15px;
+
+        .form-container {{% block stylesheets %}{% block stylesheets %}
+
+            background: #fff;
+
+            border-radius: 12px;    {{ parent() }}    {{ parent() }}
+
+            padding: 2.5rem;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);    <style>    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+
+            border-left: 5px solid #b2903e;
+
+        }        .form-container {    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
+        
+
+        .page-header {            background: #fff;    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+
+            font-size: 2.2rem;
+
+            font-weight: bold;            border-radius: 12px;    <style>
+
+            color: #1a2e4f;
+
+            margin-bottom: 2rem;            padding: 2.5rem;        .author-create-form, .discipline-create-form {
+
+            display: flex;
+
+            align-items: center;            box-shadow: 0 4px 12px rgba(0,0,0,0.1);            display: none;
+
+            gap: 1rem;
+
+        }            border-left: 5px solid #b2903e;            margin-top: 20px;
+
+        
+
+        .form-section {        }            padding: 15px;
+
+            background: #f8f9fa;
+
+            border-radius: 8px;                    background-color: #f8f9fa;
+
+            padding: 1.5rem;
+
+            margin-bottom: 1.5rem;        .page-header {            border-radius: 8px;
+
+            border-left: 3px solid #b2903e;
+
+        }            font-size: 2.2rem;            border: 1px solid #e9ecef;
+
+        
+
+        .section-title {            font-weight: bold;            margin-bottom: 15px;
+
+            font-size: 1.1rem;
+
+            font-weight: bold;            color: #1a2e4f;        }
+
+            color: #1a2e4f;
+
+            margin-bottom: 1rem;            margin-bottom: 2rem;        .btn-link {
+
+            display: flex;
+
+            align-items: center;            display: flex;            cursor: pointer;
+
+            gap: 0.5rem;
+
+        }            align-items: center;            color: #117986;
+
+        
+
+        .form-label {            gap: 1rem;            font-size: 0.9rem;
+
+            font-weight: 600;
+
+            color: #495057;        }            text-decoration: underline;
+
+            margin-bottom: 0.5rem;
+
+            font-size: 0.9rem;                }
+
         }
-        .btn-link {
-            cursor: pointer;
-            color: #117986;
-            font-size: 0.9rem;
-            text-decoration: underline;
+
+                .form-section {        .btn-link:hover {
+
+        .form-control, .form-select {
+
+            border: 1px solid #dee2e6;            background: #f8f9fa;            color: #0e6655;
+
+            border-radius: 6px;
+
+            padding: 0.75rem 1rem;            border-radius: 8px;        }
+
+            font-size: 0.95rem;
+
+            transition: all 0.3s ease;            padding: 1.5rem;        .select2-container--default .select2-selection--multiple {
+
         }
-        .btn-link:hover {
-            color: #0e6655;
-        }
-        .select2-container--default .select2-selection--multiple {
-            border-color: #ced4da;
-        }
-        .select2-container--default.select2-container--focus .select2-selection--multiple {
-            border-color: #117986;
-            box-shadow: 0 0 0 0.25rem rgba(17, 121, 134, 0.25);
-        }
+
+                    margin-bottom: 1.5rem;            border-color: #ced4da;
+
+        .form-control:focus, .form-select:focus {
+
+            border-color: #b2903e;            border-left: 3px solid #b2903e;        }
+
+            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
+
+        }        }        .select2-container--default.select2-container--focus .select2-selection--multiple {
+
+        
+
+        /* Select2 Styling */                    border-color: #117986;
+
         .select2-container {
-            width: 100% !important;
+
+            width: 100% !important;        .section-title {            box-shadow: 0 0 0 0.25rem rgba(17, 121, 134, 0.25);
+
         }
-        .form-label {
-            font-weight: 500;
+
+                    font-size: 1.1rem;        }
+
+        .select2-container--default .select2-selection--multiple {
+
+            border: 1px solid #dee2e6;            font-weight: bold;        .select2-container {
+
+            border-radius: 6px;
+
+            min-height: 45px;            color: #1a2e4f;            width: 100% !important;
+
+            padding: 5px;
+
+        }            margin-bottom: 1rem;        }
+
+        
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {            display: flex;        .form-label {
+
+            border-color: #b2903e;
+
+            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);            align-items: center;            font-weight: 500;
+
         }
+
+                    gap: 0.5rem;        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+
+            background-color: #b2903e;        }    </style>
+
+            border: 1px solid #a08232;
+
+            color: white;        {% endblock %}
+
+            padding: 2px 8px;
+
+            border-radius: 4px;        .form-label {
+
+        }
+
+                    font-weight: 600;{% block body %}
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+
+            color: white;            color: #495057;    <div class="container mt-4">
+
+            border-right: 1px solid #a08232;
+
+            margin-right: 5px;            margin-bottom: 0.5rem;        <div class="admin-nav">
+
+            padding-right: 5px;
+
+        }            font-size: 0.9rem;            <div class="admin-nav-links">
+
+        
+
+        .select2-dropdown {        }                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+
+            border: 1px solid #dee2e6;
+
+            border-radius: 6px;                        <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
+
+        }
+
+                .form-control, .form-select {                <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link">Disciplines</a>
+
+        .select2-results__option--highlighted {
+
+            background-color: #b2903e;            border: 1px solid #dee2e6;                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
+
+        }
+
+                    border-radius: 6px;                <a href="{{ path('admin_books_index') }}" class="admin-nav-link active">Books</a>
+
+        .btn-primary {
+
+            background: linear-gradient(135deg, #1a2e4f, #2a3e5f);            padding: 0.75rem 1rem;                <a href="{{ path('home') }}" class="admin-nav-link">Main Site</a>
+
+            border: none;
+
+            border-radius: 8px;            font-size: 0.95rem;            </div>
+
+            padding: 0.75rem 1.5rem;
+
+            font-weight: 600;            transition: all 0.3s ease;            <div class="admin-user-info">
+
+            transition: all 0.3s ease;
+
+        }        }                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+
+        
+
+        .btn-primary:hover {                    </div>
+
+            background: linear-gradient(135deg, #2a3e5f, #1a2e4f);
+
+            transform: translateY(-2px);        .form-control:focus, .form-select:focus {        </div>
+
+            box-shadow: 0 4px 12px rgba(26, 46, 79, 0.3);
+
+        }            border-color: #b2903e;        
+
+        
+
+        .btn-secondary {            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);        {% for label, messages in app.flashes %}
+
+            background: #f7e7c1;
+
+            color: #b2903e;        }            {% for message in messages %}
+
+            border: 1px solid #b2903e;
+
+            border-radius: 8px;                        <div class="alert alert-{{ label }} alert-dismissible fade show">
+
+            padding: 0.75rem 1.5rem;
+
+            font-weight: 600;        /* Styles pour les checkboxes d'auteurs et éditeurs */                    {{ message }}
+
+            transition: all 0.3s ease;
+
+        }        .checkbox-container {                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+        
+
+        .btn-secondary:hover {            border: 1px solid #dee2e6;                </div>
+
+            background: #b2903e;
+
+            color: #fff;            border-radius: 8px;            {% endfor %}
+
+            transform: translateY(-2px);
+
+        }            background: #fff;        {% endfor %}
+
+        
+
+        .form-actions {            overflow: hidden;        
+
+            display: flex;
+
+            gap: 1rem;        }        <div class="page-header">
+
+            margin-top: 2rem;
+
+            padding-top: 1.5rem;                    <h1>Create New Book</h1>
+
+            border-top: 1px solid #dee2e6;
+
+        }        .search-input {        </div>
+
+        
+
+        .file-upload-area {            width: 100%;        
+
+            border: 2px dashed #dee2e6;
+
+            border-radius: 8px;            border: none;        <div class="form-container">
+
+            padding: 1rem;
+
+            text-align: center;            border-bottom: 1px solid #dee2e6;            <form method="post" enctype="multipart/form-data" id="bookForm">
+
+            background: #f8f9fa;
+
+            transition: all 0.3s ease;            padding: 0.75rem;                <div class="row">
+
+        }
+
+                    font-size: 0.9rem;                    <div class="col-md-6">
+
+        .file-upload-area:hover {
+
+            border-color: #b2903e;            background: #f8f9fa;                        <div class="mb-3">
+
+            background: #fdf8f0;
+
+        }        }                            <label for="title" class="form-label">Book Title</label>
+
+        
+
+        .required-field::after {                                    <input type="text" class="form-control" id="title" name="title" required>
+
+            content: " *";
+
+            color: #dc3545;        .search-input:focus {                        </div>
+
+            font-weight: bold;
+
+        }            outline: none;                        
+
     </style>
-{% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
-                <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link">Disciplines</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link active">Books</a>
-                <a href="{{ path('home') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
-            </div>
-        </div>
-        
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endfor %}
-        
-        <div class="page-header">
-            <h1>Create New Book</h1>
-        </div>
-        
-        <div class="form-container">
-            <form method="post" enctype="multipart/form-data" id="bookForm">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Book Title</label>
-                            <input type="text" class="form-control" id="title" name="title" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="5"></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="publicationYear" class="form-label">Publication Year</label>
-                            <input type="number" class="form-control" id="publicationYear" name="publicationYear" min="1000" max="{{ "now"|date("Y") }}">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="isbn" class="form-label">ISBN</label>
-                            <input type="text" class="form-control" id="isbn" name="isbn">
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="coverImage" class="form-label">Cover Image</label>
-                            <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label d-block">Discipline</label>
-                            
-                            <div class="mb-2">
-                                <label for="discipline" class="form-label">Discipline</label>
-                                <div class="d-flex align-items-center gap-2">
-                                    <select class="form-select" id="discipline" name="discipline" required>
-                                        <option value="">Select a discipline</option>
-                                        {% for discipline in disciplines %}
-                                            <option value="{{ discipline.id }}">{{ discipline.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <span class="btn-link" id="showDisciplineForm">+ New Discipline</span>
-                                </div>
-                            </div>
-                            
-                            <div class="discipline-create-form" id="disciplineForm">
-                                <h5>Create New Discipline</h5>
-                                <div class="mb-3">
-                                    <label for="disciplineName" class="form-label">Discipline Name</label>
-                                    <input type="text" class="form-control" id="disciplineName">
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-primary" id="createDiscipline">
-                                        <i class="fas fa-plus"></i> Create Discipline
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" id="cancelDiscipline">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="authors" class="form-label">Authors</label>
-                            <div class="d-flex flex-column">
-                                <select class="form-select" id="authors" name="authors[]" multiple required>
-                                    {% for author in authors %}
-                                        <option value="{{ author.id }}">{{ author.name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <small class="form-text text-muted mt-1">Select multiple authors by holding Ctrl (or Cmd on Mac) and clicking.</small>
-                                <span class="btn-link align-self-start mt-2" id="showAuthorForm">+ Add New Author</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Author form -->
-                        <div class="author-create-form" id="authorForm">
-                            <h5>Create New Author</h5>
-                            <div class="mb-3">
-                                <label for="authorName" class="form-label">Author Name</label>
-                                <input type="text" class="form-control" id="authorName">
-                            </div>
-                            <div class="mb-3">
-                                <label for="authorBio" class="form-label">Biography</label>
-                                <textarea class="form-control" id="authorBio" rows="3"></textarea>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-primary" id="createAuthor">
-                                    <i class="fas fa-plus"></i> Create Author
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="cancelAuthor">
-                                    <i class="fas fa-times"></i> Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Create Book
-                    </button>
-                    <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
+{% endblock %}            background: #fff;                        <div class="mb-3">
+
+
+
+{% block admin_content %}            border-bottom-color: #b2903e;                            <label for="description" class="form-label">Description</label>
+
+    <div class="page-header">
+
+        <i class="fas fa-plus text-success"></i>        }                            <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+
+        Create New Book Notice
+
+    </div>                                </div>
+
     
-    <!-- Message modal -->
-    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="messageModalTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="messageModalBody">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <div class="form-container">        .checkbox-group {                        
+
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+                    max-height: 200px;                        <div class="mb-3">
+
+        <!-- Section 1: Basic Information -->
+
+        <div class="form-section">            overflow-y: auto;                            <label for="publicationYear" class="form-label">Publication Year</label>
+
+            <div class="section-title">
+
+                <i class="fas fa-book"></i>            padding: 0;                            <input type="number" class="form-control" id="publicationYear" name="publicationYear" min="1000" max="{{ "now"|date("Y") }}">
+
+                Basic Information
+
+            </div>        }                        </div>
+
+            <div class="row">
+
+                <div class="col-md-8">                                
+
+                    {{ form_row(form.title, {
+
+                        'label_attr': {'class': 'form-label required-field'},        .checkbox-item {                        <div class="mb-3">
+
+                        'attr': {'class': 'form-control', 'placeholder': 'Enter the book title'}
+
+                    }) }}            display: block !important;                            <label for="isbn" class="form-label">ISBN</label>
+
+                </div>
+
+                <div class="col-md-4">            width: 100%;                            <input type="text" class="form-control" id="isbn" name="isbn">
+
+                    {{ form_row(form.publicationYear, {
+
+                        'label_attr': {'class': 'form-label'},            padding: 0.75rem;                        </div>
+
+                        'attr': {'class': 'form-control', 'placeholder': 'e.g., 2023'}
+
+                    }) }}            border-bottom: 1px solid #f1f3f4;                    </div>
+
+                </div>
+
+            </div>            transition: all 0.2s ease;                    
+
+            <div class="row mt-3">
+
+                <div class="col-md-6">            cursor: pointer;                    <div class="col-md-6">
+
+                    {{ form_row(form.discipline, {
+
+                        'label_attr': {'class': 'form-label required-field'},            margin: 0 !important;                        <div class="mb-3">
+
+                        'attr': {'class': 'form-select'}
+
+                    }) }}        }                            <label for="coverImage" class="form-label">Cover Image</label>
+
+                </div>
+
+                <div class="col-md-6">                                    <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*">
+
+                    {{ form_row(form.isbn, {
+
+                        'label_attr': {'class': 'form-label'},        .checkbox-item:last-child {                        </div>
+
+                        'attr': {'class': 'form-control', 'placeholder': 'e.g., 978-3-16-148410-0'}
+
+                    }) }}            border-bottom: none;                        
+
+                </div>
+
+            </div>        }                        <div class="mb-3">
+
+        </div>
+
+                                            <label class="form-label d-block">Discipline</label>
+
+        <!-- Section 2: Authors & Publishers -->
+
+        <div class="form-section">        .checkbox-item:hover {                            
+
+            <div class="section-title">
+
+                <i class="fas fa-users"></i>            background-color: #f8f9fa;                            <div class="mb-2">
+
+                Authors & Publishers
+
+            </div>        }                                <label for="discipline" class="form-label">Discipline</label>
+
+            <div class="row">
+
+                <div class="col-md-6">                                        <div class="d-flex align-items-center gap-2">
+
+                    {{ form_row(form.authors, {
+
+                        'label_attr': {'class': 'form-label required-field'},        .checkbox-item.selected {                                    <select class="form-select" id="discipline" name="discipline" required>
+
+                        'attr': {'class': 'form-select select2-multiple', 'multiple': true, 'data-placeholder': 'Search and select authors...'}
+
+                    }) }}            background-color: #e8f4f8;                                        <option value="">Select a discipline</option>
+
+                    <small class="form-text text-muted mt-2">
+
+                        <i class="fas fa-info-circle"></i> Type to search, click to select multiple authors            border-left: 3px solid #b2903e;                                        {% for discipline in disciplines %}
+
+                    </small>
+
+                </div>        }                                            <option value="{{ discipline.id }}">{{ discipline.name }}</option>
+
+                <div class="col-md-6">
+
+                    {{ form_row(form.publishers, {                                                {% endfor %}
+
+                        'label_attr': {'class': 'form-label'},
+
+                        'attr': {'class': 'form-select select2-multiple', 'multiple': true, 'data-placeholder': 'Search and select publishers...'}        .checkbox-item input[type="checkbox"] {                                    </select>
+
+                    }) }}
+
+                    <small class="form-text text-muted mt-2">            margin-right: 0.75rem;                                    <span class="btn-link" id="showDisciplineForm">+ New Discipline</span>
+
+                        <i class="fas fa-info-circle"></i> Type to search, click to select multiple publishers
+
+                    </small>            transform: scale(1.3);                                </div>
+
+                </div>
+
+            </div>            accent-color: #b2903e;                            </div>
+
+        </div>
+
+                    cursor: pointer;                            
+
+        <!-- Section 3: Description -->
+
+        <div class="form-section">            vertical-align: middle;                            <div class="discipline-create-form" id="disciplineForm">
+
+            <div class="section-title">
+
+                <i class="fas fa-align-left"></i>        }                                <h5>Create New Discipline</h5>
+
+                Description & Details
+
+            </div>                                        <div class="mb-3">
+
+            <div class="row">
+
+                <div class="col-md-12">        .checkbox-item label {                                    <label for="disciplineName" class="form-label">Discipline Name</label>
+
+                    {{ form_row(form.description, {
+
+                        'label_attr': {'class': 'form-label'},            margin: 0 !important;                                    <input type="text" class="form-control" id="disciplineName">
+
+                        'attr': {
+
+                            'class': 'form-control',             font-weight: 500 !important;                                </div>
+
+                            'rows': '4',
+
+                            'placeholder': 'Enter a detailed description of the book...'            cursor: pointer;                                <div class="d-flex gap-2">
+
+                        }
+
+                    }) }}            font-size: 0.9rem !important;                                    <button type="button" class="btn btn-primary" id="createDiscipline">
+
+                </div>
+
+            </div>            color: #495057 !important;                                        <i class="fas fa-plus"></i> Create Discipline
+
+        </div>
+
+                    background: transparent !important;                                    </button>
+
+        <!-- Section 4: Cover Image -->
+
+        <div class="form-section">            display: inline !important;                                    <button type="button" class="btn btn-secondary" id="cancelDiscipline">
+
+            <div class="section-title">
+
+                <i class="fas fa-image"></i>            vertical-align: middle;                                        <i class="fas fa-times"></i> Cancel
+
+                Cover Image
+
+            </div>        }                                    </button>
+
+            <div class="row">
+
+                <div class="col-md-12">                                        </div>
+
+                    <div class="file-upload-area">
+
+                        {{ form_row(form.coverImage, {        .checkbox-item.hidden {                            </div>
+
+                            'label_attr': {'class': 'form-label'},
+
+                            'attr': {            display: none !important;                        </div>
+
+                                'class': 'form-control',
+
+                                'accept': 'image/*'        }                        
+
+                            }
+
+                        }) }}                                <div class="mb-3">
+
+                        <small class="form-text text-muted mt-2">
+
+                            <i class="fas fa-upload"></i> Supported formats: JPG, PNG, GIF (Max: 5MB)        .no-results {                            <label for="authors" class="form-label">Authors</label>
+
+                        </small>
+
+                    </div>            padding: 1rem;                            <div class="d-flex flex-column">
+
+                </div>
+
+            </div>            text-align: center;                                <select class="form-select" id="authors" name="authors[]" multiple required>
+
+        </div>
+
+                    color: #6c757d;                                    {% for author in authors %}
+
+        <div class="form-actions">
+
+            <button type="submit" class="btn btn-primary">            font-style: italic;                                        <option value="{{ author.id }}">{{ author.name }}</option>
+
+                <i class="fas fa-save"></i> Create Book
+
+            </button>            display: none;                                    {% endfor %}
+
+            <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
+
+                <i class="fas fa-arrow-left"></i> Back to Books        }                                </select>
+
+            </a>
+
+        </div>                                        <small class="form-text text-muted mt-1">Select multiple authors by holding Ctrl (or Cmd on Mac) and clicking.</small>
+
+        
+
+        {{ form_end(form) }}        .btn-primary {                                <span class="btn-link align-self-start mt-2" id="showAuthorForm">+ Add New Author</span>
+
+    </div>
+
+            background: linear-gradient(135deg, #1a2e4f, #2a3e5f);                            </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>            border: none;                        </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Select2 for authors
-            $('#authors').select2({
-                placeholder: 'Select authors',
-                width: '100%'
-            });
+
+        $(document).ready(function() {            border-radius: 8px;                        
+
+            // Initialize Select2 for authors and publishers
+
+            $('.select2-multiple').select2({            padding: 0.75rem 1.5rem;                        <!-- Author form -->
+
+                width: '100%',
+
+                closeOnSelect: false,            font-weight: 600;                        <div class="author-create-form" id="authorForm">
+
+                allowClear: true,
+
+                tags: false,            transition: all 0.3s ease;                            <h5>Create New Author</h5>
+
+                placeholder: function(){
+
+                    return $(this).data('placeholder');        }                            <div class="mb-3">
+
+                }
+
+            });                                        <label for="authorName" class="form-label">Author Name</label>
+
+        });
+
+    </script>        .btn-primary:hover {                                <input type="text" class="form-control" id="authorName">
+
+{% endblock %}
+            background: linear-gradient(135deg, #2a3e5f, #1a2e4f);                            </div>
+
+            transform: translateY(-2px);                            <div class="mb-3">
+
+            box-shadow: 0 4px 12px rgba(26, 46, 79, 0.3);                                <label for="authorBio" class="form-label">Biography</label>
+
+        }                                <textarea class="form-control" id="authorBio" rows="3"></textarea>
+
+                                    </div>
+
+        .btn-secondary {                            <div class="d-flex gap-2">
+
+            background: #f7e7c1;                                <button type="button" class="btn btn-primary" id="createAuthor">
+
+            color: #b2903e;                                    <i class="fas fa-plus"></i> Create Author
+
+            border: 1px solid #b2903e;                                </button>
+
+            border-radius: 8px;                                <button type="button" class="btn btn-secondary" id="cancelAuthor">
+
+            padding: 0.75rem 1.5rem;                                    <i class="fas fa-times"></i> Cancel
+
+            font-weight: 600;                                </button>
+
+            transition: all 0.3s ease;                            </div>
+
+        }                        </div>
+
+                            </div>
+
+        .btn-secondary:hover {                </div>
+
+            background: #b2903e;                
+
+            color: #fff;                <div class="d-flex gap-2 mt-4">
+
+            transform: translateY(-2px);                    <button type="submit" class="btn btn-primary">
+
+        }                        <i class="fas fa-save"></i> Create Book
+
+                            </button>
+
+        .form-actions {                    <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
+
+            display: flex;                        <i class="fas fa-arrow-left"></i> Back to List
+
+            gap: 1rem;                    </a>
+
+            margin-top: 2rem;                </div>
+
+            padding-top: 1.5rem;            </form>
+
+            border-top: 1px solid #dee2e6;        </div>
+
+        }    </div>
+
             
-            // Author form toggle
-            const showAuthorForm = document.getElementById('showAuthorForm');
-            const authorForm = document.getElementById('authorForm');
-            const createAuthorBtn = document.getElementById('createAuthor');
-            const cancelAuthorBtn = document.getElementById('cancelAuthor');
-            const authorsSelect = document.getElementById('authors');
-            
-            // Discipline form toggle
+
+        .file-upload-area {    <!-- Message modal -->
+
+            border: 2px dashed #dee2e6;    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+
+            border-radius: 8px;        <div class="modal-dialog">
+
+            padding: 1rem;            <div class="modal-content">
+
+            text-align: center;                <div class="modal-header">
+
+            background: #f8f9fa;                    <h5 class="modal-title" id="messageModalTitle"></h5>
+
+            transition: all 0.3s ease;                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+        }                </div>
+
+                        <div class="modal-body" id="messageModalBody">
+
+        .file-upload-area:hover {                </div>
+
+            border-color: #b2903e;                <div class="modal-footer">
+
+            background: #fdf8f0;                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+
+        }                </div>
+
+                    </div>
+
+        .required-field::after {        </div>
+
+            content: " *";    </div>
+
+            color: #dc3545;{% endblock %}
+
+            font-weight: bold;
+
+        }{% block javascripts %}
+
+            {{ parent() }}
+
+        .select-all-btn {    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+            background: #e9ecef;    <script>
+
+            border: 1px solid #ced4da;        document.addEventListener('DOMContentLoaded', function() {
+
+            border-radius: 4px;            // Initialize Select2 for authors
+
+            padding: 0.25rem 0.5rem;            $('#authors').select2({
+
+            font-size: 0.8rem;                placeholder: 'Select authors',
+
+            color: #495057;                width: '100%'
+
+            cursor: pointer;            });
+
+            margin-bottom: 0.5rem;            
+
+        }            // Author form toggle
+
+                    const showAuthorForm = document.getElementById('showAuthorForm');
+
+        .select-all-btn:hover {            const authorForm = document.getElementById('authorForm');
+
+            background: #b2903e;            const createAuthorBtn = document.getElementById('createAuthor');
+
+            color: #fff;            const cancelAuthorBtn = document.getElementById('cancelAuthor');
+
+        }            const authorsSelect = document.getElementById('authors');
+
+    </style>            
+
+{% endblock %}            // Discipline form toggle
+
             const showDisciplineForm = document.getElementById('showDisciplineForm');
-            const disciplineForm = document.getElementById('disciplineForm');
-            const createDisciplineBtn = document.getElementById('createDiscipline');
-            const cancelDisciplineBtn = document.getElementById('cancelDiscipline');
-            const disciplineSelect = document.getElementById('discipline');
-            
-            // Message modal
-            const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
-            const messageModalTitle = document.getElementById('messageModalTitle');
-            const messageModalBody = document.getElementById('messageModalBody');
-            
-            // Show/hide author form
-            showAuthorForm.addEventListener('click', function() {
-                authorForm.style.display = 'block';
-                document.getElementById('authorName').focus();
-            });
-            
-            cancelAuthorBtn.addEventListener('click', function() {
-                authorForm.style.display = 'none';
-                document.getElementById('authorName').value = '';
-                document.getElementById('authorBio').value = '';
-            });
-            
-            // Show/hide discipline form
-            showDisciplineForm.addEventListener('click', function() {
-                disciplineForm.style.display = 'block';
-                document.getElementById('disciplineName').focus();
-            });
-            
-            cancelDisciplineBtn.addEventListener('click', function() {
-                disciplineForm.style.display = 'none';
-                document.getElementById('disciplineName').value = '';
-            });
-            
-            // Create discipline via AJAX
-            createDisciplineBtn.addEventListener('click', function() {
-                const disciplineName = document.getElementById('disciplineName').value;
-                
-                if (disciplineName.trim() === '') {
-                    messageModalTitle.textContent = 'Error';
-                    messageModalBody.textContent = 'Discipline name cannot be empty.';
-                    messageModal.show();
-                    return;
-                }
-                
-                // Send AJAX request
-                                                                                                                                                                                                                                                                                            fetch('{{ path('admin_disciplines_quick_create') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        'name': disciplineName
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Add new discipline to the select
-                        const option = document.createElement('option');
-                        option.value = data.id;
-                        option.textContent = data.name;
-                        disciplineSelect.appendChild(option);
-                        
-                        // Select the new discipline
-                        disciplineSelect.value = data.id;
-                        
-                        // Hide the form
-                        disciplineForm.style.display = 'none';
-                        document.getElementById('disciplineName').value = '';
-                        
-                        // Show success message
-                        messageModalTitle.textContent = 'Success';
-                        messageModalBody.textContent = 'Discipline created successfully.';
-                        messageModal.show();
-                    } else {
-                        messageModalTitle.textContent = 'Error';
-                        messageModalBody.textContent = data.error || 'An error occurred.';
-                        messageModal.show();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    messageModalTitle.textContent = 'Error';
-                    messageModalBody.textContent = 'An error occurred while creating the discipline.';
-                    messageModal.show();
+
+{% block admin_content %}            const disciplineForm = document.getElementById('disciplineForm');
+
+    <div class="page-header">            const createDisciplineBtn = document.getElementById('createDiscipline');
+
+        <i class="fas fa-plus text-success"></i>            const cancelDisciplineBtn = document.getElementById('cancelDiscipline');
+
+        Create New Book Notice            const disciplineSelect = document.getElementById('discipline');
+
+    </div>            
+
+                // Message modal
+
+    <div class="form-container">            const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}            const messageModalTitle = document.getElementById('messageModalTitle');
+
+                    const messageModalBody = document.getElementById('messageModalBody');
+
+        <!-- Section 1: Basic Information -->            
+
+        <div class="form-section">            // Show/hide author form
+
+            <div class="section-title">            showAuthorForm.addEventListener('click', function() {
+
+                <i class="fas fa-book"></i>                authorForm.style.display = 'block';
+
+                Basic Information                document.getElementById('authorName').focus();
+
+            </div>            });
+
+            <div class="row">            
+
+                <div class="col-md-8">            cancelAuthorBtn.addEventListener('click', function() {
+
+                    {{ form_row(form.title, {                authorForm.style.display = 'none';
+
+                        'label_attr': {'class': 'form-label required-field'},                document.getElementById('authorName').value = '';
+
+                        'attr': {'class': 'form-control', 'placeholder': 'Enter the book title'}                document.getElementById('authorBio').value = '';
+
+                    }) }}            });
+
+                </div>            
+
+                <div class="col-md-4">            // Show/hide discipline form
+
+                    {{ form_row(form.publicationYear, {            showDisciplineForm.addEventListener('click', function() {
+
+                        'label_attr': {'class': 'form-label'},                disciplineForm.style.display = 'block';
+
+                        'attr': {'class': 'form-control', 'placeholder': 'e.g., 2023'}                document.getElementById('disciplineName').focus();
+
+                    }) }}            });
+
+                </div>            
+
+            </div>            cancelDisciplineBtn.addEventListener('click', function() {
+
+            <div class="row mt-3">                disciplineForm.style.display = 'none';
+
+                <div class="col-md-6">                document.getElementById('disciplineName').value = '';
+
+                    {{ form_row(form.discipline, {            });
+
+                        'label_attr': {'class': 'form-label required-field'},            
+
+                        'attr': {'class': 'form-select'}            // Create discipline via AJAX
+
+                    }) }}            createDisciplineBtn.addEventListener('click', function() {
+
+                </div>                const disciplineName = document.getElementById('disciplineName').value;
+
+                <div class="col-md-6">                
+
+                    {{ form_row(form.isbn, {                if (disciplineName.trim() === '') {
+
+                        'label_attr': {'class': 'form-label'},                    messageModalTitle.textContent = 'Error';
+
+                        'attr': {'class': 'form-control', 'placeholder': 'e.g., 978-3-16-148410-0'}                    messageModalBody.textContent = 'Discipline name cannot be empty.';
+
+                    }) }}                    messageModal.show();
+
+                </div>                    return;
+
+            </div>                }
+
+        </div>                
+
+                        // Send AJAX request
+
+        <!-- Section 2: Authors & Publishers -->                                                                                                                                                                                                                                                                                            fetch('{{ path('admin_disciplines_quick_create') }}', {
+
+        <div class="form-section">                    method: 'POST',
+
+            <div class="section-title">                    headers: {
+
+                <i class="fas fa-users"></i>                        'Content-Type': 'application/x-www-form-urlencoded'
+
+                Authors & Publishers                    },
+
+            </div>                    body: new URLSearchParams({
+
+            <div class="row">                        'name': disciplineName
+
+                <div class="col-md-6">                    })
+
+                    <label class="form-label required-field">Authors</label>                })
+
+                    <div class="d-flex gap-2 mb-2">                .then(response => response.json())
+
+                        <button type="button" class="select-all-btn" onclick="toggleAllAuthors()">                .then(data => {
+
+                            <i class="fas fa-check-square"></i> Toggle All                    if (data.success) {
+
+                        </button>                        // Add new discipline to the select
+
+                        <button type="button" class="select-all-btn" onclick="clearAuthors()">                        const option = document.createElement('option');
+
+                            <i class="fas fa-times"></i> Clear All                        option.value = data.id;
+
+                        </button>                        option.textContent = data.name;
+
+                    </div>                        disciplineSelect.appendChild(option);
+
+                    <div class="checkbox-container">                        
+
+                        <input type="text" class="search-input" placeholder="Search authors..." onkeyup="searchAuthors(this.value)">                        // Select the new discipline
+
+                        <div class="checkbox-group" id="authors-group">                        disciplineSelect.value = data.id;
+
+                            {{ form_widget(form.authors) }}                        
+
+                        </div>                        // Hide the form
+
+                        <div class="no-results" id="authors-no-results">No authors found</div>                        disciplineForm.style.display = 'none';
+
+                    </div>                        document.getElementById('disciplineName').value = '';
+
+                    <small class="form-text text-muted mt-2">                        
+
+                        <i class="fas fa-info-circle"></i> Use the search box to find specific authors                        // Show success message
+
+                    </small>                        messageModalTitle.textContent = 'Success';
+
+                </div>                        messageModalBody.textContent = 'Discipline created successfully.';
+
+                <div class="col-md-6">                        messageModal.show();
+
+                    <label class="form-label">Publishers</label>                    } else {
+
+                    <div class="d-flex gap-2 mb-2">                        messageModalTitle.textContent = 'Error';
+
+                        <button type="button" class="select-all-btn" onclick="toggleAllPublishers()">                        messageModalBody.textContent = data.error || 'An error occurred.';
+
+                            <i class="fas fa-check-square"></i> Toggle All                        messageModal.show();
+
+                        </button>                    }
+
+                        <button type="button" class="select-all-btn" onclick="clearPublishers()">                })
+
+                            <i class="fas fa-times"></i> Clear All                .catch(error => {
+
+                        </button>                    console.error('Error:', error);
+
+                    </div>                    messageModalTitle.textContent = 'Error';
+
+                    <div class="checkbox-container">                    messageModalBody.textContent = 'An error occurred while creating the discipline.';
+
+                        <input type="text" class="search-input" placeholder="Search publishers..." onkeyup="searchPublishers(this.value)">                    messageModal.show();
+
+                        <div class="checkbox-group" id="publishers-group">                });
+
+                            {{ form_widget(form.publishers) }}            });
+
+                        </div>            
+
+                        <div class="no-results" id="publishers-no-results">No publishers found</div>            // Create author via AJAX
+
+                    </div>            createAuthorBtn.addEventListener('click', function() {
+
+                    <small class="form-text text-muted mt-2">                const authorName = document.getElementById('authorName').value;
+
+                        <i class="fas fa-info-circle"></i> Use the search box to find specific publishers                const authorBio = document.getElementById('authorBio').value;
+
+                    </small>                
+
+                </div>                if (authorName.trim() === '') {
+
+            </div>                    messageModalTitle.textContent = 'Error';
+
+        </div>                    messageModalBody.textContent = 'Author name cannot be empty.';
+
+                            messageModal.show();
+
+        <!-- Section 3: Description -->                    return;
+
+        <div class="form-section">                }
+
+            <div class="section-title">                
+
+                <i class="fas fa-align-left"></i>                // Send AJAX request
+
+                Description & Details                fetch('{{ path('admin_author_quick_create') }}', {
+
+            </div>                    method: 'POST',
+
+            <div class="row">                    headers: {
+
+                <div class="col-md-12">                        'Content-Type': 'application/x-www-form-urlencoded'
+
+                    {{ form_row(form.description, {                    },
+
+                        'label_attr': {'class': 'form-label'},                    body: new URLSearchParams({
+
+                        'attr': {                        'name': authorName,
+
+                            'class': 'form-control',                         'bio': authorBio
+
+                            'rows': '4',                    })
+
+                            'placeholder': 'Enter a detailed description of the book...'                })
+
+                        }                .then(response => response.json())
+
+                    }) }}                .then(data => {
+
+                </div>                    if (data.success) {
+
+            </div>                        // Add new author to the select
+
+        </div>                        const option = new Option(data.name, data.id, true, true);
+
+                                $('#authors').append(option).trigger('change');
+
+        <!-- Section 4: Cover Image -->                        
+
+        <div class="form-section">                        // Hide the form
+
+            <div class="section-title">                        authorForm.style.display = 'none';
+
+                <i class="fas fa-image"></i>                        document.getElementById('authorName').value = '';
+
+                Cover Image                        document.getElementById('authorBio').value = '';
+
+            </div>                        
+
+            <div class="row">                        // Show success message
+
+                <div class="col-md-12">                        messageModalTitle.textContent = 'Success';
+
+                    <div class="file-upload-area">                        messageModalBody.textContent = 'Author created successfully.';
+
+                        {{ form_row(form.coverImage, {                        messageModal.show();
+
+                            'label_attr': {'class': 'form-label'},                    } else {
+
+                            'attr': {                        messageModalTitle.textContent = 'Error';
+
+                                'class': 'form-control',                        messageModalBody.textContent = data.error || 'An error occurred.';
+
+                                'accept': 'image/*'                        messageModal.show();
+
+                            }                    }
+
+                        }) }}                })
+
+                        <small class="form-text text-muted mt-2">                .catch(error => {
+
+                            <i class="fas fa-upload"></i> Supported formats: JPG, PNG, GIF (Max: 5MB)                    console.error('Error:', error);
+
+                        </small>                    messageModalTitle.textContent = 'Error';
+
+                    </div>                    messageModalBody.textContent = 'An error occurred while creating the author.';
+
+                </div>                    messageModal.show();
+
+            </div>                });
+
+        </div>            });
+
                 });
+
+        <div class="form-actions">    </script>
+
+            <button type="submit" class="btn btn-primary">{% endblock %} 
+                <i class="fas fa-save"></i> Create Book
+            </button>
+            <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Books
+            </a>
+        </div>
+        
+        {{ form_end(form) }}
+    </div>
+
+    <script>
+        function toggleAllAuthors() {
+            const checkboxes = document.querySelectorAll('#authors-group input[name="book[authors][]"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+                updateCheckboxStyle(cb);
+            });
+        }
+        
+        function clearAuthors() {
+            const checkboxes = document.querySelectorAll('#authors-group input[name="book[authors][]"]');
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                updateCheckboxStyle(cb);
+            });
+        }
+        
+        function toggleAllPublishers() {
+            const checkboxes = document.querySelectorAll('#publishers-group input[name="book[publishers][]"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+                updateCheckboxStyle(cb);
+            });
+        }
+        
+        function clearPublishers() {
+            const checkboxes = document.querySelectorAll('#publishers-group input[name="book[publishers][]"]');
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                updateCheckboxStyle(cb);
+            });
+        }
+        
+        function searchAuthors(searchTerm) {
+            searchInGroup('#authors-group', searchTerm, '#authors-no-results');
+        }
+        
+        function searchPublishers(searchTerm) {
+            searchInGroup('#publishers-group', searchTerm, '#publishers-no-results');
+        }
+        
+        function searchInGroup(groupSelector, searchTerm, noResultsSelector) {
+            const group = document.querySelector(groupSelector);
+            const items = group.querySelectorAll('div');
+            const noResults = document.querySelector(noResultsSelector);
+            let visibleCount = 0;
+            
+            items.forEach(item => {
+                const label = item.querySelector('label');
+                if (label) {
+                    const text = label.textContent.toLowerCase();
+                    if (text.includes(searchTerm.toLowerCase())) {
+                        item.classList.remove('hidden');
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.classList.add('hidden');
+                        item.style.display = 'none';
+                    }
+                }
             });
             
-            // Create author via AJAX
-            createAuthorBtn.addEventListener('click', function() {
-                const authorName = document.getElementById('authorName').value;
-                const authorBio = document.getElementById('authorBio').value;
-                
-                if (authorName.trim() === '') {
-                    messageModalTitle.textContent = 'Error';
-                    messageModalBody.textContent = 'Author name cannot be empty.';
-                    messageModal.show();
-                    return;
+            noResults.style.display = visibleCount === 0 && searchTerm ? 'block' : 'none';
+        }
+        
+        function updateCheckboxStyle(checkbox) {
+            const item = checkbox.closest('div');
+            if (item) {
+                if (checkbox.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
                 }
+            }
+        }
+        
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Style les checkboxes et ajoute les écouteurs d'événements
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                const parent = checkbox.parentElement;
                 
-                // Send AJAX request
-                fetch('{{ path('admin_author_quick_create') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        'name': authorName,
-                        'bio': authorBio
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Add new author to the select
-                        const option = new Option(data.name, data.id, true, true);
-                        $('#authors').append(option).trigger('change');
-                        
-                        // Hide the form
-                        authorForm.style.display = 'none';
-                        document.getElementById('authorName').value = '';
-                        document.getElementById('authorBio').value = '';
-                        
-                        // Show success message
-                        messageModalTitle.textContent = 'Success';
-                        messageModalBody.textContent = 'Author created successfully.';
-                        messageModal.show();
-                    } else {
-                        messageModalTitle.textContent = 'Error';
-                        messageModalBody.textContent = data.error || 'An error occurred.';
-                        messageModal.show();
+                // Mise à jour du style initial
+                updateCheckboxStyle(checkbox);
+                
+                // Écouteur pour les changements
+                checkbox.addEventListener('change', function() {
+                    updateCheckboxStyle(this);
+                });
+                
+                // Permettre de cliquer sur l'élément entier
+                parent.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox' && e.target.tagName !== 'LABEL') {
+                        checkbox.checked = !checkbox.checked;
+                        updateCheckboxStyle(checkbox);
+                        checkbox.dispatchEvent(new Event('change'));
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    messageModalTitle.textContent = 'Error';
-                    messageModalBody.textContent = 'An error occurred while creating the author.';
-                    messageModal.show();
                 });
             });
         });
     </script>
-{% endblock %} 
+{% endblock %}

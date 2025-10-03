@@ -1,0 +1,411 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - New Book{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <style>
+        .author-create-form, .discipline-create-form {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+        .btn-link {
+            cursor: pointer;
+            color: #117986;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
+        .btn-link:hover {
+            color: #0e6655;
+        }
+        .select2-container--default .select2-selection--multiple {
+            border-color: #ced4da;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #117986;
+            box-shadow: 0 0 0 0.25rem rgba(17, 121, 134, 0.25);
+        }
+        .select2-container {
+            width: 100% !important;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
+                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
+                <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link">Disciplines</a>
+                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
+                <a href="{{ path('admin_books_index') }}" class="admin-nav-link active">Books</a>
+                <a href="{{ path('home') }}" class="admin-nav-link">Main Site</a>
+            </div>
+            <div class="admin-user-info">
+                Welcome, Admin | <a href="{{ path('app_logout') }}" style="color: white;">Logout</a>
+            </div>
+        </div>
+        
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        <div class="page-header">
+            <h1>Create New Book</h1>
+        </div>
+        
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data" id="bookForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Book Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="publicationYear" class="form-label">Publication Year</label>
+                            <input type="number" class="form-control" id="publicationYear" name="publicationYear" min="1000" max="{{ "now"|date("Y") }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" name="isbn">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="edition" class="form-label">Edition</label>
+                            <input type="text" class="form-control" id="edition" name="edition">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" min="0">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="acquisitionMode" class="form-label">Acquisition Mode</label>
+                            <select class="form-select" id="acquisitionMode" name="acquisitionMode">
+                                <option value="">Select acquisition mode</option>
+                                <option value="purchase">Purchase</option>
+                                <option value="donation">Donation</option>
+                                <option value="exchange">Exchange</option>
+                                <option value="loan">Loan</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="coverImage" class="form-label">Cover Image</label>
+                            <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="acquisitionDate" class="form-label">Acquisition Date</label>
+                            <input type="date" class="form-control" id="acquisitionDate" name="acquisitionDate">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="documentType" class="form-label">Document Type</label>
+                            <select class="form-select" id="documentType" name="documentType">
+                                <option value="">Select document type</option>
+                                <option value="book">Book</option>
+                                <option value="thesis">Thesis</option>
+                                <option value="digital">Digital Document</option>
+                                <option value="journal">Journal</option>
+                                <option value="magazine">Magazine</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="location" name="location" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label d-block">Discipline</label>
+                            
+                            <div class="mb-2">
+                                <label for="discipline" class="form-label">Discipline</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <select class="form-select" id="discipline" name="discipline" required>
+                                        <option value="">Select a discipline</option>
+                                        {% for discipline in disciplines %}
+                                            <option value="{{ discipline.id }}">{{ discipline.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="btn-link" id="showDisciplineForm">+ New Discipline</span>
+                                </div>
+                            </div>
+                            
+                            <div class="discipline-create-form" id="disciplineForm">
+                                <h5>Create New Discipline</h5>
+                                <div class="mb-3">
+                                    <label for="disciplineName" class="form-label">Discipline Name</label>
+                                    <input type="text" class="form-control" id="disciplineName">
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-primary" id="createDiscipline">
+                                        <i class="fas fa-plus"></i> Create Discipline
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="cancelDiscipline">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="authors" class="form-label">Authors</label>
+                            <div class="d-flex flex-column">
+                                <select class="form-select" id="authors" name="authors[]" multiple required>
+                                    {% for author in authors %}
+                                        <option value="{{ author.id }}">{{ author.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted mt-1">Select multiple authors by holding Ctrl (or Cmd on Mac) and clicking.</small>
+                                <span class="btn-link align-self-start mt-2" id="showAuthorForm">+ Add New Author</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Author form -->
+                        <div class="author-create-form" id="authorForm">
+                            <h5>Create New Author</h5>
+                            <div class="mb-3">
+                                <label for="authorName" class="form-label">Author Name</label>
+                                <input type="text" class="form-control" id="authorName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="authorBio" class="form-label">Biography</label>
+                                <textarea class="form-control" id="authorBio" rows="3"></textarea>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" id="createAuthor">
+                                    <i class="fas fa-plus"></i> Create Author
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancelAuthor">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Book
+                    </button>
+                    <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Message modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="messageModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Select2 for authors
+            $('#authors').select2({
+                placeholder: 'Select authors',
+                width: '100%'
+            });
+            
+            // Author form toggle
+            const showAuthorForm = document.getElementById('showAuthorForm');
+            const authorForm = document.getElementById('authorForm');
+            const createAuthorBtn = document.getElementById('createAuthor');
+            const cancelAuthorBtn = document.getElementById('cancelAuthor');
+            const authorsSelect = document.getElementById('authors');
+            
+            // Discipline form toggle
+            const showDisciplineForm = document.getElementById('showDisciplineForm');
+            const disciplineForm = document.getElementById('disciplineForm');
+            const createDisciplineBtn = document.getElementById('createDiscipline');
+            const cancelDisciplineBtn = document.getElementById('cancelDiscipline');
+            const disciplineSelect = document.getElementById('discipline');
+            
+            // Message modal
+            const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+            const messageModalTitle = document.getElementById('messageModalTitle');
+            const messageModalBody = document.getElementById('messageModalBody');
+            
+            // Show/hide author form
+            showAuthorForm.addEventListener('click', function() {
+                authorForm.style.display = 'block';
+                document.getElementById('authorName').focus();
+            });
+            
+            cancelAuthorBtn.addEventListener('click', function() {
+                authorForm.style.display = 'none';
+                document.getElementById('authorName').value = '';
+                document.getElementById('authorBio').value = '';
+            });
+            
+            // Show/hide discipline form
+            showDisciplineForm.addEventListener('click', function() {
+                disciplineForm.style.display = 'block';
+                document.getElementById('disciplineName').focus();
+            });
+            
+            cancelDisciplineBtn.addEventListener('click', function() {
+                disciplineForm.style.display = 'none';
+                document.getElementById('disciplineName').value = '';
+            });
+            
+            // Create discipline via AJAX
+            createDisciplineBtn.addEventListener('click', function() {
+                const disciplineName = document.getElementById('disciplineName').value;
+                
+                if (disciplineName.trim() === '') {
+                    messageModalTitle.textContent = 'Error';
+                    messageModalBody.textContent = 'Discipline name cannot be empty.';
+                    messageModal.show();
+                    return;
+                }
+                
+                // Send AJAX request
+                                                                                                                                                                                                                                                                                            fetch('{{ path('admin_disciplines_quick_create') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'name': disciplineName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add new discipline to the select
+                        const option = document.createElement('option');
+                        option.value = data.id;
+                        option.textContent = data.name;
+                        disciplineSelect.appendChild(option);
+                        
+                        // Select the new discipline
+                        disciplineSelect.value = data.id;
+                        
+                        // Hide the form
+                        disciplineForm.style.display = 'none';
+                        document.getElementById('disciplineName').value = '';
+                        
+                        // Show success message
+                        messageModalTitle.textContent = 'Success';
+                        messageModalBody.textContent = 'Discipline created successfully.';
+                        messageModal.show();
+                    } else {
+                        messageModalTitle.textContent = 'Error';
+                        messageModalBody.textContent = data.error || 'An error occurred.';
+                        messageModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    messageModalTitle.textContent = 'Error';
+                    messageModalBody.textContent = 'An error occurred while creating the discipline.';
+                    messageModal.show();
+                });
+            });
+            
+            // Create author via AJAX
+            createAuthorBtn.addEventListener('click', function() {
+                const authorName = document.getElementById('authorName').value;
+                const authorBio = document.getElementById('authorBio').value;
+                
+                if (authorName.trim() === '') {
+                    messageModalTitle.textContent = 'Error';
+                    messageModalBody.textContent = 'Author name cannot be empty.';
+                    messageModal.show();
+                    return;
+                }
+                
+                // Send AJAX request
+                fetch('{{ path('admin_author_quick_create') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'name': authorName,
+                        'bio': authorBio
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add new author to the select
+                        const option = new Option(data.name, data.id, true, true);
+                        $('#authors').append(option).trigger('change');
+                        
+                        // Hide the form
+                        authorForm.style.display = 'none';
+                        document.getElementById('authorName').value = '';
+                        document.getElementById('authorBio').value = '';
+                        
+                        // Show success message
+                        messageModalTitle.textContent = 'Success';
+                        messageModalBody.textContent = 'Author created successfully.';
+                        messageModal.show();
+                    } else {
+                        messageModalTitle.textContent = 'Error';
+                        messageModalBody.textContent = data.error || 'An error occurred.';
+                        messageModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    messageModalTitle.textContent = 'Error';
+                    messageModalBody.textContent = 'An error occurred while creating the author.';
+                    messageModal.show();
+                });
+            });
+        });
+    </script>
+{% endblock %} 

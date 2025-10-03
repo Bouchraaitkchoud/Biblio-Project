@@ -26,8 +26,8 @@ class Book
     #[ORM\JoinColumn(nullable: false)]
     private ?Discipline $discipline = null;
 
-    #[ORM\Column(type: "blob", nullable: true)]
-    private $coverImage = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $coverImage = null;
 
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $description = null;
@@ -46,6 +46,24 @@ class Book
 
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Exemplaire::class, orphanRemoval: true)]
     private Collection $exemplaires;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $edition = null;
+
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $price = null;
+
+    #[ORM\Column(name: 'acquisition_mode', length: 50, nullable: true)]
+    private ?string $acquisitionMode = null;
+
+    #[ORM\Column(name: 'acquisition_date', type: 'date', nullable: true)]
+    private ?\DateTimeInterface $acquisitionDate = null;
+
+    #[ORM\Column(name: 'document_type', length: 50, nullable: true)]
+    private ?string $documentType = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $location = null;
 
     public function __construct()
     {
@@ -121,28 +139,22 @@ class Book
         return $this;
     }
 
-    public function getCoverImage()
+    public function getCoverImage(): ?string
     {
-        if ($this->coverImage === null) {
-            return null;
-        }
-        
-        if (is_resource($this->coverImage)) {
-            // Reset stream pointer
-            rewind($this->coverImage);
-            $data = stream_get_contents($this->coverImage);
-        } else {
-            $data = $this->coverImage;
-        }
-        
-        if ($data) {
-            return 'data:image/jpeg;base64,' . base64_encode($data);
-        }
-        
-        return null;
+        return $this->coverImage;
     }
 
-    public function setCoverImage($coverImage): self
+    public function getCoverImageUrl(): string
+    {
+        if ($this->coverImage) {
+            return '/uploads/book_covers/' . $this->coverImage;
+        }
+
+        // Default book cover
+        return '/images/book-placeholder.jpg';
+    }
+
+    public function setCoverImage(?string $coverImage): self
     {
         $this->coverImage = $coverImage;
         return $this;
@@ -267,5 +279,71 @@ class Book
         return $this->exemplaires->filter(function(Exemplaire $exemplaire) {
             return $exemplaire->getStatus() === 'available';
         })->count();
+    }
+
+    public function getEdition(): ?string
+    {
+        return $this->edition;
+    }
+
+    public function setEdition(?string $edition): self
+    {
+        $this->edition = $edition;
+        return $this;
+    }
+
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?string $price): self
+    {
+        $this->price = $price;
+        return $this;
+    }
+
+    public function getAcquisitionMode(): ?string
+    {
+        return $this->acquisitionMode;
+    }
+
+    public function setAcquisitionMode(?string $acquisitionMode): self
+    {
+        $this->acquisitionMode = $acquisitionMode;
+        return $this;
+    }
+
+    public function getAcquisitionDate(): ?\DateTimeInterface
+    {
+        return $this->acquisitionDate;
+    }
+
+    public function setAcquisitionDate(?\DateTimeInterface $acquisitionDate): self
+    {
+        $this->acquisitionDate = $acquisitionDate;
+        return $this;
+    }
+
+    public function getDocumentType(): ?string
+    {
+        return $this->documentType;
+    }
+
+    public function setDocumentType(?string $documentType): self
+    {
+        $this->documentType = $documentType;
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?string $location): self
+    {
+        $this->location = $location;
+        return $this;
     }
 }

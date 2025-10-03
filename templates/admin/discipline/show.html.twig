@@ -1,0 +1,184 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Discipline: {{ discipline.name }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Détails de la discipline</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">ID:</th>
+                                        <td>{{ discipline.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Nom:</th>
+                                        <td><strong>{{ discipline.name }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Image:</th>
+                                        <td>{{ discipline.image ?: 'Image automatique' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Nombre de livres:</th>
+                                        <td>{{ discipline.books|length }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h5>Aperçu de la discipline</h5>
+                                {% if discipline.image %}
+                                    <img src="{{ asset('images/disciplines/' ~ discipline.image) }}" 
+                                         alt="Image de {{ discipline.name }}" 
+                                         style="width: 200px; height: 150px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                {% else %}
+                                    <div style="width: 200px; height: 150px; background: linear-gradient(135deg, #b2903e, #1a2e4f); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                        <div style="font-size: 3rem; color: white;">
+                                            {% set disciplineName = discipline.name|lower %}
+                                            {% if 'informatique' in disciplineName or 'computer' in disciplineName %}
+                                                💻
+                                            {% elseif 'mathematiques' in disciplineName or 'math' in disciplineName %}
+                                                📊
+                                            {% elseif 'physique' in disciplineName or 'physics' in disciplineName %}
+                                                ⚛️
+                                            {% elseif 'chimie' in disciplineName or 'chemistry' in disciplineName %}
+                                                🧪
+                                            {% elseif 'biologie' in disciplineName or 'biology' in disciplineName %}
+                                                🧬
+                                            {% elseif 'histoire' in disciplineName or 'history' in disciplineName %}
+                                                📜
+                                            {% elseif 'geographie' in disciplineName or 'geography' in disciplineName %}
+                                                🌍
+                                            {% elseif 'litterature' in disciplineName or 'literature' in disciplineName %}
+                                                📚
+                                            {% elseif 'philosophie' in disciplineName or 'philosophy' in disciplineName %}
+                                                💭
+                                            {% elseif 'economie' in disciplineName or 'economics' in disciplineName %}
+                                                💰
+                                            {% elseif 'psychologie' in disciplineName or 'psychology' in disciplineName %}
+                                                🧠
+                                            {% elseif 'droit' in disciplineName or 'law' in disciplineName %}
+                                                ⚖️
+                                            {% elseif 'medecine' in disciplineName or 'medicine' in disciplineName %}
+                                                🏥
+                                            {% elseif 'art' in disciplineName %}
+                                                🎨
+                                            {% elseif 'musique' in disciplineName or 'music' in disciplineName %}
+                                                🎵
+                                            {% elseif 'sport' in disciplineName %}
+                                                ⚽
+                                            {% elseif 'langue' in disciplineName or 'language' in disciplineName %}
+                                                🗣️
+                                            {% else %}
+                                                📖
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if discipline.books|length > 0 %}
+                    <div class="mt-4">
+                        <h4>Livres dans cette discipline</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Auteur(s)</th>
+                                        <th>Éditeur</th>
+                                        <th>Année</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for book in discipline.books %}
+                                    <tr>
+                                        <td>{{ book.title }}</td>
+                                        <td>{{ book.authorName }}</td>
+                                        <td>{{ book.publisherName ?: 'Non défini' }}</td>
+                                        <td>{{ book.publicationYear }}</td>
+                                        <td>
+                                            <a href="{{ path('admin_books_show', {'id': book.id}) }}" 
+                                               class="btn btn-info btn-sm" title="Voir le livre">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle"></i> Aucun livre n'est associé à cette discipline pour le moment.
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ path('admin_disciplines_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                        <div>
+                            <a href="{{ path('admin_disciplines_edit', {'id': discipline.id}) }}" class="btn btn-warning me-2">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            {% if discipline.books|length == 0 %}
+                                <button type="button" class="btn btn-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-secondary" 
+                                        disabled 
+                                        title="Impossible de supprimer: contient des livres">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if discipline.books|length == 0 %}
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir supprimer la discipline "<strong>{{ discipline.name }}</strong>" ?
+                Cette action est irréversible.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('admin_disciplines_delete', {'id': discipline.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ discipline.id) }}">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

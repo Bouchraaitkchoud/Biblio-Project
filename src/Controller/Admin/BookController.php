@@ -7,6 +7,7 @@ use App\Entity\Author;
 use App\Repository\BookRepository;
 use App\Repository\AuthorRepository;
 use App\Repository\DisciplineRepository;
+use App\Service\ImageUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +25,8 @@ class BookController extends AbstractController
         private BookRepository $bookRepository,
         private AuthorRepository $authorRepository,
         private DisciplineRepository $disciplineRepository,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private ImageUploadService $imageUploadService
     ) {}
 
     #[Route('/', name: 'admin_books_index')]
@@ -50,76 +52,36 @@ class BookController extends AbstractController
     #[Route('/new', name: 'admin_book_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
-        $disciplines = $this->disciplineRepository->findAll();
-        
-        if ($request->isMethod('POST')) {
-            $title = $request->request->get('title');
-            $description = $request->request->get('description');
-            $publicationYear = $request->request->get('publicationYear');
-            $isbn = $request->request->get('isbn');
-            $disciplineId = $request->request->get('discipline');
-            $authorIds = $request->request->all('authors');
-            
-            // File upload
-            $coverImage = $request->files->get('coverImage');
-            
-            // Validation
-            if (empty($title)) {
-                $this->addFlash('error', 'Book title cannot be empty.');
-                return $this->redirectToRoute('admin_book_new');
-            }
-            
-            if (empty($disciplineId)) {
-                $this->addFlash('error', 'Please select a discipline for the book.');
-                return $this->redirectToRoute('admin_book_new');
-            }
-            
-            if (empty($authorIds)) {
-                $this->addFlash('error', 'Please select at least one author.');
-                return $this->redirectToRoute('admin_book_new');
-            }
-            
-            $discipline = $this->disciplineRepository->find($disciplineId);
-            if (!$discipline) {
-                $this->addFlash('error', 'Selected discipline does not exist.');
-                return $this->redirectToRoute('admin_book_new');
-            }
-            
-            // Create book
-            $book = new Book();
-            $book->setTitle($title);
-            $book->setDescription($description);
-            $book->setIsbn($isbn);
-            $book->setDiscipline($discipline);
-            
-            if (!empty($publicationYear)) {
-                $book->setPublicationYear((int) $publicationYear);
-            }
-            
-            // Handle cover image
-            if ($coverImage && $coverImage->isValid()) {
-                $book->setCoverImage(file_get_contents($coverImage->getPathname()));
-            }
-            
-            // Add authors
-            foreach ($authorIds as $authorId) {
-                $author = $this->authorRepository->find($authorId);
-                if ($author) {
-                    $book->addAuthor($author);
+        $book = new Book();
+        $form = $this->createForm(\App\Form\BookType::class, $book);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Handle cover image upload
+            $coverImageFile = $form->get('coverImage')->getData();
+            if ($coverImageFile) {
+                try {
+                    $imageFileName = $this->imageUploadService->uploadBookCover($coverImageFile, $book->getTitle());
+                    $book->setCoverImage($imageFileName);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', $e->getMessage());
+                    return $this->render('admin/book/new.html.twig', [
+                        'book' => $book,
+                        'form' => $form->createView(),
+                    ]);
                 }
             }
-            
+
             $this->entityManager->persist($book);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Book created successfully.');
             return $this->redirectToRoute('admin_books_index');
         }
-        
-        $authors = $this->authorRepository->findAll();
+
         return $this->render('admin/book/new.html.twig', [
-            'authors' => $authors,
-            'disciplines' => $disciplines,
+            'book' => $book,
+            'form' => $form->createView(),
         ]);
     }
     
@@ -135,10 +97,31 @@ class BookController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_book_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Book $book): Response
     {
+        $oldCoverImage = $book->getCoverImage(); // Store old image filename
         $form = $this->createForm(\App\Form\BookType::class, $book);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle cover image upload
+            $coverImageFile = $form->get('coverImage')->getData();
+            if ($coverImageFile) {
+                try {
+                    // Delete old image if exists
+                    if ($oldCoverImage) {
+                        $this->imageUploadService->deleteBookCover($oldCoverImage);
+                    }
+                    
+                    $imageFileName = $this->imageUploadService->uploadBookCover($coverImageFile, $book->getTitle());
+                    $book->setCoverImage($imageFileName);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', $e->getMessage());
+                    return $this->render('admin/book/edit.html.twig', [
+                        'book' => $book,
+                        'form' => $form->createView(),
+                    ]);
+                }
+            }
+
             $this->entityManager->flush();
             $this->addFlash('success', 'Book updated successfully.');
             return $this->redirectToRoute('admin_books_index');

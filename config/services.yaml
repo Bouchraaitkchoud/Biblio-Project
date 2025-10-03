@@ -34,3 +34,4 @@ services:
   App\Service\ImageUploadService:
     arguments:
       $disciplinesDirectory: "%disciplines_directory%"
+      $bookCoversDirectory: "%book_covers_directory%"

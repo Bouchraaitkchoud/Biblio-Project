@@ -1,10 +1,9 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Edit Book{% endblock %}
+{% block title %}New Book{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .form-container {
             background: #fff;
@@ -62,45 +61,45 @@
             box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
         }
         
-        /* Select2 Styling */
-        .select2-container {
-            width: 100% !important;
-        }
-        
-        .select2-container--default .select2-selection--multiple {
+        /* Styles pour les checkboxes d'auteurs et éditeurs */
+        .checkbox-group {
+            max-height: 200px;
+            overflow-y: auto;
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            min-height: 45px;
-            padding: 5px;
+            padding: 1rem;
+            background: #fff;
         }
         
-        .select2-container--default.select2-container--focus .select2-selection--multiple {
-            border-color: #b2903e;
-            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.3rem 0;
         }
         
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: #b2903e;
-            border: 1px solid #a08232;
-            color: white;
-            padding: 2px 8px;
+        .checkbox-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2);
+            accent-color: #b2903e;
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .checkbox-item:hover {
+            background-color: #f8f9fa;
             border-radius: 4px;
-        }
-        
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: white;
-            border-right: 1px solid #a08232;
-            margin-right: 5px;
-            padding-right: 5px;
-        }
-        
-        .select2-dropdown {
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-        
-        .select2-results__option--highlighted {
-            background-color: #b2903e;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
         }
         
         .btn-primary {
@@ -142,13 +141,6 @@
             border-top: 1px solid #dee2e6;
         }
         
-        .current-image {
-            max-width: 150px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
         .file-upload-area {
             border: 2px dashed #dee2e6;
             border-radius: 8px;
@@ -168,13 +160,29 @@
             color: #dc3545;
             font-weight: bold;
         }
+        
+        .select-all-btn {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            color: #495057;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+        
+        .select-all-btn:hover {
+            background: #b2903e;
+            color: #fff;
+        }
     </style>
 {% endblock %}
 
 {% block admin_content %}
     <div class="page-header">
-        <i class="fas fa-edit text-warning"></i>
-        Edit Book Notice
+        <i class="fas fa-plus text-success"></i>
+        Create New Book Notice
     </div>
     
     <div class="form-container">
@@ -224,21 +232,27 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    {{ form_row(form.authors, {
-                        'label_attr': {'class': 'form-label required-field'},
-                        'attr': {'class': 'form-select select2-multiple', 'multiple': true, 'data-placeholder': 'Search and select authors...'}
-                    }) }}
-                    <small class="form-text text-muted mt-2">
-                        <i class="fas fa-info-circle"></i> Type to search, click to select multiple authors
+                    <label class="form-label required-field">Authors</label>
+                    <button type="button" class="select-all-btn" onclick="toggleAllAuthors()">
+                        <i class="fas fa-check-square"></i> Toggle All
+                    </button>
+                    <div class="checkbox-group">
+                        {{ form_widget(form.authors) }}
+                    </div>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> Check the boxes to select multiple authors
                     </small>
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.publishers, {
-                        'label_attr': {'class': 'form-label'},
-                        'attr': {'class': 'form-select select2-multiple', 'multiple': true, 'data-placeholder': 'Search and select publishers...'}
-                    }) }}
-                    <small class="form-text text-muted mt-2">
-                        <i class="fas fa-info-circle"></i> Type to search, click to select multiple publishers
+                    <label class="form-label">Publishers</label>
+                    <button type="button" class="select-all-btn" onclick="toggleAllPublishers()">
+                        <i class="fas fa-check-square"></i> Toggle All
+                    </button>
+                    <div class="checkbox-group">
+                        {{ form_widget(form.publishers) }}
+                    </div>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> Check the boxes to select multiple publishers
                     </small>
                 </div>
             </div>
@@ -272,13 +286,6 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    {% if book.coverImage %}
-                        <div class="mb-3">
-                            <label class="form-label">Current Cover Image:</label><br>
-                            <img src="{{ book.coverImageUrl }}" alt="Current cover" class="current-image">
-                        </div>
-                    {% endif %}
-                    
                     <div class="file-upload-area">
                         {{ form_row(form.coverImage, {
                             'label_attr': {'class': 'form-label'},
@@ -297,7 +304,7 @@
         
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Changes
+                <i class="fas fa-save"></i> Create Book
             </button>
             <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Books
@@ -307,20 +314,27 @@
         {{ form_end(form) }}
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // Initialize Select2 for authors and publishers
-            $('.select2-multiple').select2({
-                width: '100%',
-                closeOnSelect: false,
-                allowClear: true,
-                tags: false,
-                placeholder: function(){
-                    return $(this).data('placeholder');
-                }
+        function toggleAllAuthors() {
+            const checkboxes = document.querySelectorAll('input[name="book[authors][]"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+        }
+        
+        function toggleAllPublishers() {
+            const checkboxes = document.querySelectorAll('input[name="book[publishers][]"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+        }
+        
+        // Style les checkboxes pour qu'elles ressemblent à des éléments de liste
+        document.addEventListener('DOMContentLoaded', function() {
+            // Améliorer l'apparence des checkboxes
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                const parent = checkbox.parentElement;
+                parent.classList.add('checkbox-item');
             });
         });
     </script>
-{% endblock %} 
+{% endblock %}

@@ -20,8 +20,8 @@ class ExemplaireType extends AbstractType
                 'label' => 'Barcode',
                 'required' => true
             ])
-            ->add('section_id', NumberType::class, [
-                'label' => 'Section ID',
+            ->add('discipline_id', NumberType::class, [
+                'label' => 'Discipline ID',
                 'required' => false
             ])
             ->add('status', ChoiceType::class, [
