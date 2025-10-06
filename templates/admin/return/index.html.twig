@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Process Returns{% endblock %}
 
@@ -122,8 +122,7 @@
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
+{% block admin_content %}
         <div class="page-header">Process Returns</div>
         <div class="return-container">
             <div class="scanner-section">

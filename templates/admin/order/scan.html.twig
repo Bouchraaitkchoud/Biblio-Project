@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Barcode Scanner{% endblock %}
 
@@ -177,46 +177,7 @@
             color: #1a2e4f;
             font-family: 'Georgia', serif;
         }
-        .admin-nav {
-            background-color: #1a2e4f;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .admin-nav-links {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .admin-nav-link {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 8px 15px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
-        }
-        .admin-nav-link:hover, .admin-nav-link.active {
-            background-color: #b2903e;
-            color: #fff;
-        }
-        .admin-user-info {
-            color: #fff;
-            font-family: 'Georgia', serif;
-        }
-        .admin-user-info a {
-            color: #b2903e;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        .admin-user-info a:hover {
-            color: #fff;
-        }
+
         h1, h2, h3 {
             color: #1a2e4f;
             font-family: 'Georgia', serif;
@@ -225,24 +186,7 @@
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link">Orders</a>
-                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link">Returns</a>
-                <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link">Disciplines</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
-                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link">Publishers</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('home') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}">Logout</a>
-            </div>
-        </div>
-
+{% block admin_content %}
         <h1 class="mb-4">Barcode Scanner</h1>
 
         <div class="scanner-container" style="display: flex; gap: 10px; align-items: center;">

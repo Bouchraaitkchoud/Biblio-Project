@@ -1,23 +1,100 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Search Results{% endblock %}
+{% block title %}Résultats de recherche{% if query %} - "{{ query }}"{% endif %}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        html, body {
-            background: #fdfaf5 !important;
+        body {
+            background: linear-gradient(135deg, #fdfaf5 0%, #f8f5f0 100%) !important;
         }
-        .search-results {
-            padding: 2rem;
+        
+        .search-header {
+            text-align: center;
+            margin: 2rem 0;
+            color: #1a2e4f;
         }
-        .result-section {
+        
+        .search-stats {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
             margin-bottom: 2rem;
+            border-left: 5px solid #b2903e;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+        
+        .section-title {
+            color: #1a2e4f;
+            font-family: 'Merriweather', serif;
+            border-bottom: 2px solid #b2903e;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .result-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #b2903e;
+        }
+        
         .result-item {
-            padding: 1.2rem 1rem;
-            margin-bottom: 1.2rem;
-            border: 1.5px solid #e8e4db;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+        }
+        
+        .result-item:hover {
+            background: #f8f9fa;
+            border-color: #b2903e;
+            transform: translateX(5px);
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #1a2e4f;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .badge-count {
+            background: linear-gradient(135deg, #b2903e, #9b7e46);
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .author-books, .publisher-books, .discipline-books {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #b2903e;
+        }
+    </style>
+{% endblock %}
             border-left: 4px solid #b2903e;
             border-radius: 10px;
             background: #fff;

@@ -53,15 +53,27 @@ class BookRepository extends ServiceEntityRepository
            ->setMaxResults($limit);
         
         $paginator = new Paginator($qb);
-        $totalItems = count($paginator);
-        $totalPages = ceil($totalItems / $limit);
         
         return [
-            'books' => $paginator,
-            'totalItems' => $totalItems,
-            'totalPages' => $totalPages,
-            'currentPage' => $page,
-            'limit' => $limit
+            'books' => iterator_to_array($paginator),
+            'totalItems' => count($paginator),
+            'totalPages' => ceil(count($paginator) / $limit),
+            'currentPage' => $page
         ];
+    }
+    
+    public function searchByTitleOrIsbn(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('b')
+            ->leftJoin('b.authors', 'a')
+            ->leftJoin('b.discipline', 'd')
+            ->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
+            ->orWhere('LOWER(b.isbn) LIKE LOWER(:searchTerm)')
+            ->orWhere('LOWER(a.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('b.title', 'ASC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
     }
 }

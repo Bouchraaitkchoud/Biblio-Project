@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Admin - Authors Management{% endblock %}
 
@@ -120,17 +120,7 @@
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endfor %}
-        
+{% block admin_content %}
         <div class="page-header">
             <span>Authors Management</span>
             <a href="{{ path('admin_author_new') }}" class="btn btn-add">
@@ -224,5 +214,4 @@
                 {% endif %}
             </div>
         {% endif %}
-    </div>
 {% endblock %} 

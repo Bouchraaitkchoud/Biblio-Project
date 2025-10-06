@@ -175,12 +175,28 @@ class CartService
      * 
      * @param User $user The user who owns the cart
      * @return Cart|null The created cart, or null if cart is empty
+     * @throws \Exception If any exemplaire is no longer available
      */
     public function convertCookieCartToEntity(User $user): ?Cart
     {
         $exemplaires = $this->getCartItems();
         if (empty($exemplaires)) {
             return null;
+        }
+
+        // Verify all exemplaires are still available
+        $unavailableBooks = [];
+        foreach ($exemplaires as $exemplaire) {
+            if ($exemplaire->getStatus() !== 'available') {
+                $unavailableBooks[] = $exemplaire->getBook()->getTitle();
+            }
+        }
+
+        if (!empty($unavailableBooks)) {
+            throw new \Exception(
+                'Les livres suivants ne sont plus disponibles: ' . implode(', ', $unavailableBooks) . 
+                '. Veuillez retirer ces livres de votre panier.'
+            );
         }
 
         $cart = new Cart();
@@ -198,5 +214,43 @@ class CartService
         $this->entityManager->flush();
         
         return $cart;
+    }
+
+    /**
+     * Check cart items availability and remove unavailable ones
+     * 
+     * @return array ['removed' => [...], 'cookie' => Cookie|null]
+     */
+    public function validateAndCleanCart(): array
+    {
+        $itemIds = $this->getDraftCart();
+        if (empty($itemIds)) {
+            return ['removed' => [], 'cookie' => null];
+        }
+
+        $exemplaires = $this->entityManager->getRepository(Exemplaire::class)
+            ->findBy(['id' => $itemIds]);
+
+        $removedBooks = [];
+        $validItemIds = [];
+
+        foreach ($exemplaires as $exemplaire) {
+            if ($exemplaire->getStatus() === 'available') {
+                $validItemIds[] = $exemplaire->getId();
+            } else {
+                $removedBooks[] = $exemplaire->getBook()->getTitle();
+            }
+        }
+
+        // If some items were removed, update the cookie
+        $cookie = null;
+        if (count($validItemIds) !== count($itemIds)) {
+            $cookie = $this->createCartCookie($validItemIds);
+        }
+
+        return [
+            'removed' => $removedBooks,
+            'cookie' => $cookie
+        ];
     }
 } 

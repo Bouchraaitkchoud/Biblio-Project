@@ -90,6 +90,7 @@
             cursor: pointer;
             transition: background 0.3s;
             margin-bottom: 1.2rem;
+            margin-right: 1rem;
         }
         .add-to-cart-btn:hover:not(:disabled) {
             background-color: #a07d33;
@@ -97,6 +98,37 @@
         .add-to-cart-btn:disabled {
             background-color: #d6c3a5;
             cursor: not-allowed;
+        }
+        .view-cart-btn {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            transition: background 0.3s;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .view-cart-btn:hover {
+            background-color: #218838;
+            color: white;
+            text-decoration: none;
+        }
+        .cart-count-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
         }
         .back-button {
             display: inline-block;
@@ -117,6 +149,13 @@
                 flex-direction: column;
                 padding: 1.5rem 0.7rem;
                 gap: 1.5rem;
+            }
+            .add-to-cart-btn, .view-cart-btn {
+                display: block;
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 0.8rem;
+                text-align: center;
             }
             .book-detail-cover {
                 max-width: 100%;
@@ -154,10 +193,10 @@
                 <div class="meta-label">Publication Year:</div>
                 <div class="meta-value">{{ book.publicationYear }}</div>
             {% endif %}
-            <div class="meta-label">Section:</div>
-            <div class="meta-value">{{ book.section.name }}</div>
-            <div class="meta-label">Domain:</div>
-            <div class="meta-value">{{ book.section.domain.name }}</div>
+            {% if book.discipline %}
+                <div class="meta-label">Discipline:</div>
+                <div class="meta-value">{{ book.discipline.name }}</div>
+            {% endif %}
         </div>
         {% if book.description %}
             <div class="book-description">
@@ -165,9 +204,40 @@
                 {{ book.description|nl2br }}
             </div>
         {% endif %}
-        <button id="add-to-cart-btn" class="add-to-cart-btn" onclick="addToCart({{ book.id }})">
-            <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
+        
+        <div class="availability-info" style="margin: 1.5rem 0; padding: 1rem; border-radius: 8px; border-left: 5px solid {% if book.isAvailable %}#28a745{% else %}#dc3545{% endif %}; background: {% if book.isAvailable %}#f8fff9{% else %}#fff5f5{% endif %};">
+            {% if book.isAvailable %}
+                <i class="fas fa-check-circle" style="color: #28a745;"></i> 
+                <strong style="color: #28a745;">Disponible</strong>
+                <small style="display: block; color: #666; margin-top: 0.3rem;">
+                    {{ book.availableCount }} exemplaire(s) disponible(s)
+                </small>
+            {% else %}
+                <i class="fas fa-times-circle" style="color: #dc3545;"></i> 
+                <strong style="color: #dc3545;">Non disponible</strong>
+                <small style="display: block; color: #666; margin-top: 0.3rem;">
+                    Tous les exemplaires sont actuellement empruntés
+                </small>
+            {% endif %}
+        </div>
+        
+        {% if book.isAvailable %}
+            <button id="add-to-cart-btn" class="add-to-cart-btn" onclick="window.addToCartGlobal({{ book.id }}, this); return false;">
+                <i class="fas fa-cart-plus"></i> Ajouter au panier
+            </button>
+        {% else %}
+            <button class="add-to-cart-btn" disabled style="background: #6c757d; cursor: not-allowed; opacity: 0.6;">
+                <i class="fas fa-ban"></i> Non disponible
+            </button>
+        {% endif %}
+        
+        <a href="{{ path('view_cart') }}" class="view-cart-btn">
+            <i class="fas fa-shopping-cart"></i> Voir mon panier
+            {% set cartCount = cart_count() %}
+            {% if cartCount > 0 %}
+                <span class="cart-count-badge">{{ cartCount }}</span>
+            {% endif %}
+        </a>
         <a href="{{ path('home') }}" class="back-button">
             <i class="fas fa-arrow-left"></i> Back to Catalog
         </a>
@@ -177,32 +247,91 @@
 
 {% block javascripts %}
 <script>
-    function addToCart(bookId) {
-        const button = document.getElementById('add-to-cart-btn');
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-        fetch(`/add-to-cart/${bookId}`, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                button.innerHTML = '<i class="fas fa-check"></i> Added to Cart';
+    // Test if the global functions are available
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking global functions...');
+        console.log('window.addToCartGlobal:', typeof window.addToCartGlobal);
+        console.log('window.updateCartBadge:', typeof window.updateCartBadge);
+        
+        // Fallback function if global is not available
+        if (typeof window.addToCartGlobal !== 'function') {
+            console.log('Global function not found, creating fallback...');
+            window.addToCartGlobal = function(bookId, button) {
+                console.log('Fallback addToCart called');
+                alert('Function is working! BookID: ' + bookId);
+                
+                // Here we would do the actual AJAX call
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout...';
                 button.disabled = true;
+                
+                fetch(`/add-to-cart/${bookId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    console.log('Response:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data:', data);
+                    if (data.success) {
+                        button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
+                        button.style.backgroundColor = '#28a745';
+                        
+                        // Update cart badge in header
+                        const headerBadge = document.querySelector('.cart-badge');
+                        const currentCount = headerBadge ? parseInt(headerBadge.textContent) : 0;
+                        if (window.updateCartBadge) {
+                            window.updateCartBadge(currentCount + 1);
+                        }
+                        
+                        // Update cart button badge on this page
+                        updateLocalCartButton(currentCount + 1);
+                        
+                        setTimeout(() => {
+                            button.innerHTML = originalContent;
+                            button.disabled = false;
+                            button.style.backgroundColor = '';
+                        }, 2000);
+                    } else {
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
+                        alert(data.message || 'Erreur');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                    alert('Erreur: ' + error.message);
+                });
+            };
+        }
+        
+        // Function to update the local cart button badge
+        function updateLocalCartButton(count) {
+            const cartBtn = document.querySelector('.view-cart-btn');
+            const existingBadge = cartBtn ? cartBtn.querySelector('.cart-count-badge') : null;
+            
+            if (count > 0) {
+                if (existingBadge) {
+                    existingBadge.textContent = count;
+                } else if (cartBtn) {
+                    const badge = document.createElement('span');
+                    badge.className = 'cart-count-badge';
+                    badge.textContent = count;
+                    cartBtn.appendChild(badge);
+                }
             } else {
-                button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
-                button.disabled = false;
-                alert(data.message || 'Failed to add book to cart');
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
             }
-        })
-        .catch(error => {
-            button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
-            button.disabled = false;
-            alert('An error occurred while adding the book to cart');
-        });
-    }
+        }
+    });
 </script>
 {% endblock %} 

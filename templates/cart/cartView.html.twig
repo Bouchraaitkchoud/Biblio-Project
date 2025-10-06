@@ -108,109 +108,191 @@
             font-size: 1.1rem;
             font-family: 'Georgia', serif;
             transition: background 0.2s;
+            text-decoration: none;
         }
         .browse-btn:hover {
             background: #13203a;
+            text-decoration: none;
+            color: #fff;
         }
     </style>
 {% endblock %}
 
-{% block title %}My Cart{% endblock %}
+{% block title %}Mon Panier{% endblock %}
 
 {% block body %}
     <div class="container py-5 cart-container">
-        <div class="cart-title">🛒 My Cart</div>
-        <div class="cart-content">
+        <div class="cart-title">🛒 Mon Panier</div>
+        
+        <!-- Alert for automatically removed items -->
+        {% if removedItems is defined and removedItems|length > 0 %}
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Attention :</strong> Les livres suivants ont été automatiquement retirés de votre panier car ils ne sont plus disponibles :
+                <ul class="mb-0 mt-2">
+                    {% for book in removedItems %}
+                        <li>{{ book }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        
+        <!-- Notification pour les messages -->
+        <div id="cart-notification" class="alert" style="display: none;"></div>
+        
+        <div class="cart-content" id="cart-content">
             {% if items|length > 0 %}
                 {% for item in items %}
-                    <div class="cart-card">
+                    <div class="cart-card" id="cart-item-{{ item.getBook().getId() }}">
                         <div class="cart-book-info">
                             <div class="cart-book-title">{{ item.getBook().getTitle() }}</div>
-                            <div class="cart-book-author">by {{ item.getBook().getAuthorName() }}</div>
+                            <div class="cart-book-author">par {{ item.getBook().getAuthorName() }}</div>
                             <div class="cart-book-barcode">Barcode: {{ item.getBarcode() }}</div>
                         </div>
                         <div class="book-actions">
-                            <form action="{{ path('remove_from_cart', {'id': item.getBook().getId()}) }}" method="POST" class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('remove_from_cart') }}">
-                                <button type="submit" class="remove-btn">
-                                    <i class="fas fa-trash"></i> Remove
-                                </button>
-                            </form>
+                            <button type="button" class="remove-btn" onclick="removeFromCart({{ item.getBook().getId() }})">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
                         </div>
                     </div>
                 {% endfor %}
                 <div class="text-center">
-                    <form action="{{ path('submit_cart') }}" method="POST" class="d-inline">
-                        <input type="hidden" name="_token" value="{{ csrf_token('submit_cart') }}">
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-check"></i> Submit Request
-                        </button>
-                    </form>
+                    <button type="button" class="submit-btn" onclick="submitCart()">
+                        <i class="fas fa-check"></i> Envoyer la demande
+                    </button>
                 </div>
             {% else %}
                 <div class="empty-cart">
-                    <div class="empty-cart-icon"><i class="fas fa-shopping-cart"></i></div>
-                    <div class="empty-cart-text">Your cart is empty</div>
+                    <div class="empty-cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="empty-cart-text">Votre panier est vide</div>
                     <a href="{{ path('home') }}" class="browse-btn">
-                        <i class="fas fa-book"></i> Browse Books
+                        <i class="fas fa-book"></i> Parcourir les livres
                     </a>
                 </div>
             {% endif %}
         </div>
     </div>
-{% endblock %}
 
-{% block javascripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form[action="{{ path('submit_cart') }}"]');
+    <script>
+    function removeFromCart(bookId) {
+        const button = event.target.closest('.remove-btn');
+        const cartItem = document.getElementById(`cart-item-${bookId}`);
         
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+        // Visual feedback
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+        button.disabled = true;
+        
+        fetch(`/remove-from-cart/${bookId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Animation de suppression
+                cartItem.style.transition = 'all 0.3s ease';
+                cartItem.style.opacity = '0';
+                cartItem.style.transform = 'translateX(-100%)';
                 
-                const submitButton = form.querySelector('button[type="submit"]');
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                
-                fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'include'
-                })
-                .then(response => {
-                    if (response.headers.get('content-type')?.includes('application/pdf')) {
-                        // Handle PDF response
-                        return response.blob().then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = 'request_receipt.pdf';
-                            document.body.appendChild(a);
-                            a.click();
-                            window.URL.revokeObjectURL(url);
-                            a.remove();
-                            
-                            // Redirect to home page after download
-                            window.location.href = '{{ path('home') }}';
-                        });
-                    } else {
-                        // Handle JSON response (error case)
-                        return response.json().then(data => {
-                            throw new Error(data.message || 'An error occurred');
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert(error.message || 'An unexpected error occurred. Please try again.');
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = '<i class="fas fa-check"></i> Submit Request';
-                });
-            });
+                setTimeout(() => {
+                    cartItem.remove();
+                    updateCartDisplay();
+                    showNotification('Livre supprimé du panier', 'success');
+                    updateCartBadge();
+                }, 300);
+            } else {
+                button.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+                button.disabled = false;
+                showNotification(data.message || 'Erreur lors de la suppression', 'error');
+            }
+        })
+        .catch(error => {
+            button.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+            button.disabled = false;
+            showNotification('Une erreur est survenue', 'error');
+        });
+    }
+
+    function submitCart() {
+        const button = event.target;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
+        button.disabled = true;
+        
+        fetch('/submit-cart', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Demande envoyée avec succès !', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
+                button.disabled = false;
+                showNotification(data.message || 'Erreur lors de l\'envoi', 'error');
+            }
+        })
+        .catch(error => {
+            button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
+            button.disabled = false;
+            showNotification('Une erreur est survenue', 'error');
+        });
+    }
+
+    function updateCartDisplay() {
+        const cartCards = document.querySelectorAll('.cart-card').length;
+        if (cartCards === 0) {
+            document.getElementById('cart-content').innerHTML = `
+                <div class="empty-cart">
+                    <div class="empty-cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="empty-cart-text">Votre panier est vide</div>
+                    <a href="{{ path('home') }}" class="browse-btn">
+                        <i class="fas fa-book"></i> Parcourir les livres
+                    </a>
+                </div>
+            `;
         }
-    });
-</script>
+    }
+
+    function updateCartBadge() {
+        // Use the global function
+        if (typeof window.updateCartBadge === 'function') {
+            window.updateCartBadge();
+        } else {
+            // Fallback if global function not available
+            const badge = document.querySelector('.cart-badge');
+            if (badge) {
+                const currentCount = parseInt(badge.textContent) - 1;
+                if (currentCount <= 0) {
+                    badge.style.display = 'none';
+                } else {
+                    badge.textContent = currentCount;
+                }
+            }
+        }
+    }
+
+    function showNotification(message, type) {
+        const notification = document.getElementById('cart-notification');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+        notification.textContent = message;
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 4000);
+    }
+    </script>
 {% endblock %}

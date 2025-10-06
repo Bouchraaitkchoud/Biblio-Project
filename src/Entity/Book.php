@@ -346,4 +346,30 @@ class Book
         $this->location = $location;
         return $this;
     }
+
+    /**
+     * Get available exemplaires (not borrowed or damaged)
+     */
+    public function getAvailableExemplaires(): Collection
+    {
+        return $this->exemplaires->filter(function(Exemplaire $exemplaire) {
+            return $exemplaire->getStatus() === 'available';
+        });
+    }
+
+    /**
+     * Check if book has available exemplaires
+     */
+    public function isAvailable(): bool
+    {
+        return $this->getAvailableExemplaires()->count() > 0;
+    }
+
+    /**
+     * Get count of available exemplaires
+     */
+    public function getAvailableCount(): int
+    {
+        return $this->getAvailableExemplaires()->count();
+    }
 }

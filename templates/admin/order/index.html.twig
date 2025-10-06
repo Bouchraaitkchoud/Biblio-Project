@@ -1,5 +1,5 @@
 {# templates/admin/order/index.html.twig #}
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Orders Management{% endblock %}
 
@@ -248,46 +248,34 @@
         .badge-rejected {
             background-color: #dc3545;
         }
-        .admin-nav {
-            background-color: #1a2e4f;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .admin-nav-links {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .admin-nav-link {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 8px 15px;
+        .availability-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 6px;
-            transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: #856404;
         }
-        .admin-nav-link:hover, .admin-nav-link.active {
-            background-color: #b2903e;
-            color: #fff;
+        .availability-warning i {
+            color: #f39c12;
         }
-        .admin-user-info {
-            color: #fff;
-            font-family: 'Georgia', serif;
+        .book-item.unavailable {
+            background: #f8d7da;
+            border-left-color: #dc3545;
         }
-        .admin-user-info a {
-            color: #b2903e;
-            text-decoration: none;
-            transition: color 0.3s ease;
+        .book-item.unavailable .book-title {
+            color: #721c24;
+            text-decoration: line-through;
         }
-        .admin-user-info a:hover {
-            color: #fff;
+        .btn-approve.disabled {
+            background-color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
         }
+        .btn-approve.disabled:hover {
+            background-color: #6c757d !important;
+        }
+
         h1, h2, h3 {
             color: #1a2e4f;
             font-family: 'Georgia', serif;
@@ -296,26 +284,11 @@
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
+{% block admin_content %}
+    <div data-controller="order-filter">
         {% for message in app.flashes('success') %}
             <div class="alert alert-success mt-3">{{ message|raw }}</div>
         {% endfor %}
-        <div class="admin-nav">
-            <div class="admin-nav-links">
-                <a href="{{ path('admin_dashboard') }}" class="admin-nav-link">Dashboard</a>
-                <a href="{{ path('admin_orders_index') }}" class="admin-nav-link active">Orders</a>
-                <a href="{{ path('admin_returns_index') }}" class="admin-nav-link">Returns</a>
-                <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link">Disciplines</a>
-                <a href="{{ path('admin_authors_index') }}" class="admin-nav-link">Authors</a>
-                <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link">Publishers</a>
-                <a href="{{ path('admin_books_index') }}" class="admin-nav-link">Books</a>
-                <a href="{{ path('home') }}" class="admin-nav-link">Main Site</a>
-            </div>
-            <div class="admin-user-info">
-                Welcome, Admin | <a href="{{ path('app_logout') }}">Logout</a>
-            </div>
-        </div>
 
         <h1 class="mb-4">Orders Management</h1>
 
@@ -327,10 +300,10 @@
 
         <div class="filters-container">
             <div class="filter-buttons">
-                <button class="filter-btn filter-btn-all active" data-status="all">All Orders</button>
-                <button class="filter-btn filter-btn-pending" data-status="pending">Pending</button>
-                <button class="filter-btn filter-btn-approved" data-status="approved">Approved</button>
-                <button class="filter-btn filter-btn-rejected" data-status="rejected">Rejected</button>
+                <button class="filter-btn filter-btn-all active" data-status="all" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">All Orders</button>
+                <button class="filter-btn filter-btn-pending" data-status="pending" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">Pending</button>
+                <button class="filter-btn filter-btn-approved" data-status="approved" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">Approved</button>
+                <button class="filter-btn filter-btn-rejected" data-status="rejected" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">Rejected</button>
             </div>
             <div class="order-stats">
                 <div class="stat-item">
@@ -348,7 +321,7 @@
             </div>
             <div class="sort-options">
                 <span class="sort-label">Sort by:</span>
-                <select class="sort-select" id="sortSelect">
+                <select class="sort-select" data-order-filter-target="sortSelect" data-action="change->order-filter#sortOrders">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
                 </select>
@@ -363,7 +336,8 @@
                 </div>
             {% else %}
                 {% for cart in carts %}
-                    <div class="order-item status-{{ cart.status|lower }}" data-status="{{ cart.status|lower }}">
+                    {% set availability = check_cart_availability(cart) %}
+                    <div class="order-item status-{{ cart.status|lower }}" data-status="{{ cart.status|lower }}" data-order-filter-target="orderItem">
                         <div class="order-header">
                             <div class="order-id">Order #{{ cart.id }}</div>
                             <div class="order-date">{{ cart.createdAt|date('M d, Y H:i') }}</div>
@@ -372,11 +346,26 @@
                             <i class="fas fa-user"></i>
                             {{ cart.user.email }}
                         </div>
+                        
+                        {% if cart.status == 'pending' and not availability.all_available %}
+                            <div class="availability-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Attention :</strong> {{ availability.unavailable_books|length }} livre(s) ne sont plus disponibles dans cette commande.
+                                L'approbation est désactivée jusqu'à ce que les livres redeviennent disponibles ou que la commande soit rejetée.
+                            </div>
+                        {% endif %}
+                        
                         <div class="books-list">
                             {% for item in cart.items %}
-                                <div class="book-item">
+                                {% set isAvailable = item.exemplaire.status == 'available' %}
+                                <div class="book-item {{ not isAvailable ? 'unavailable' : '' }}">
                                     <div class="book-info">
-                                        <div class="book-title">{{ item.exemplaire.book.title }}</div>
+                                        <div class="book-title">
+                                            {{ item.exemplaire.book.title }}
+                                            {% if not isAvailable %}
+                                                <span style="color: #dc3545; font-size: 0.8em;">({{ item.exemplaire.status|title }})</span>
+                                            {% endif %}
+                                        </div>
                                         <div class="book-author">by {{ item.exemplaire.book.authorName }}</div>
                                     </div>
                                     <div class="book-quantity">Qty: 1</div>
@@ -385,12 +374,18 @@
                         </div>
                         <div class="action-buttons">
                             {% if cart.status == 'pending' %}
-                                <form action="{{ path('admin_order_approve', {'id': cart.id}) }}" method="POST" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
-                                    <button type="submit" class="btn-approve">
-                                        <i class="fas fa-check"></i> Approve
+                                {% if availability.all_available %}
+                                    <form action="{{ path('admin_order_approve', {'id': cart.id}) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cart.id) }}">
+                                        <button type="submit" class="btn-approve">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <button type="button" class="btn-approve disabled" disabled title="Impossible d'approuver : {{ availability.unavailable_books|length }} livre(s) indisponible(s)">
+                                        <i class="fas fa-ban"></i> Cannot Approve
                                     </button>
-                                </form>
+                                {% endif %}
                                 <form action="{{ path('admin_order_reject', {'id': cart.id}) }}" method="POST" class="d-inline">
                                     <input type="hidden" name="_token" value="{{ csrf_token('reject_order') }}">
                                     <button type="submit" class="btn-reject">
@@ -408,47 +403,4 @@
             {% endif %}
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            const orderItems = document.querySelectorAll('.order-item');
-            const sortSelect = document.getElementById('sortSelect');
-
-            // Filter functionality
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const status = this.dataset.status;
-                    
-                    // Update active button
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Filter orders
-                    orderItems.forEach(item => {
-                        if (status === 'all' || item.dataset.status === status) {
-                            item.style.display = 'block';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
-            });
-
-            // Sort functionality
-            sortSelect.addEventListener('change', function() {
-                const ordersContainer = document.querySelector('.orders-container');
-                const orders = Array.from(orderItems);
-                
-                orders.sort((a, b) => {
-                    const dateA = new Date(a.querySelector('.order-date').textContent);
-                    const dateB = new Date(b.querySelector('.order-date').textContent);
-                    
-                    return this.value === 'newest' ? dateB - dateA : dateA - dateB;
-                });
-                
-                orders.forEach(order => ordersContainer.appendChild(order));
-            });
-        });
-    </script>
 {% endblock %}

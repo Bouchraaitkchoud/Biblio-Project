@@ -38,4 +38,15 @@ class DisciplineRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    
+    public function searchByName(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('d')
+            ->where('LOWER(d.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('d.name', 'ASC')
+            ->setMaxResults(20)
+            ->getQuery()
+            ->getResult();
+    }
 }

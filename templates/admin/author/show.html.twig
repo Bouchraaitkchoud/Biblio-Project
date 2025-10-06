@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Admin - Author Details{% endblock %}
 
@@ -138,7 +138,7 @@
                         {% for book in author.books %}
                             <li>
                                 <a href="{{ path('book_show', {'id': book.id}) }}">{{ book.title }}</a>
-                                <span class="count-badge">({{ book.section.name }})</span>
+                                <span class="count-badge">({{ book.discipline.name }})</span>
                             </li>
                         {% endfor %}
                     </ul>

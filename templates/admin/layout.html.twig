@@ -2,22 +2,91 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}?v={{ "now"|date('YmdHis') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ "now"|date('YmdHis') }}">
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
-        .admin-main-content {
-            margin: 0 auto;
-            max-width: 900px;
-            padding: 2.5rem 2rem 2rem 2rem;
+        html, body {
+            background: #fdfaf5 !important;
+        }
+        .admin-layout {
+            display: flex;
+        }
+        .admin-sidebar {
+            width: 230px;
             min-height: 100vh;
+            background: #1a2e4f;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.07);
+        }
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .admin-nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+            font-family: 'Georgia', serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .admin-nav-link.active, .admin-nav-link:hover {
+            background-color: #b2903e;
+            color: #fff;
+        }
+        .sidebar-user {
+            margin: 30px 0 20px 0;
+            padding: 0 24px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .logout-link {
+            color: #b2903e;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+        .logout-link:hover {
+            color: #fff;
+        }
+        .dashboard-main-content {
+            margin-left: 250px;
+            width: 100%;
+            padding: 30px 30px 30px 0;
+        }
+        .admin-content-wrapper {
+            padding: 20px;
             background: #fdfaf5;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* Ensure layout styles don't interfere with dashboard */
+        body:not(.dashboard-page) .admin-content-wrapper {
+            padding: 20px;
         }
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
-        <div class="admin-main-content">
+{% block content %}
+    <div class="admin-content-wrapper">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show">
@@ -27,61 +96,5 @@
             {% endfor %}
         {% endfor %}
         {% block admin_content %}{% endblock %}
-        </div>
     </div>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        // Force immediate CSS reloading on every page transition
-        document.addEventListener('DOMContentLoaded', function() {
-            // Reload stylesheets
-            var links = document.getElementsByTagName('link');
-            for (var i = 0; i < links.length; i++) {
-                if (links[i].rel === 'stylesheet') {
-                    var href = links[i].href;
-                    links[i].href = href + (href.indexOf('?') >= 0 ? '&' : '?') + 'forceReload=' + new Date().getTime();
-                }
-            }
-            
-            // Force style recalculation
-            setTimeout(function() {
-                document.querySelectorAll('.admin-nav, .admin-table, .actions').forEach(function(el) {
-                    el.style.display = 'none';
-                    el.offsetHeight; // Force reflow
-                    el.style.display = '';
-                });
-                
-                // Make sure action buttons are properly styled
-                document.querySelectorAll('.actions .btn').forEach(function(btn) {
-                    btn.style.display = 'inline-flex !important';
-                    btn.style.alignItems = 'center !important';
-                    btn.style.justifyContent = 'center !important';
-                });
-            }, 50);
-        });
-        
-        // Prevent caching and ensure full page reload when navigating
-        window.onpageshow = function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            }
-        };
-        
-        // Add cache-busting parameter to certain links
-        document.addEventListener('DOMContentLoaded', function() {
-            // For special navigation that requires full page reload (like admin to main site)
-            document.querySelectorAll('a[href*="home"]').forEach(function(link) {
-                if (!link.getAttribute('onclick')) {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        let url = this.href;
-                        url += (url.includes('?') ? '&' : '?') + '_=' + new Date().getTime();
-                        window.location.href = url;
-                    });
-                }
-            });
-        });
-    </script>
 {% endblock %} 

@@ -1,22 +1,242 @@
 ﻿{% extends "base.html.twig" %}
 
-{% block title %}Books in {{ discipline.name }}{% endblock %}
+{% block title %}Livres - {{ discipline.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            background: linear-gradient(135deg, #fdfaf5 0%, #f8f5f0 100%) !important;
+        }
+        
+        .page-header {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 2rem 0;
+            color: #1a2e4f;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-left: 5px solid #b2903e;
+        }
+        
+        .search-input {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+        
+        .search-input:focus {
+            border-color: #b2903e;
+            box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
+            outline: none;
+        }
+        
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+            border-left: 5px solid #b2903e;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+        
+        .book-image {
+            height: 250px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .book-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .book-image .fallback-icon {
+            font-size: 3rem;
+            color: #b2903e;
+            opacity: 0.7;
+        }
+        
+        .book-content {
+            padding: 1.5rem;
+        }
+        
+        .book-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a2e4f;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            height: 3rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-family: 'Merriweather', serif;
+        }
+        
+        .book-authors {
+            color: #b2903e;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .book-year {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .availability-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .available {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .unavailable {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .no-books {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #b2903e;
+        }
+        
+        .no-books i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #b2903e;
+            opacity: 0.7;
+        }
+        
+        .btn-search {
+            background: linear-gradient(135deg, #b2903e, #9b7e46);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-search:hover {
+            background: linear-gradient(135deg, #9b7e46, #7d6435);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .page-header {
+                font-size: 2rem;
+                margin: 1rem 0;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <h1>{{ discipline.name }}</h1>
-    <p>Browse all books in this discipline</p>
+<main class="library-main">
+    <h1 class="page-header">{{ discipline.name }}</h1>
+    
+    <div class="search-section">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="input-group">
+                    <input type="text" class="form-control search-input" id="bookSearch" placeholder="Rechercher dans {{ discipline.name }}...">
+                    <button class="btn btn-search" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <small class="text-muted mt-2 d-block">Recherche par titre ou auteur dans cette discipline</small>
+            </div>
+        </div>
+    </div>
     
     {% if books|length > 0 %}
-        <div class="row">
+        <div class="books-grid" id="booksContainer">
             {% for book in books %}
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ book.title }}</h5>
-                            <p class="card-text">by {{ book.authorName }}</p>
-                            {% if book.publicationYear %}
-                                <small class="text-muted">Published: {{ book.publicationYear }}</small>
+                <div class="book-card" data-title="{{ book.title|lower }}" data-authors="{% for author in book.authors %}{{ author.name|lower }} {% endfor %}" onclick="window.location.href='{{ path('book_show', {id: book.id}) }}'">
+                    <div class="book-image">
+                        {% if book.coverImage %}
+                            <img src="{{ book.coverImage }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="fallback-icon" style="display: none;">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        {% else %}
+                            <div class="fallback-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="book-content">
+                        <h5 class="book-title">{{ book.title }}</h5>
+                        <div class="book-authors">
+                            {% if book.authors|length > 0 %}
+                                {% for author in book.authors %}
+                                    {{ author.name }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                Auteur inconnu
+                            {% endif %}
+                        </div>
+                        {% if book.publicationYear %}
+                            <div class="book-year">{{ book.publicationYear }}</div>
+                        {% endif %}
+                        <div class="availability-badge {% if book.isAvailable %}available{% else %}unavailable{% endif %}">
+                            {% if book.isAvailable %}
+                                <i class="fas fa-check"></i> {{ book.availableCount }} disponible(s)
+                            {% else %}
+                                <i class="fas fa-times"></i> Non disponible
                             {% endif %}
                         </div>
                     </div>
@@ -24,10 +244,37 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="alert alert-info">
-            <h4>No Books Found</h4>
-            <p>There are no books available in this discipline yet.</p>
+        <div class="no-books">
+            <i class="fas fa-book-open"></i>
+            <h4>Aucun livre trouvé</h4>
+            <p>Il n'y a pas encore de livres dans cette discipline.</p>
         </div>
     {% endif %}
-</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('bookSearch');
+    const booksContainer = document.getElementById('booksContainer');
+    const bookCards = document.querySelectorAll('.book-card');
+    
+    if (searchInput && bookCards.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            bookCards.forEach(card => {
+                const title = card.getAttribute('data-title');
+                const authors = card.getAttribute('data-authors');
+                const searchText = title + ' ' + authors;
+                
+                if (searchText.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

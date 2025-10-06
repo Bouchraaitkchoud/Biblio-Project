@@ -4,7 +4,6 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .form-container {
             background: #fff;
@@ -178,7 +177,7 @@
     </div>
     
     <div class="form-container">
-        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+        {{ form_start(form, {'attr': {'data-controller': 'select2', 'multipart': true}}) }}
         
         <!-- Section 1: Basic Information -->
         <div class="form-section">
@@ -226,7 +225,12 @@
                 <div class="col-md-6">
                     {{ form_row(form.authors, {
                         'label_attr': {'class': 'form-label required-field'},
-                        'attr': {'class': 'form-select select2-multiple', 'multiple': true, 'data-placeholder': 'Search and select authors...'}
+                        'attr': {
+                            'class': 'form-select', 
+                            'multiple': true, 
+                            'data-select2-target': 'select',
+                            'data-placeholder': 'Search and select authors...'
+                        }
                     }) }}
                     <small class="form-text text-muted mt-2">
                         <i class="fas fa-info-circle"></i> Type to search, click to select multiple authors
@@ -235,7 +239,12 @@
                 <div class="col-md-6">
                     {{ form_row(form.publishers, {
                         'label_attr': {'class': 'form-label'},
-                        'attr': {'class': 'form-select select2-multiple', 'multiple': true, 'data-placeholder': 'Search and select publishers...'}
+                        'attr': {
+                            'class': 'form-select', 
+                            'multiple': true, 
+                            'data-select2-target': 'select',
+                            'data-placeholder': 'Search and select publishers...'
+                        }
                     }) }}
                     <small class="form-text text-muted mt-2">
                         <i class="fas fa-info-circle"></i> Type to search, click to select multiple publishers
@@ -307,20 +316,5 @@
         {{ form_end(form) }}
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2 for authors and publishers
-            $('.select2-multiple').select2({
-                width: '100%',
-                closeOnSelect: false,
-                allowClear: true,
-                tags: false,
-                placeholder: function(){
-                    return $(this).data('placeholder');
-                }
-            });
-        });
-    </script>
+
 {% endblock %} 

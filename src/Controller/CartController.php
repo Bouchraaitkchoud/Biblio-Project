@@ -45,7 +45,16 @@ class CartController extends AbstractController
                 return new JsonResponse(['success' => false, 'message' => 'Book not found'], 404);
             }
 
-            // 2. Get authenticated user
+            // 2. Check if book is available
+            if (!$book->isAvailable()) {
+                $this->logger->warning('Attempt to add unavailable book to cart: {bookId}', ['bookId' => $id]);
+                return new JsonResponse([
+                    'success' => false, 
+                    'message' => 'Ce livre n\'est pas disponible actuellement'
+                ], 400);
+            }
+
+            // 3. Get authenticated user
             /** @var User $user */
             $user = $security->getUser();
             if (!$user) {
@@ -89,7 +98,7 @@ class CartController extends AbstractController
     }
 
     #[Route('/submit-cart', name: 'submit_cart', methods: ['POST'])]
-    public function submitCart(EntityManagerInterface $em, Security $security): Response
+    public function submitCart(EntityManagerInterface $em, Security $security, Request $request): Response
     {
         /** @var User $user */
         $user = $security->getUser();
@@ -106,8 +115,21 @@ class CartController extends AbstractController
                 return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
             }
 
+            // If it's an AJAX request, return success message without PDF
+            if ($request->isXmlHttpRequest()) {
+                // Clear the cookie cart
+                $response = new JsonResponse([
+                    'success' => true,
+                    'message' => 'Demande envoyée avec succès ! Vous serez redirigé vers l\'accueil.'
+                ]);
+                
+                $response->headers->setCookie($this->cartService->clearDraftCart());
+                
+                return $response;
+            }
+
             try {
-                // Generate request receipt
+                // Generate request receipt for non-AJAX requests
                 $pdfContent = $this->receiptGenerator->generateRequestReceipt($cart);
                 
                 // Clear the cookie cart
@@ -157,6 +179,25 @@ class CartController extends AbstractController
         // Verify CSRF token if coming from web form
         if ($request->isMethod('POST') && !$this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
+        }
+
+        // CRITICAL: Check if all exemplaires are still available
+        $unavailableBooks = [];
+        foreach ($cart->getItems() as $item) {
+            $exemplaire = $item->getExemplaire();
+            if ($exemplaire->getStatus() !== 'available') {
+                $unavailableBooks[] = $exemplaire->getBook()->getTitle();
+            }
+        }
+
+        if (!empty($unavailableBooks)) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Impossible d\'approuver cette demande. Les livres suivants ne sont plus disponibles: ' . 
+                            implode(', ', $unavailableBooks) . 
+                            '. Veuillez soit rejeter la demande, soit attendre que les livres redeviennent disponibles.',
+                'unavailable_books' => $unavailableBooks
+            ], 400);
         }
 
         try {
@@ -233,21 +274,32 @@ class CartController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
-        // Load exemplaires from cookie cart
+        // Validate cart and remove unavailable items
+        $validation = $this->cartService->validateAndCleanCart();
+        
+        // Load exemplaires from cookie cart (now cleaned)
         $items = $this->cartService->getCartItems();
         
-        // Get a valid section (first book in cart)
-        $section = null;
+        // Get a valid discipline (first book in cart)
+        $discipline = null;
         if (!empty($items)) {
-            $section = $items[0]->getBook()->getSection();
+            $discipline = $items[0]->getBook()->getDiscipline();
         }
-    
-        return $this->render('cart/cartView.html.twig', [
+
+        $response = $this->render('cart/cartView.html.twig', [
             'cart' => null, // No database cart for draft
             'items' => $items,
             'total' => count($items),
-            'section' => $section,
+            'discipline' => $discipline,
+            'removedItems' => $validation['removed'] // Pass removed items to template
         ]);
+
+        // Set updated cookie if items were removed
+        if ($validation['cookie']) {
+            $response->headers->setCookie($validation['cookie']);
+        }
+
+        return $response;
     }
     
     #[Route('/remove-from-cart/{id}', name: 'remove_from_cart', methods: ['POST'])]

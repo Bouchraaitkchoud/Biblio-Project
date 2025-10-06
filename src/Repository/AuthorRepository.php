@@ -28,6 +28,17 @@ class AuthorRepository extends ServiceEntityRepository
             ->getResult();
     }
     
+    public function searchByName(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('a')
+            ->where('LOWER(a.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('a.name', 'ASC')
+            ->setMaxResults(20)
+            ->getQuery()
+            ->getResult();
+    }
+    
     /**
      * Get paginated list of authors with optional search filter
      */

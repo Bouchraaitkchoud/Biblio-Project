@@ -46,6 +46,17 @@ class PublisherRepository extends ServiceEntityRepository
             ->getResult();
     }
     
+    public function searchByName(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('LOWER(p.name) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('p.name', 'ASC')
+            ->setMaxResults(20)
+            ->getQuery()
+            ->getResult();
+    }
+    
     /**
      * Get paginated list of publishers with optional search filter
      */
@@ -74,4 +85,4 @@ class PublisherRepository extends ServiceEntityRepository
             'limit' => $limit
         ];
     }
-} 
+}

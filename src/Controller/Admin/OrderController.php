@@ -171,4 +171,26 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('admin_orders_index');
         }
     }
+
+    #[Route('/borrowed-exemplaires', name: 'admin_borrowed_exemplaires')]
+    public function borrowedExemplaires(Request $request): Response
+    {
+        // Get all cart items for approved carts with borrowed status exemplaires
+        $cartItems = $this->em->getRepository(\App\Entity\CartItem::class)
+            ->createQueryBuilder('ci')
+            ->innerJoin('ci.exemplaire', 'e')
+            ->innerJoin('ci.cart', 'c')
+            ->leftJoin('c.user', 'u')
+            ->where('c.status = :status')
+            ->andWhere('e.status = :exemplaireStatus')
+            ->setParameter('status', 'approved')
+            ->setParameter('exemplaireStatus', 'borrowed')
+            ->orderBy('ci.addedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('admin/order/borrowed_exemplaires.html.twig', [
+            'cartItems' => $cartItems,
+        ]);
+    }
 }
