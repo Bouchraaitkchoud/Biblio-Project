@@ -191,13 +191,25 @@
     <div class="search-section">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="input-group">
-                    <input type="text" class="form-control search-input" id="bookSearch" placeholder="Rechercher dans {{ discipline.name }}...">
-                    <button class="btn btn-search" type="button">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                <small class="text-muted mt-2 d-block">Recherche par titre ou auteur dans cette discipline</small>
+                <form method="GET" action="{{ path('discipline_books', {id: discipline.id}) }}">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control search-input" id="bookSearch" 
+                               placeholder="Rechercher dans {{ discipline.name }}..." 
+                               value="{{ searchQuery }}">
+                        <button class="btn btn-search" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                <small class="text-muted mt-2 d-block">
+                    Recherche par titre, auteur ou ISBN dans cette discipline
+                    {% if searchQuery %}
+                        - <strong>{{ books|length }}</strong> résultat(s) pour "{{ searchQuery }}"
+                        <a href="{{ path('discipline_books', {id: discipline.id}) }}" class="ms-2 text-primary">
+                            <i class="fas fa-times"></i> Effacer
+                        </a>
+                    {% endif %}
+                </small>
             </div>
         </div>
     </div>
@@ -205,7 +217,11 @@
     {% if books|length > 0 %}
         <div class="books-grid" id="booksContainer">
             {% for book in books %}
-                <div class="book-card" data-title="{{ book.title|lower }}" data-authors="{% for author in book.authors %}{{ author.name|lower }} {% endfor %}" onclick="window.location.href='{{ path('book_show', {id: book.id}) }}'">
+                <div class="book-card" 
+                     data-title="{{ book.title|lower }}" 
+                     data-authors="{% for author in book.authors %}{{ author.name|lower }} {% endfor %}"
+                     data-isbn="{{ book.isbn|lower|default('') }}"
+                     onclick="window.location.href='{{ path('book_show', {id: book.id}) }}'">
                     <div class="book-image">
                         {% if book.coverImage %}
                             <img src="{{ book.coverImage }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -259,20 +275,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookCards = document.querySelectorAll('.book-card');
     
     if (searchInput && bookCards.length > 0) {
+        // Real-time search as user types (client-side filtering)
+        let debounceTimer;
         searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim();
-            
-            bookCards.forEach(card => {
-                const title = card.getAttribute('data-title');
-                const authors = card.getAttribute('data-authors');
-                const searchText = title + ' ' + authors;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const searchTerm = this.value.toLowerCase().trim();
                 
-                if (searchText.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+                bookCards.forEach(card => {
+                    const title = card.getAttribute('data-title');
+                    const authors = card.getAttribute('data-authors');
+                    const isbn = card.getAttribute('data-isbn');
+                    const searchText = title + ' ' + authors + ' ' + isbn;
+                    
+                    if (searchTerm === '' || searchText.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Update visible count
+                const visibleCards = Array.from(bookCards).filter(card => card.style.display !== 'none');
+                console.log(`Affichage ${visibleCards.length} livre(s) sur ${bookCards.length}`);
+            }, 300);
+        });
+
+        // Submit form on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.form.submit();
+            }
         });
     }
 });

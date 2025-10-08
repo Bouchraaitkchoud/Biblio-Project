@@ -22,6 +22,7 @@ class SearchController extends AbstractController
         DisciplineRepository $disciplineRepository
     ): Response {
         $query = $request->query->get('q', '');
+        $searchType = $request->query->get('search_type', 'title');
         
         $results = [
             'books' => [],
@@ -31,21 +32,37 @@ class SearchController extends AbstractController
         ];
         
         if (!empty(trim($query))) {
-            // Recherche dans les livres (titre, ISBN)
-            $results['books'] = $bookRepository->searchByTitleOrIsbn($query);
-            
-            // Recherche dans les auteurs
-            $results['authors'] = $authorRepository->searchByName($query);
-            
-            // Recherche dans les éditeurs
-            $results['publishers'] = $publisherRepository->searchByName($query);
-            
-            // Recherche dans les disciplines
-            $results['disciplines'] = $disciplineRepository->searchByName($query);
+            // Recherche ciblée selon le type sélectionné
+            switch ($searchType) {
+                case 'title':
+                    $results['books'] = $bookRepository->searchByTitle($query);
+                    break;
+                case 'author':
+                    $results['authors'] = $authorRepository->searchByName($query);
+                    break;
+                case 'publisher':
+                    $results['publishers'] = $publisherRepository->searchByName($query);
+                    break;
+                case 'discipline':
+                    $results['disciplines'] = $disciplineRepository->searchByName($query);
+                    break;
+                case 'isbn':
+                    $results['books'] = $bookRepository->searchByIsbn($query);
+                    break;
+                case 'all':
+                default:
+                    // Recherche globale dans tout
+                    $results['books'] = $bookRepository->searchByTitleOrIsbn($query);
+                    $results['authors'] = $authorRepository->searchByName($query);
+                    $results['publishers'] = $publisherRepository->searchByName($query);
+                    $results['disciplines'] = $disciplineRepository->searchByName($query);
+                    break;
+            }
         }
         
         return $this->render('search/results.html.twig', [
             'query' => $query,
+            'searchType' => $searchType,
             'results' => $results,
         ]);
     }

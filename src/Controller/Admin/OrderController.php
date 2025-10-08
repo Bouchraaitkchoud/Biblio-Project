@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Psr\Log\LoggerInterface;
 
 #[Route('/admin/orders')]
@@ -24,6 +25,7 @@ class OrderController extends AbstractController
         private CartRepository $cartRepository,
         private EntityManagerInterface $em,
         private UrlGeneratorInterface $urlGenerator,
+        private CsrfTokenManagerInterface $csrfTokenManager,
         private LoggerInterface $logger
     ) {}
 
@@ -172,25 +174,18 @@ class OrderController extends AbstractController
         }
     }
 
-    #[Route('/borrowed-exemplaires', name: 'admin_borrowed_exemplaires')]
-    public function borrowedExemplaires(Request $request): Response
+    #[Route('/csrf-token', name: 'csrf_token_ajax', methods: ['POST'])]
+    public function getCsrfToken(Request $request): Response
     {
-        // Get all cart items for approved carts with borrowed status exemplaires
-        $cartItems = $this->em->getRepository(\App\Entity\CartItem::class)
-            ->createQueryBuilder('ci')
-            ->innerJoin('ci.exemplaire', 'e')
-            ->innerJoin('ci.cart', 'c')
-            ->leftJoin('c.user', 'u')
-            ->where('c.status = :status')
-            ->andWhere('e.status = :exemplaireStatus')
-            ->setParameter('status', 'approved')
-            ->setParameter('exemplaireStatus', 'borrowed')
-            ->orderBy('ci.addedAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-
-        return $this->render('admin/order/borrowed_exemplaires.html.twig', [
-            'cartItems' => $cartItems,
-        ]);
+        $data = json_decode($request->getContent(), true);
+        $tokenId = $data['tokenId'] ?? null;
+        
+        if (!$tokenId) {
+            return $this->json(['error' => 'Token ID required'], 400);
+        }
+        
+        $token = $this->csrfTokenManager->getToken($tokenId)->getValue();
+        
+        return $this->json(['token' => $token]);
     }
 }

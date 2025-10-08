@@ -76,4 +76,42 @@ class BookRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function searchByTitle(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('b')
+            ->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('b.title', 'ASC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function searchByIsbn(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('b')
+            ->where('LOWER(b.isbn) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('b.title', 'ASC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Search books within a specific discipline
+     */
+    public function searchInDiscipline($discipline, string $searchTerm): array
+    {
+        return $this->createQueryBuilder('b')
+            ->leftJoin('b.authors', 'a')
+            ->where('b.discipline = :discipline')
+            ->andWhere('(LOWER(b.title) LIKE LOWER(:searchTerm) OR LOWER(a.name) LIKE LOWER(:searchTerm) OR LOWER(b.isbn) LIKE LOWER(:searchTerm))')
+            ->setParameter('discipline', $discipline)
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->orderBy('b.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

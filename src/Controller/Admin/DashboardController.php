@@ -50,42 +50,4 @@ class DashboardController extends AbstractController
             'recent_orders' => $recent_orders
         ]);
     }
-
-    #[Route('/borrowed-exemplaires', name: 'admin_borrowed_exemplaires', methods: ['GET'])]
-    public function borrowedExemplaires(): Response
-    {
-        $borrowedExemplaires = $this->exemplaireRepository->createQueryBuilder('e')
-            ->where('e.status = :status')
-            ->setParameter('status', 'borrowed')
-            ->getQuery()
-            ->getResult();
-
-        $data = [];
-        foreach ($borrowedExemplaires as $exemplaire) {
-            $cartItem = $this->entityManager->getRepository(\App\Entity\CartItem::class)
-                ->createQueryBuilder('ci')
-                ->where('ci.exemplaire = :exemplaire')
-                ->setParameter('exemplaire', $exemplaire)
-                ->orderBy('ci.addedAt', 'DESC')
-                ->setMaxResults(1)
-                ->getQuery()
-                ->getOneOrNullResult();
-
-            $cart = $cartItem ? $cartItem->getCart() : null;
-            $student = $cart ? $cart->getUser() : null;
-            $admin = $cart ? $cart->getProcessedBy() : null;
-            $processedAt = $cart ? $cart->getProcessedAt() : null;
-
-            $data[] = [
-                'exemplaire' => $exemplaire,
-                'student' => $student,
-                'admin' => $admin,
-                'borrowed_at' => $processedAt,
-            ];
-        }
-
-        return $this->render('admin/dashboard/borrowed_exemplaires.html.twig', [
-            'borrowedExemplaires' => $data
-        ]);
-    }
 } 

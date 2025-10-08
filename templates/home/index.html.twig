@@ -199,24 +199,23 @@
             margin-top: 1rem;
         }
         
-        .filter-badge {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 20px;
-            padding: 0.3rem 0.8rem;
-            font-size: 0.85rem;
-            color: #666;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .search-filters {
+            margin-top: 1rem;
         }
         
-        .filter-badge:hover {
-            background: #b2903e;
-            color: white;
-            border-color: #b2903e;
+        .radio-group label {
+            font-size: 0.9rem;
+            color: #1a2e4f;
+            font-weight: 500;
+        }
+        
+        .radio-group label:hover {
+            color: #b2903e;
+        }
+        
+        .radio-group input[type="radio"]:checked + span {
+            color: #b2903e;
+            font-weight: bold;
         }
     </style>
 {% endblock %}
@@ -237,22 +236,33 @@
             </div>
             
             <div class="search-filters text-center">
-                <small class="text-muted d-block mb-2">Recherche par :</small>
-                <span class="filter-badge" title="Titre du livre">
-                    <i class="fas fa-book"></i> Titre
-                </span>
-                <span class="filter-badge" title="Nom de l'auteur">
-                    <i class="fas fa-user"></i> Auteur
-                </span>
-                <span class="filter-badge" title="Maison d'édition">
-                    <i class="fas fa-building"></i> Éditeur
-                </span>
-                <span class="filter-badge" title="Discipline">
-                    <i class="fas fa-tags"></i> Discipline
-                </span>
-                <span class="filter-badge" title="ISBN">
-                    <i class="fas fa-barcode"></i> ISBN
-                </span>
+                <small class="text-muted d-block mb-3">Recherche par :</small>
+                <div class="radio-group" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="search_type" value="all" style="margin: 0;">
+                        <span><i class="fas fa-search"></i> Tout</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="search_type" value="title" checked style="margin: 0;">
+                        <span><i class="fas fa-book"></i> Titre</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="search_type" value="author" style="margin: 0;">
+                        <span><i class="fas fa-user"></i> Auteur</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="search_type" value="publisher" style="margin: 0;">
+                        <span><i class="fas fa-building"></i> Éditeur</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="search_type" value="discipline" style="margin: 0;">
+                        <span><i class="fas fa-tags"></i> Discipline</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="search_type" value="isbn" style="margin: 0;">
+                        <span><i class="fas fa-barcode"></i> ISBN</span>
+                    </label>
+                </div>
             </div>
         </form>
     </div>
@@ -327,4 +337,31 @@
         {% endif %}
     </div>
     {% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Simple - les boutons radio fonctionnent nativement !
+        // Juste s'assurer qu'on a "title" sélectionné par défaut au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const titleRadio = document.querySelector('input[name="search_type"][value="title"]');
+            if (titleRadio && !document.querySelector('input[name="search_type"]:checked')) {
+                titleRadio.checked = true;
+            }
+        });
+        
+        // Réinitialiser sur navigation arrière
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                const titleRadio = document.querySelector('input[name="search_type"][value="title"]');
+                if (titleRadio) {
+                    // Décocher tous
+                    document.querySelectorAll('input[name="search_type"]').forEach(r => r.checked = false);
+                    // Sélectionner "title"
+                    titleRadio.checked = true;
+                }
+            }
+        });
+    </script>
 {% endblock %}

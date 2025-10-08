@@ -232,7 +232,6 @@
                         <a href="{{ path('admin_dashboard') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_dashboard' %} active{% endif %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                         <a href="{{ path('admin_orders_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_orders' %} active{% endif %}"><i class="fas fa-clipboard-list"></i> Orders</a>
                         <a href="{{ path('admin_returns_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_returns' %} active{% endif %}"><i class="fas fa-undo"></i> Returns</a>
-                        <a href="{{ path('admin_borrowed_exemplaires') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_borrowed_exemplaires' %} active{% endif %}"><i class="fas fa-book-reader"></i> Borrowed Books</a>
                         <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_disciplines' %} active{% endif %}"><i class="fas fa-sitemap"></i> Disciplines</a>
                         <a href="{{ path('admin_authors_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_authors' %} active{% endif %}"><i class="fas fa-user-edit"></i> Authors</a>
                         <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_publishers' %} active{% endif %}"><i class="fas fa-building"></i> Publishers</a>
