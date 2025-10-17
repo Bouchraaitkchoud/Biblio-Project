@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Process Returns{% endblock %}
+{% block title %}Traiter les retours{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -23,7 +23,7 @@
             margin: 0 auto;
             padding: 20px 0;
         }
-        .scanner-section, .return-history, .book-details {
+        .scanner-section, .return-history, .book-details, .pending-orders {
             background: #fff;
             border-left: 4px solid #b2903e;
             border-radius: 8px;
@@ -31,7 +31,7 @@
             padding: 2rem 2.5rem;
             margin-bottom: 2rem;
         }
-        .scanner-section h3 {
+        .scanner-section h3, .pending-orders h3 {
             color: #1a2e4f;
             font-size: 1.2rem;
             font-weight: bold;
@@ -74,18 +74,20 @@
         .book-details.show {
             display: block;
         }
-        .return-history h3 {
-            color: #1a2e4f;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
         }
-        .return-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+        table th,
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-family: 'Georgia', serif;
         }
-        .return-item:last-child {
-            border-bottom: none;
+        table th {
+            background-color: #f4f4f4;
         }
         .status-badge {
             display: inline-block;
@@ -96,10 +98,6 @@
         }
         .status-success {
             background-color: #28a745;
-            color: white;
-        }
-        .status-error {
-            background-color: #dc3545;
             color: white;
         }
         .btn-success {
@@ -123,38 +121,80 @@
 {% endblock %}
 
 {% block admin_content %}
-        <div class="page-header">Process Returns</div>
-        <div class="return-container">
-            <div class="scanner-section">
-                <h3>Scan Barcode</h3>
-                <div class="input-group mb-3">
-                    <input type="text" id="barcodeInput" class="form-control" placeholder="Scan or enter barcode" autofocus>
-                    <button type="button" id="scanButton" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Scan
-                    </button>
-                </div>
-                <div id="scanMessage" class="alert" style="display: none;"></div>
-            </div>
-            <div id="bookDetails" class="book-details">
-                <h3>Book Details</h3>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Title:</strong> <span id="bookTitle"></span></p>
-                        <p><strong>Barcode:</strong> <span id="bookBarcode"></span></p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Borrowed by:</strong> <span id="borrowedBy"></span></p>
-                        <p><strong>Borrowed date:</strong> <span id="borrowedDate"></span></p>
-                    </div>
-                </div>
-                <button id="processReturn" class="btn btn-success">
-                    <i class="fas fa-check"></i> Process Return
+    <div class="page-header">Traiter les retours</div>
+    <div class="return-container">
+        <div class="scanner-section">
+            <h3>Scanner le code-barres</h3>
+            <div class="input-group mb-3">
+                <input type="text" id="barcodeInput" class="form-control" placeholder="Scannez ou entrez le code-barres" autofocus>
+                <button type="button" id="scanButton" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Scanner
                 </button>
             </div>
-            <div class="return-history">
-                <h3>Today's Returns</h3>
-                <div id="returnHistory"></div>
+            <div id="scanMessage" class="alert" style="display: none;"></div>
+        </div>
+
+        {# Table listing approved orders not yet returned #}
+        <div class="pending-orders">
+            <h3>Commandes en attente de retour</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Lecteur</th>
+                        <th>Date de commande</th>
+                        <th>Exemplaire</th>
+                        <th>Discipline</th>
+                        <th>Admin traitant</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in pendingOrders %}
+                        <tr>
+                            <td>
+                                {{ order.user.nom }} {{ order.user.prenom }}<br>
+                                <small>{{ order.user.email }}</small>
+                            </td>
+                            <td>{{ order.placedAt|date('d/m/Y H:i') }}</td>
+                            <td>
+                                {{ order.exemplaire.book.title }}<br>
+                                <small>Code: {{ order.exemplaire.barcode }}</small>
+                            </td>
+                            <td>{{ order.exemplaire.discipline.name }}</td>
+                            <td>{{ order.adminEmail ? order.adminEmail : 'N/A' }}</td>
+                            <td>
+                                {# Example: link to process return manually if needed #}
+                                <a href="{{ path('admin_returns_process_single', { id: order.id }) }}" class="btn btn-success btn-sm">Traiter</a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6">Aucune commande en attente de retour</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="bookDetails" class="book-details">
+            <h3>Détails du livre</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Titre :</strong> <span id="bookTitle"></span></p>
+                    <p><strong>Code-barres :</strong> <span id="bookBarcode"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Emprunté par :</strong> <span id="borrowedBy"></span></p>
+                    <p><strong>Date d'emprunt :</strong> <span id="borrowedDate"></span></p>
+                </div>
             </div>
+            <button id="processReturn" class="btn btn-success">
+                <i class="fas fa-check"></i> Traiter le retour
+            </button>
+        </div>
+        <div class="return-history">
+            <h3>Retours d'aujourd'hui</h3>
+            <div id="returnHistory"></div>
         </div>
     </div>
     <script>
@@ -167,7 +207,9 @@
             const returnHistory = document.getElementById('returnHistory');
             let currentExemplaireId = null;
 
-            // Handle barcode input
+            barcodeInput.focus();
+
+            // Handle Enter key in barcode input
             barcodeInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -187,7 +229,7 @@
                 }
             }
 
-            // Process return button
+            // Handle process return button click
             processReturnBtn.addEventListener('click', function() {
                 if (currentExemplaireId) {
                     processReturn(currentExemplaireId);
@@ -195,38 +237,32 @@
             });
 
             function scanBarcode(barcode) {
-                console.log('Scanning barcode:', barcode);
                 const formData = new FormData();
                 formData.append('barcode', barcode);
 
                 fetch('{{ path('admin_returns_scan') }}', {
                     method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 })
                 .then(response => {
-                    console.log('Response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`HTTP error: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Response data:', data);
                     if (data.success) {
                         showBookDetails(data.exemplaire);
                         currentExemplaireId = data.exemplaire.id;
-                        showMessage('Book found!', 'success');
+                        showMessage('Livre trouvé !', 'success');
                     } else {
-                        showMessage(data.message || 'Error scanning barcode', 'error');
+                        showMessage(data.message || 'Erreur lors du scan', 'error');
                         hideBookDetails();
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showMessage('Error scanning barcode: ' + error.message, 'error');
+                    showMessage('Erreur lors du scan : ' + error.message, 'error');
                     hideBookDetails();
                 });
             }
@@ -237,34 +273,30 @@
 
                 fetch('{{ path('admin_returns_process') }}', {
                     method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`HTTP error: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        showMessage('Book returned successfully!', 'success');
+                        showMessage('Retour traité avec succès !', 'success');
                         addToReturnHistory(data.exemplaire);
                         resetForm();
                     } else {
-                        showMessage(data.message || 'Error processing return', 'error');
+                        showMessage(data.message || 'Erreur lors du traitement', 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showMessage('Error processing return: ' + error.message, 'error');
+                    showMessage('Erreur lors du traitement : ' + error.message, 'error');
                 });
             }
 
             function showBookDetails(exemplaire) {
-                console.log('Showing book details:', exemplaire);
                 document.getElementById('bookTitle').textContent = exemplaire.book_title;
                 document.getElementById('bookBarcode').textContent = exemplaire.barcode;
                 document.getElementById('borrowedBy').textContent = exemplaire.borrowed_by;
@@ -278,13 +310,10 @@
             }
 
             function showMessage(message, type) {
-                console.log('Showing message:', message, 'Type:', type);
                 scanMessage.textContent = message;
                 scanMessage.className = 'alert alert-' + (type === 'success' ? 'success' : 'danger');
                 scanMessage.style.display = 'block';
-                setTimeout(() => {
-                    scanMessage.style.display = 'none';
-                }, 3000);
+                setTimeout(() => { scanMessage.style.display = 'none'; }, 3000);
             }
 
             function addToReturnHistory(exemplaire) {
@@ -293,11 +322,10 @@
                 returnItem.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${exemplaire.book_title}</strong>
-                            <br>
-                            <small>Barcode: ${exemplaire.barcode}</small>
+                            <strong>${exemplaire.book_title}</strong><br>
+                            <small>Code-barres : ${exemplaire.barcode}</small>
                         </div>
-                        <span class="status-badge status-success">Returned</span>
+                        <span class="status-badge status-success">Retourné</span>
                     </div>
                 `;
                 returnHistory.insertBefore(returnItem, returnHistory.firstChild);
@@ -310,4 +338,4 @@
             }
         });
     </script>
-{% endblock %} 
+{% endblock %}

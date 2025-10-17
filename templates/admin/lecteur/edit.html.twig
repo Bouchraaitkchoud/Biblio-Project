@@ -1,0 +1,13 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\lecteur/edit.html.twig #}
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Modifier le Lecteur{% endblock %}
+
+{% block admin_content %}
+    <h1>Modifier le Lecteur</h1>
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+    {{ form_end(form) }}
+    <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}

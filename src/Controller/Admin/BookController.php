@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller\Admin;
 
 use App\Entity\Book;
@@ -8,17 +7,18 @@ use App\Repository\BookRepository;
 use App\Repository\AuthorRepository;
 use App\Repository\DisciplineRepository;
 use App\Service\ImageUploadService;
+use App\Entity\Exemplaire;
+use App\Form\ExemplaireType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Form\ExemplaireType;
-use App\Entity\Exemplaire;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/books')]
-#[IsGranted('ROLE_ADMIN')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_LIVRES')")]
 class BookController extends AbstractController
 {
     public function __construct(
@@ -47,6 +47,48 @@ class BookController extends AbstractController
             ],
             'searchTerm' => $searchTerm,
         ]);
+    }
+    
+    #[Route('/export-csv', name: 'admin_book_export_csv', methods: ['GET'])]
+    public function exportCsv(): Response
+    {
+        $books = $this->bookRepository->findAll();
+
+        // Build CSV content. Adjust or add columns as needed.
+        $csvData = "ID,Title,Author,Discipline,Publication Year,ISBN\n";
+        foreach ($books as $book) {
+            $title = str_replace([",", "\n"], [" ", " "], $book->getTitle());
+            // Use getAuthorName() instead of getAuthor()
+            $authorName = $book->getAuthorName() 
+                ? str_replace([",", "\n"], [" ", " "], $book->getAuthorName()) 
+                : '';
+            $disciplineName = $book->getDiscipline() 
+                ? str_replace([",", "\n"], [" ", " "], $book->getDiscipline()->getName()) 
+                : '';
+            $publicationYear = $book->getPublicationYear() ?: '';
+            $isbn = $book->getIsbn() 
+                ? str_replace([",", "\n"], [" ", " "], $book->getIsbn()) 
+                : '';
+            
+            $csvData .= sprintf("%d,%s,%s,%s,%s,%s\n",
+                $book->getId(),
+                $title,
+                $authorName,
+                $disciplineName,
+                $publicationYear,
+                $isbn
+            );
+        }
+
+        $response = new Response($csvData);
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'books.csv'
+        );
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', 'text/csv');
+
+        return $response;
     }
     
     #[Route('/new', name: 'admin_book_new', methods: ['GET', 'POST'])]
@@ -183,8 +225,8 @@ class BookController extends AbstractController
                 }
                 
                 // Set default section if not provided
-                if (!$exemplaire->getDisciplineId()) {
-                    $exemplaire->setDisciplineId($book->getDiscipline()->getId());
+                if (!$exemplaire->getDiscipline()) {
+                    $exemplaire->setDiscipline($book->getDiscipline());
                 }
                 
                 $this->entityManager->persist($exemplaire);
@@ -210,4 +252,4 @@ class BookController extends AbstractController
             'form' => $form->createView()
         ]);
     }
-} 
+}

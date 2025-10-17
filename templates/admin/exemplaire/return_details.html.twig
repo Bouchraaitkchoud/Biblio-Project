@@ -1,49 +1,49 @@
 {% extends 'admin/dashboard/index.html.twig' %}
 
 {% block body %}
-    <h2>Return Book</h2>
+    <h2>Retour du Livre</h2>
     <div class="mb-3">
-        <b>Barcode:</b> {{ exemplaire.barcode }}<br>
-        <b>Book Title:</b> {{ exemplaire.book.title }}
+        <b>Code-barres :</b> {{ exemplaire.barcode }}<br>
+        <b>Titre du livre :</b> {{ exemplaire.book.title }}
     </div>
     <form method="post" action="{{ path('admin_exemplaire_mark_returned', {id: exemplaire.id}) }}" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3">
-            <label for="condition">Condition of Book</label>
+            <label for="condition">État du livre</label>
             <select name="condition" id="condition" class="form-control" required>
                 <option value="Excellent">Excellent</option>
-                <option value="Good">Good</option>
-                <option value="Damaged">Damaged</option>
-                <option value="Lost">Lost</option>
+                <option value="Good">Bon</option>
+                <option value="Damaged">Abîmé</option>
+                <option value="Lost">Perdu</option>
             </select>
         </div>
         <div class="mb-3">
-            <label for="notes">Notes (optional)</label>
+            <label for="notes">Remarques (facultatif)</label>
             <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
         </div>
         <div class="mb-3">
-            <label for="photo">Upload Photo (optional)</label>
+            <label for="photo">Télécharger une photo (facultatif)</label>
             <input type="file" name="photo" id="photo" class="form-control">
         </div>
         <div class="mb-3">
-            <label for="date_returned">Date Returned</label>
+            <label for="date_returned">Date de retour</label>
             <input type="date" name="date_returned" id="date_returned" class="form-control" value="{{ "now"|date('Y-m-d') }}" required>
         </div>
         <div class="mb-3">
-            <label>Flags</label><br>
-            <input type="checkbox" name="flag_late" id="flag_late"> <label for="flag_late">Late Return</label>
-            <input type="checkbox" name="flag_damaged" id="flag_damaged" style="margin-left:15px;"> <label for="flag_damaged">Damaged</label>
+            <label>Options</label><br>
+            <input type="checkbox" name="flag_late" id="flag_late"> <label for="flag_late">Retour en retard</label>
+            <input type="checkbox" name="flag_damaged" id="flag_damaged" style="margin-left:15px;"> <label for="flag_damaged">Abîmé</label>
         </div>
         <div class="mb-3">
-            <label for="fine">Suggest Fine (optional)</label>
+            <label for="fine">Proposer une amende (facultatif)</label>
             <input type="number" name="fine" id="fine" class="form-control" min="0" step="0.01">
         </div>
         <div class="mb-3">
-            <input type="checkbox" name="print_receipt" id="print_receipt" value="1"> <label for="print_receipt">Print Return Receipt</label><br>
-            <input type="checkbox" name="email_receipt" id="email_receipt" value="1"> <label for="email_receipt">Email Return Receipt</label>
+            <input type="checkbox" name="print_receipt" id="print_receipt" value="1"> <label for="print_receipt">Imprimer le reçu de retour</label><br>
+            <input type="checkbox" name="email_receipt" id="email_receipt" value="1"> <label for="email_receipt">Envoyer par e-mail le reçu de retour</label>
         </div>
         <div class="text-end">
-            <button type="submit" class="btn btn-success">Submit Return</button>
-            <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success">Valider le retour</button>
+            <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">Annuler</a>
         </div>
     </form>
-{% endblock %} 
+{% endblock %}

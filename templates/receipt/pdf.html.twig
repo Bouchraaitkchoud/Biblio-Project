@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Receipt {{ receipt.code }}</title>
+    <title>Reçu {{ receipt.code }}</title>
     <style>
         body { 
             font-family: 'Helvetica Neue', Arial, sans-serif; 
@@ -73,13 +73,13 @@
 </head>
 <body>
     <div class="header">
-        <h2>Library Receipt</h2>
+        <h2>Reçu de la Bibliothèque</h2>
     </div>
     
     <div class="receipt-info">
-        <p><strong>Receipt No:</strong> {{ receipt.code }}</p>
-        <p><strong>Date:</strong> {{ receipt.generatedAt|date('d/m/Y H:i') }}</p>
-        <p><strong>User:</strong> {{ receipt.cart.user.email }}</p>
+        <p><strong>N° de reçu :</strong> {{ receipt.code }}</p>
+        <p><strong>Date :</strong> {{ receipt.generatedAt|date('d/m/Y H:i') }}</p>
+        <p><strong>Utilisateur :</strong> {{ receipt.cart.user.email }}</p>
     </div>
     
     <div class="barcode">
@@ -88,19 +88,19 @@
     </div>
     
     <div class="items">
-        <h3>Borrowed Books:</h3>
+        <h3>Livres empruntés :</h3>
         {% for item in receipt.cart.items %}
         <div class="item">
             <span>{{ item.exemplaire.book.title }}</span>
-            <span>by {{ item.exemplaire.book.authorName }}</span>
+            <span>par {{ item.exemplaire.book.authorName }}</span>
         </div>
         {% endfor %}
     </div>
     
     <div class="footer">
-        <p><span class="status">Status: {{ receipt.cart.status|upper }}</span></p>
-        <p>Processed by: {{ receipt.cart.processedBy ? receipt.cart.processedBy.email : 'SYSTEM' }}</p>
-        <p>Thank you for your borrowing!</p>
+        <p><span class="status">Statut : {{ receipt.cart.status|upper }}</span></p>
+        <p>Traité par : {{ receipt.cart.processedBy ? receipt.cart.processedBy.email : 'SYSTEM' }}</p>
+        <p>Merci pour votre emprunt !</p>
     </div>
 </body>
 </html>

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller\Admin;
 
 use App\Entity\Publisher;
@@ -9,11 +8,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/publishers')]
-#[IsGranted('ROLE_ADMIN')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_EDITEURS')")]
 class PublisherController extends AbstractController
 {
     public function __construct(
@@ -39,6 +39,44 @@ class PublisherController extends AbstractController
             ],
             'searchTerm' => $searchTerm,
         ]);
+    }
+    
+    #[Route('/export-csv', name: 'admin_publisher_export_csv', methods: ['GET'])]
+    public function exportCsv(): Response
+    {
+        $publishers = $this->publisherRepository->findAll();
+
+        // Build CSV string. Adjust columns as needed.
+        $csvData = "ID,Name,Address,City,Country,Website,Comment\n";
+        foreach ($publishers as $publisher) {
+            // Replace commas and newlines to avoid breaking CSV format
+            $name    = str_replace([",", "\n"], [" ", " "], $publisher->getName());
+            $address = str_replace([",", "\n"], [" ", " "], $publisher->getAddress() ?: '');
+            $city    = str_replace([",", "\n"], [" ", " "], $publisher->getCity() ?: '');
+            $country = str_replace([",", "\n"], [" ", " "], $publisher->getCountry() ?: '');
+            $website = str_replace([",", "\n"], [" ", " "], $publisher->getWebsite() ?: '');
+            $comment = str_replace([",", "\n"], [" ", " "], $publisher->getComment() ?: '');
+            
+            $csvData .= sprintf("%d,%s,%s,%s,%s,%s,%s\n",
+                $publisher->getId(),
+                $name,
+                $address,
+                $city,
+                $country,
+                $website,
+                $comment
+            );
+        }
+
+        $response = new Response($csvData);
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'publishers.csv'
+        );
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', 'text/csv');
+
+        return $response;
     }
     
     #[Route('/new', name: 'admin_publisher_new', methods: ['GET', 'POST'])]
@@ -114,7 +152,6 @@ class PublisherController extends AbstractController
     public function delete(Request $request, Publisher $publisher): Response
     {
         if ($this->isCsrfTokenValid('delete'.$publisher->getId(), $request->request->get('_token'))) {
-            
             // Check if it has books
             if (!$publisher->getBooks()->isEmpty()) {
                 $this->addFlash('error', 'Cannot delete publisher that has books.');
@@ -162,4 +199,4 @@ class PublisherController extends AbstractController
             'name' => $publisher->getName()
         ]);
     }
-} 
+}

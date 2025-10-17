@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Edit Exemplaire{% endblock %}
+{% block title %}Modifier l'exemplaire{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -95,11 +95,11 @@
         {% endfor %}
 
         <div class="page-header">
-            <span>Edit Exemplaire</span>
+            <span>Modifier l'exemplaire</span>
         </div>
         <div class="book-info">
-            <span><strong>Book:</strong> {{ book.title }}</span> |
-            <span><strong>Barcode:</strong> {{ exemplaire.barcode }}</span>
+            <span><strong>Livre :</strong> {{ book.title }}</span> |
+            <span><strong>Code-barres :</strong> {{ exemplaire.barcode }}</span>
         </div>
 
         <div class="form-container mt-4">
@@ -158,13 +158,13 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
+                        <i class="fas fa-save"></i> Enregistrer les modifications
                     </button>
                     <a href="{{ path('admin_books_show', {'id': book.id}) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Book
+                        <i class="fas fa-arrow-left"></i> Retour au livre
                     </a>
                 </div>
             {{ form_end(form) }}
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

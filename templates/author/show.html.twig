@@ -51,11 +51,11 @@
     <div class="container mt-4">
         <div class="author-header">
             <h1 class="author-name">{{ author.name }}</h1>
-            <p class="mb-0">{{ author.books|length }} book(s) in the library</p>
+            <p class="mb-0">{{ author.books|length }} livre(s) dans la bibliothèque</p>
         </div>
 
         <div class="books-section">
-            <h2 class="mb-4">Books by {{ author.name }}</h2>
+            <h2 class="mb-4">Livres par {{ author.name }}</h2>
             
             {% if author.books|length > 0 %}
                 <div class="row">
@@ -73,10 +73,10 @@
                                             <h3 class="book-title">{{ book.title }}</h3>
                                             <div class="book-meta">
                                                 {% if book.publicationYear %}
-                                                    <p class="mb-1">Published: {{ book.publicationYear }}</p>
+                                                    <p class="mb-1">Publié : {{ book.publicationYear }}</p>
                                                 {% endif %}
                                                 {% if book.section %}
-                                                    <p class="mb-1">Section: {{ book.section.name }}</p>
+                                                    <p class="mb-1">Section : {{ book.section.name }}</p>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -88,9 +88,9 @@
                 </div>
             {% else %}
                 <div class="alert alert-info">
-                    No books found for this author.
+                    Aucun livre trouvé pour cet auteur.
                 </div>
             {% endif %}
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

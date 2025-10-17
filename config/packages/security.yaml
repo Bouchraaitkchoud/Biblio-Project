@@ -55,11 +55,18 @@ security:
   password_hashers:
     Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
   providers:
-    # Define your user provider (e.g., from a database)
     app_user_provider:
       entity:
         class: App\Entity\User
-        property: email # The field used to log in (e.g., email or username)
+        property: email
+
+  role_hierarchy:
+    # Full admin should automatically include basic user rights.
+    ROLE_ADMIN: [ROLE_USER]
+    # Limited admin may not have full admin rights, but you give it a base inheritance.
+    ROLE_LIMITED_ADMIN: [ROLE_USER]
+    # Note: the extra roles (e.g., ROLE_GERER_UTILISATEURS) remain separate.
+  
   firewalls:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -73,17 +80,32 @@ security:
         default_target_path: home
         enable_csrf: false
         success_handler: App\Security\LoginSuccessHandler
-        # Ensure proper target path saving
         use_referer: true
         always_use_default_target_path: false
         target_path_parameter: _target_path
       logout:
         path: app_logout
         target: app_login
+    admin:
+      pattern: ^/admin
+      provider: app_user_provider
+      form_login:
+        login_path: app_admin_login
+        check_path: app_admin_check
+        default_target_path: admin_dashboard
+        enable_csrf: true
+      logout:
+        path: /admin/logout
+
   access_control:
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/register, roles: PUBLIC_ACCESS }
-    - { path: ^/receipt, roles: ROLE_USER } # Allow access to receipts for authenticated users
-    - { path: ^/section/\d+/books, roles: ROLE_USER } # Allow access to the book page for authenticated users
-    - { path: ^/admin, roles: ROLE_ADMIN } # Admin access rule needs to be before the catch-all rule
-    - { path: ^/, roles: ROLE_USER } # Default rule for all other routes
+    - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin/authors, roles: [ROLE_ADMIN, ROLE_GERER_AUTEURS] }
+    - { path: ^/admin/users, roles: [ROLE_ADMIN, ROLE_GERER_UTILISATEURS] }
+    - { path: ^/admin/books, roles: [ROLE_ADMIN, ROLE_GERER_LIVRES] }
+    - { path: ^/admin/returns, roles: [ROLE_ADMIN, ROLE_GERER_RETOURS] }
+    - { path: ^/admin/publishers, roles: [ROLE_ADMIN, ROLE_GERER_EDITEURS] }
+    - { path: ^/admin/disciplines, roles: [ROLE_ADMIN, ROLE_GERER_DISCIPLINES] }
+    - { path: ^/admin/orders, roles: [ROLE_ADMIN, ROLE_GERER_COMMANDES] }
+    - { path: ^/, roles: ROLE_USER }

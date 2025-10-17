@@ -9,10 +9,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/exemplaires')]
-#[IsGranted('ROLE_ADMIN')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_EXEMPLAIRES')")]
 class ExemplaireController extends AbstractController
 {
     public function __construct(
@@ -47,28 +47,18 @@ class ExemplaireController extends AbstractController
     {
         if ($this->isCsrfTokenValid('return'.$exemplaire->getId(), $request->request->get('_token'))) {
             try {
-                // Start transaction
                 $this->entityManager->beginTransaction();
-
-                // Update exemplaire status
                 $exemplaire->setStatus('available');
                 $exemplaire->setReturnDate(new \DateTime());
-
-                // Update book quantity
                 $book = $exemplaire->getBook();
                 $currentQuantity = $book->getQuantity();
                 $book->setQuantity($currentQuantity + 1);
-
                 $this->entityManager->persist($exemplaire);
                 $this->entityManager->persist($book);
                 $this->entityManager->flush();
-
-                // Commit transaction
                 $this->entityManager->commit();
-
                 $this->addFlash('success', 'Book returned successfully.');
             } catch (\Exception $e) {
-                // Rollback transaction on error
                 $this->entityManager->rollback();
                 $this->addFlash('error', 'An error occurred while processing the return.');
             }
@@ -85,7 +75,6 @@ class ExemplaireController extends AbstractController
             return $this->redirectToRoute('admin_borrowed_exemplaires');
         }
 
-        // Process form fields
         $condition = $request->request->get('condition');
         $notes = $request->request->get('notes');
         $dateReturned = $request->request->get('date_returned');
@@ -95,15 +84,11 @@ class ExemplaireController extends AbstractController
         $printReceipt = $request->request->get('print_receipt') === '1';
         $emailReceipt = $request->request->get('email_receipt') === '1';
         $photoFile = $request->files->get('photo');
-
-        // Update exemplaire status and return date
         $exemplaire->setStatus('available');
         $exemplaire->setReturnDate($dateReturned ? new \DateTime($dateReturned) : new \DateTime());
-        // Optionally, store condition, notes, flags, fine, and photo in your DB (requires schema update)
         $this->entityManager->persist($exemplaire);
         $this->entityManager->flush();
 
-        // Generate PDF receipt if requested
         if ($printReceipt) {
             $request->getSession()->set('return_receipt_data', [
                 'barcode' => $exemplaire->getBarcode(),
@@ -140,7 +125,6 @@ class ExemplaireController extends AbstractController
             return $this->redirectToRoute('admin_borrowed_exemplaires');
         }
 
-        // Find the latest CartItem for this exemplaire
         $cartItem = $this->entityManager->getRepository(\App\Entity\CartItem::class)
             ->createQueryBuilder('ci')
             ->where('ci.exemplaire = :exemplaire')
@@ -173,11 +157,10 @@ class ExemplaireController extends AbstractController
         $pdf->MultiCell(0, 8, 'Processed by: ' . $returnData['processed_by']);
         $pdf->Ln(5);
         $pdf->Cell(0, 10, 'Thank you!', 0, 1, 'C');
-        // Clear session data after use
         $request->getSession()->remove('return_receipt_data');
         return new Response($pdf->Output('return_receipt.pdf', 'S'), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="return_receipt.pdf"'
         ]);
     }
-} 
+}

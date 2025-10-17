@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - Publisher Details{% endblock %}
+{% block title %}Admin - Détails de l'Éditeur{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -8,9 +8,6 @@
         body {
             background-color: #fdfaf5 !important;
             font-family: 'Georgia', serif;
-            color: #4e4a45;
-            min-height: 100vh;
-        }
             color: #4e4a45;
             min-height: 100vh;
         }
@@ -120,12 +117,12 @@
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                 </div>
             {% endfor %}
         {% endfor %}
         
-        <div class="page-header">Publisher Details</div>
+        <div class="page-header">Détails de l'Éditeur</div>
 
         <div class="publisher-detail-card">
             <div class="publisher-name">{{ publisher.name }}</div>
@@ -133,48 +130,48 @@
                 {% if publisher.city or publisher.country %}
                     {{ [publisher.city, publisher.country]|filter(v => v)|join(', ') }}
                 {% else %}
-                    <span class="text-muted">Location not specified</span>
+                    <span class="text-muted">Emplacement non spécifié</span>
                 {% endif %}
             </div>
             <div class="btn-group">
-                <a href="{{ path('admin_publisher_edit', {'id': publisher.id}) }}" class="btn btn-edit" title="Edit publisher">
-                    <i class="fas fa-edit"></i> Edit
+                <a href="{{ path('admin_publisher_edit', {'id': publisher.id}) }}" class="btn btn-edit" title="Modifier l'éditeur">
+                    <i class="fas fa-edit"></i> Modifier
                 </a>
-                <form method="post" action="{{ path('admin_publisher_delete', {'id': publisher.id}) }}" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this publisher?');">
+                <form method="post" action="{{ path('admin_publisher_delete', {'id': publisher.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet éditeur ?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ publisher.id) }}">
-                    <button class="btn btn-delete" {% if publisher.books is not empty %}disabled title="Cannot delete publisher with books"{% endif %}>
-                        <i class="fas fa-trash-alt"></i> Delete
+                    <button class="btn btn-delete" title="Supprimer l'éditeur" {% if publisher.books is not empty %}disabled title="Impossible de supprimer un éditeur avec des livres"{% endif %}>
+                        <i class="fas fa-trash-alt"></i> Supprimer
                     </button>
                 </form>
             </div>
             <table class="table publisher-info-table">
-                            <tbody>
-                                <tr>
-                        <th>ID</th>
-                                    <td>{{ publisher.id }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Address</th>
-                                    <td>{{ publisher.address|default('Not specified') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Website</th>
-                                    <td>
-                                        {% if publisher.website %}
-                                            <a href="{{ publisher.website }}" target="_blank">{{ publisher.website }}</a>
-                                        {% else %}
-                                            Not specified
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                <tbody>
                     <tr>
-                        <th>Comments</th>
-                        <td>{{ publisher.comment|default('No comments')|nl2br }}</td>
+                        <th>ID</th>
+                        <td>{{ publisher.id }}</td>
                     </tr>
-                            </tbody>
-                        </table>
+                    <tr>
+                        <th>Adresse</th>
+                        <td>{{ publisher.address|default('Non spécifiée') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Site Web</th>
+                        <td>
+                            {% if publisher.website %}
+                                <a href="{{ publisher.website }}" target="_blank">{{ publisher.website }}</a>
+                            {% else %}
+                                Non spécifié
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Commentaires</th>
+                        <td>{{ publisher.comment|default('Aucun commentaire')|nl2br }}</td>
+                    </tr>
+                </tbody>
+            </table>
             <div class="books-list">
-                <strong>Books ({{ publisher.books|length }}):</strong>
+                <strong>Livres ({{ publisher.books|length }}) :</strong>
                 {% if publisher.books|length > 0 %}
                     <ul>
                         {% for book in publisher.books %}
@@ -184,12 +181,12 @@
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <div class="text-muted">No books associated with this publisher.</div>
+                    <div class="text-muted">Aucun livre associé à cet éditeur.</div>
                 {% endif %}
             </div>
             <a href="{{ path('admin_publishers_index') }}" class="btn btn-primary back-link">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

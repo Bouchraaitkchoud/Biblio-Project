@@ -182,25 +182,25 @@
     <div class="book-detail-info">
         <div class="book-title">{{ book.title }}</div>
         {% if book.authorName %}
-            <div class="book-author">By {{ book.authorName }}</div>
+            <div class="book-author">Par {{ book.authorName }}</div>
         {% endif %}
         <div class="book-meta">
             {% if book.isbn %}
-                <div class="meta-label">ISBN:</div>
+                <div class="meta-label">ISBN :</div>
                 <div class="meta-value">{{ book.isbn }}</div>
             {% endif %}
             {% if book.publicationYear %}
-                <div class="meta-label">Publication Year:</div>
+                <div class="meta-label">Année de publication :</div>
                 <div class="meta-value">{{ book.publicationYear }}</div>
             {% endif %}
             {% if book.discipline %}
-                <div class="meta-label">Discipline:</div>
+                <div class="meta-label">Discipline :</div>
                 <div class="meta-value">{{ book.discipline.name }}</div>
             {% endif %}
         </div>
         {% if book.description %}
             <div class="book-description">
-                <strong>Description:</strong><br>
+                <strong>Description :</strong><br>
                 {{ book.description|nl2br }}
             </div>
         {% endif %}
@@ -239,7 +239,7 @@
             {% endif %}
         </a>
         <a href="{{ path('home') }}" class="back-button">
-            <i class="fas fa-arrow-left"></i> Back to Catalog
+            <i class="fas fa-arrow-left"></i> Retour au catalogue
         </a>
     </div>
 </div>
@@ -247,22 +247,17 @@
 
 {% block javascripts %}
 <script>
-    // Test if the global functions are available
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page loaded, checking global functions...');
+        console.log('Page chargée, vérification des fonctions globales...');
         console.log('window.addToCartGlobal:', typeof window.addToCartGlobal);
         console.log('window.updateCartBadge:', typeof window.updateCartBadge);
         
-        // Fallback function if global is not available
         if (typeof window.addToCartGlobal !== 'function') {
-            console.log('Global function not found, creating fallback...');
+            console.log('Fonction globale introuvée, création d\'une solution de repli...');
             window.addToCartGlobal = function(bookId, button) {
-                console.log('Fallback addToCart called');
-                alert('Function is working! BookID: ' + bookId);
-                
-                // Here we would do the actual AJAX call
+                alert('La fonction fonctionne ! BookID : ' + bookId);
                 const originalContent = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout...';
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
                 button.disabled = true;
                 
                 fetch(`/add-to-cart/${bookId}`, {
@@ -272,26 +267,17 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(response => {
-                    console.log('Response:', response);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Data:', data);
                     if (data.success) {
                         button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
                         button.style.backgroundColor = '#28a745';
-                        
-                        // Update cart badge in header
                         const headerBadge = document.querySelector('.cart-badge');
                         const currentCount = headerBadge ? parseInt(headerBadge.textContent) : 0;
                         if (window.updateCartBadge) {
                             window.updateCartBadge(currentCount + 1);
                         }
-                        
-                        // Update cart button badge on this page
                         updateLocalCartButton(currentCount + 1);
-                        
                         setTimeout(() => {
                             button.innerHTML = originalContent;
                             button.disabled = false;
@@ -300,11 +286,11 @@
                     } else {
                         button.innerHTML = originalContent;
                         button.disabled = false;
-                        alert(data.message || 'Erreur');
+                        alert(data.message || 'Erreur lors de l\'ajout');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Erreur:', error);
                     button.innerHTML = originalContent;
                     button.disabled = false;
                     alert('Erreur: ' + error.message);
@@ -312,11 +298,9 @@
             };
         }
         
-        // Function to update the local cart button badge
         function updateLocalCartButton(count) {
             const cartBtn = document.querySelector('.view-cart-btn');
             const existingBadge = cartBtn ? cartBtn.querySelector('.cart-count-badge') : null;
-            
             if (count > 0) {
                 if (existingBadge) {
                     existingBadge.textContent = count;
@@ -334,4 +318,4 @@
         }
     });
 </script>
-{% endblock %} 
+{% endblock %}

@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Exemplaire;
+use App\Entity\Order;
 use App\Repository\ExemplaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,9 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/returns')]
-#[IsGranted('ROLE_ADMIN')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_RETOURS')")]
 class ReturnController extends AbstractController
 {
     public function __construct(
@@ -24,9 +26,17 @@ class ReturnController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_returns_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
-        return $this->render('admin/return/index.html.twig');
+        // Retrieve orders that are approved and have not been marked returned
+        $pendingOrders = $entityManager->getRepository(Order::class)->findBy([
+            'status' => 'approved',
+            'returnedAt' => null,
+        ]);
+
+        return $this->render('admin/return/index.html.twig', [
+            'pendingOrders' => $pendingOrders,
+        ]);
     }
 
     #[Route('/scan', name: 'admin_returns_scan', methods: ['POST'])]
@@ -180,4 +190,4 @@ class ReturnController extends AbstractController
             ], 500);
         }
     }
-} 
+}

@@ -1,0 +1,25 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\lecteur/show.html.twig #}
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Détails du Lecteur{% endblock %}
+
+{% block admin_content %}
+    <h1>Détails du Lecteur</h1>
+    <div>
+        <p><strong>Nom:</strong> {{ lecteur.nom }}</p>
+        <p><strong>Prénom:</strong> {{ lecteur.prenom }}</p>
+        <p><strong>Email:</strong> {{ lecteur.email }}</p>
+        <p><strong>Code d'admission:</strong> {{ lecteur.codeAdmission }}</p>
+        <p><strong>Établissement:</strong> {{ lecteur.etablissement }}</p>
+        <p><strong>Formation:</strong> {{ lecteur.formation }}</p>
+        <p><strong>Promotion:</strong> {{ lecteur.promotion }}</p>
+    </div>
+    <div class="btn-group" role="group" aria-label="Actions">
+        <a href="{{ path('admin_lecteurs_edit', { id: lecteur.id }) }}" class="btn btn-primary">Modifier</a>
+        <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
+    <form method="post" action="{{ path('admin_lecteurs_delete', { id: lecteur.id }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce lecteur ?');" style="margin-top: 10px;">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecteur.id) }}">
+        <button class="btn btn-danger">Supprimer</button>
+    </form>
+{% endblock %}

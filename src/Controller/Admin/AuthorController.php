@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller\Admin;
 
 use App\Entity\Author;
@@ -9,11 +8,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/authors')]
-#[IsGranted('ROLE_ADMIN')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_AUTEURS')")]
 class AuthorController extends AbstractController
 {
     public function __construct(
@@ -31,11 +31,11 @@ class AuthorController extends AbstractController
         $paginationData = $this->authorRepository->getPaginatedAuthors($page, $limit, $searchTerm);
         
         return $this->render('admin/author/index.html.twig', [
-            'authors' => $paginationData['authors'],
+            'authors'    => $paginationData['authors'],
             'pagination' => [
                 'currentPage' => $paginationData['currentPage'],
-                'totalPages' => $paginationData['totalPages'],
-                'totalItems' => $paginationData['totalItems'],
+                'totalPages'  => $paginationData['totalPages'],
+                'totalItems'  => $paginationData['totalItems'],
             ],
             'searchTerm' => $searchTerm,
         ]);
@@ -65,8 +65,8 @@ class AuthorController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse([
                     'success' => true,
-                    'id' => $author->getId(),
-                    'name' => $author->getName()
+                    'id'      => $author->getId(),
+                    'name'    => $author->getName()
                 ]);
             }
             
@@ -74,6 +74,31 @@ class AuthorController extends AbstractController
         }
         
         return $this->render('admin/author/new.html.twig');
+    }
+    
+    #[Route('/export-csv', name: 'admin_author_export_csv', methods: ['GET'])]
+    public function exportCsv(): Response
+    {
+        $authors = $this->authorRepository->findAll();
+
+        // Build CSV string (modify columns as needed)
+        $csvData = "ID,Name,Bio\n";
+        foreach ($authors as $author) {
+            // Replace commas and newlines to avoid breaking CSV format
+            $name = str_replace([",", "\n"], [" ", " "], $author->getName());
+            $bio  = str_replace([",", "\n"], [" ", " "], $author->getBio() ?: '');
+            $csvData .= sprintf("%d,%s,%s\n", $author->getId(), $name, $bio);
+        }
+
+        $response = new Response($csvData);
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'authors.csv'
+        );
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', 'text/csv');
+
+        return $response;
     }
     
     #[Route('/{id}', name: 'admin_author_show', methods: ['GET'])]
@@ -98,7 +123,7 @@ class AuthorController extends AbstractController
         
         return $this->render('admin/author/edit.html.twig', [
             'author' => $author,
-            'form' => $form->createView(),
+            'form'   => $form->createView(),
         ]);
     }
 
@@ -121,8 +146,8 @@ class AuthorController extends AbstractController
 
         return new JsonResponse([
             'success' => true,
-            'id' => $author->getId(),
-            'name' => $author->getName()
+            'id'      => $author->getId(),
+            'name'    => $author->getName()
         ]);
     }
 

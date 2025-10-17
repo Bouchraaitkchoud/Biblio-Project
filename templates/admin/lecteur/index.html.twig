@@ -1,0 +1,58 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\lecteur\index.html.twig #}
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Gestion des Lecteurs{% endblock %}
+
+{% block admin_content %}
+    <h1>Liste des Lecteurs</h1>
+    <div class="mb-3">
+        <a href="{{ path('admin_lecteurs_export_csv') }}" class="btn btn-success me-2">
+            <i class="fas fa-file-csv"></i> Exporter CSV
+        </a>
+        <a href="{{ path('admin_lecteurs_new') }}" class="btn btn-primary">
+            Ajouter un nouveau Lecteur
+        </a>
+    </div>
+
+    {% if lecteurs|length %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Code d'admission</th>
+                    <th>Établissement</th>
+                    <th>Formation</th>
+                    <th>Promotion</th>
+                    <th>Email</th>
+                    <th>Mot de passe</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lecteur in lecteurs %}
+                    <tr>
+                        <td>{{ lecteur.nom }}</td>
+                        <td>{{ lecteur.prenom }}</td>
+                        <td>{{ lecteur.codeAdmission }}</td>
+                        <td>{{ lecteur.etablissement }}</td>
+                        <td>{{ lecteur.formation }}</td>
+                        <td>{{ lecteur.promotion }}</td>
+                        <td>{{ lecteur.email }}</td>
+                        <td>{{ lecteur.password }}</td>
+                        <td>
+                            <a href="{{ path('admin_lecteurs_show', { id: lecteur.id }) }}" class="btn btn-sm">Voir</a>
+                            <a href="{{ path('admin_lecteurs_edit', { id: lecteur.id }) }}" class="btn btn-sm">Modifier</a>
+                            <form method="post" action="{{ path('admin_lecteurs_delete', { id: lecteur.id }) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce lecteur ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecteur.id) }}">
+                                <button class="btn btn-sm">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucun lecteur trouvé.</p>
+    {% endif %}
+{% endblock %}

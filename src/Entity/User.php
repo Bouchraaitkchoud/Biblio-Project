@@ -18,35 +18,82 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    private ?string $login = null;
+
+    #[ORM\Column(type: 'string')]
+    private ?string $nom = null;
+
+    #[ORM\Column(type: 'string')]
+    private ?string $prenom = null;
 
     #[ORM\Column(length: 180)]
     private ?string $email = null;
-    #[ORM\OneToMany(targetEntity: Cart::class, mappedBy: 'user')]  // Changed from 'student' to 'user'
+
+    #[ORM\OneToMany(targetEntity: Cart::class, mappedBy: 'user')]
     private Collection $carts;
 
-
-
-
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
+    #[ORM\Column(type: 'string')]
     private ?string $password = null;
 
     #[ORM\Column]
     private bool $isVerified = false;
 
+
+    #[ORM\Column(type: 'json')]
+    private array $privileges = [];
+
+    public function __construct()
+    {
+        $this->carts = new ArrayCollection();
+        $this->sections = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getLogin(): ?string
+    {
+        return $this->login;
+    }
+
+    public function setLogin(string $login): self
+    {
+        $this->login = $login;
+
+        return $this;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(string $prenom): static
+    {
+        $this->prenom = $prenom;
+
+        return $this;
     }
 
     public function getEmail(): ?string
@@ -61,33 +108,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     *
-     * @return list<string>
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
+        // guarantee every user gets at least ROLE_USER
+        if (!in_array('ROLE_USER', $roles, true)) {
+            $roles[] = 'ROLE_USER';
+        }
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
@@ -95,9 +130,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->password;
@@ -110,13 +142,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 
     public function isVerified(): bool
@@ -131,17 +158,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     public function setCart(Cart $cart): self
     {
         $this->cart = $cart;
-        $cart->setUser($this); // Ensure the Cart entity has a setStudent() method
+        $cart->setUser($this);
         return $this;
-    }
-
-    public function __construct()
-    {
-        $this->carts = new ArrayCollection();
     }
 
     public function getCarts(): Collection
@@ -157,8 +178,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
+
     public function getLastCart(): ?Cart
-{
-    return $this->carts->last();
-}
+    {
+        return $this->carts->last();
+    }
+
+ 
+
+
+
+    public function getPrivileges(): array
+    {
+        return $this->privileges ?? [];
+    }
+
+    public function setPrivileges(array $privileges): self
+    {
+        $this->privileges = $privileges;
+        return $this;
+    }
 }

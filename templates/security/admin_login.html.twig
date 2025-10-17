@@ -1,0 +1,49 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\security/admin_login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block head %}
+    {{ parent() }}
+    <meta name="turbo-visit-control" content="reload">
+{% endblock %}
+
+{% block title %}Espace Administrateur - Connexion{% endblock %}
+
+{% block body %}
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card shadow-lg p-4" style="width: 100%; max-width: 450px; border-radius: 10px;">
+            <div class="text-center mb-4">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 50px;">
+            </div>
+            <h2 class="text-center mb-4" style="color: #2c3e50;">Connexion Administrateur</h2>
+            
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+            
+            <form action="{{ path('app_admin_check') }}" method="post" data-turbo="false" class="needs-validation" novalidate>
+                {# CSRF token field #}
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                
+                <div class="mb-3">
+                    <label for="admin_username" class="form-label">Login :</label>
+                    <input type="text" id="admin_username" name="_username" class="form-control" placeholder="Votre login" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="admin_password" class="form-label">Mot de passe :</label>
+                    <input type="password" id="admin_password" name="_password" class="form-control" placeholder="Votre mot de passe" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <a href="{{ path('app_login') }}" class="text-decoration-none">Retour à la connexion Lecteur</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+

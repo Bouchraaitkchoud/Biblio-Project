@@ -1,29 +1,34 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}Connexion Lecteur{% endblock %}
 
 {% block body %}
+    <div class="admin-login-link" style="position: absolute; top: 10px; right: 10px;">
+        <a href="{{ path('app_admin_login') }}" style="font-size: 0.8em; color: #555;">Espace Administrateur</a>
+    </div>
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="row w-100 align-items-center">
             <div class="col-md-6 d-flex justify-content-center">
-                <img src="{{ asset('images/graphic15.png') }}" alt="Library Illustration" class="img-fluid" style="max-height: 400px;">
+                <img src="{{ asset('images/graphic15.png') }}" alt="Illustration de bibliothèque" class="img-fluid" style="max-height: 400px;">
             </div>
             
             <div class="col-md-6">
                 <div class="card shadow-lg p-4" style="width: 100%; max-width: 450px; border-radius: 10px;">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="UIASS Logo" style="height: 50px;">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo UIASS" style="height: 50px;">
                     </div>
-                    <h2 class="text-center mb-4" style="color: #2c3e50;">Connexion</h2>
+                    <h2 class="text-center mb-4" style="color: #2c3e50;">Connexion Lecteur</h2>
                     
                     {% if error %}
-                        <div class="alert alert-danger" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                        <div class="alert alert-danger" role="alert">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
                     {% endif %}
                     
                     <form action="{{ path('app_login') }}" method="post" class="needs-validation" novalidate>
                         <div class="mb-3">
-                            <label for="username" class="form-label">Email :</label>
-                            <input type="text" id="username" name="_username" value="{{ last_username }}" class="form-control" placeholder="Votre email" required>
+                            <label for="username" class="form-label">Code d'admission :</label>
+                            <input type="text" id="username" name="_username" value="{{ last_username }}" class="form-control" placeholder="Votre code d'admission" required>
                         </div>
                         
                         <div class="mb-3">

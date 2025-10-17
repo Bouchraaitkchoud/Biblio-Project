@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Barcode Scanner{% endblock %}
+{% block title %}Scanner de code-barres{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -28,7 +28,7 @@
         .barcode-input:focus {
             outline: none;
             border-color: #1a2e4f;
-            box-shadow: 0 0 0 3px rgba(26, 46, 79, 0.1);
+            box-shadow: 0 0 0 3px rgba(26,46,79,0.1);
         }
         .order-details {
             background: #fff;
@@ -125,6 +125,22 @@
             border-color: #b2903e;
             transform: translateY(-2px);
         }
+        .btn-reject {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-reject:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+            transform: translateY(-2px);
+        }
         .scan-history {
             background: #fff;
             border-radius: 12px;
@@ -187,39 +203,38 @@
 {% endblock %}
 
 {% block admin_content %}
-        <h1 class="mb-4">Barcode Scanner</h1>
+    <h1 class="mb-4">Scanner de code-barres</h1>
 
-        <div class="scanner-container" style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" id="barcodeInput" class="barcode-input" placeholder="Scan barcode or enter order ID..." autofocus>
-            <button id="scanButton" class="btn-approve" style="height: 48px;">Scan</button>
+    <div class="scanner-container" style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="barcodeInput" class="barcode-input" placeholder="Scannez le code-barres ou entrez l'ID de commande..." autofocus>
+        <button id="scanButton" class="btn-approve" style="height: 48px;">Scanner</button>
+    </div>
+
+    <div id="orderDetails" class="order-details">
+        <div class="order-header">
+            <div class="order-id">Commande #<span id="orderId"></span></div>
+            <div class="order-date" id="requestDate"></div>
         </div>
-
-        <div id="orderDetails" class="order-details">
-            <div class="order-header">
-                <div class="order-id">Order #<span id="orderId"></span></div>
-                <div class="order-date" id="requestDate"></div>
-            </div>
-            <div class="user-info">
-                <i class="fas fa-user"></i>
-                <span id="studentEmail"></span>
-            </div>
-            <div class="books-list" id="booksList"></div>
-            <div class="action-buttons">
-                <button id="approveOrder" class="btn-approve">
-                    <i class="fas fa-check"></i> Approve Order
-                </button>
-                <button id="rejectOrder" class="btn-reject">
-                    <i class="fas fa-times"></i> Reject Order
-                </button>
-            </div>
+        <div class="user-info">
+            <i class="fas fa-user"></i>
+            <span id="studentEmail"></span>
         </div>
-
-        <div id="scanError" style="display:none; color:#dc3545; font-weight:bold; margin-bottom:20px;"></div>
-
-        <div class="scan-history">
-            <h3>Today's Scans</h3>
-            <div id="scanHistory"></div>
+        <div class="books-list" id="booksList"></div>
+        <div class="action-buttons">
+            <button id="approveOrder" class="btn-approve">
+                <i class="fas fa-check"></i> Approuver la commande
+            </button>
+            <button id="rejectOrder" class="btn-reject">
+                <i class="fas fa-times"></i> Rejeter la commande
+            </button>
         </div>
+    </div>
+
+    <div id="scanError" style="display:none; color:#dc3545; font-weight:bold; margin-bottom:20px;"></div>
+
+    <div class="scan-history">
+        <h3>Scans d'aujourd'hui</h3>
+        <div id="scanHistory"></div>
     </div>
 
     <script>
@@ -279,22 +294,22 @@
                     },
                     body: 'barcode=' + encodeURIComponent(orderId)
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
                         displayOrderDetails(data);
-                        addScanHistory('success', `Order #${data.cart_id} found`);
-                        } else {
+                        addScanHistory('success', `Commande #${data.cart_id} trouvée`);
+                    } else {
                         scanError.textContent = data.message;
                         scanError.style.display = 'block';
-                            addScanHistory('error', data.message);
-                        }
-                    })
-                    .catch(error => {
-                    scanError.textContent = 'Error fetching order details';
+                        addScanHistory('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    scanError.textContent = 'Erreur lors de la récupération des détails de la commande';
                     scanError.style.display = 'block';
-                        addScanHistory('error', 'Error fetching order details');
-                    });
+                    addScanHistory('error', 'Erreur lors de la récupération des détails de la commande');
+                });
             }
 
             function displayOrderDetails(data) {
@@ -308,9 +323,9 @@
                     <div class="book-item">
                         <div class="book-info">
                             <div class="book-title">${item.book_title}</div>
-                            <div class="book-author">Barcode: ${item.barcode}</div>
+                            <div class="book-author">Code-barres : ${item.barcode}</div>
                         </div>
-                        <div class="book-quantity">Qty: 1</div>
+                        <div class="book-quantity">Qté : 1</div>
                     </div>
                 `).join('');
                 orderDetails.classList.add('show');
@@ -330,9 +345,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        let msg = `Order #${orderId} ${action}d`;
+                        let msg = '';
+                        if (action === 'approve') {
+                            msg = `Commande #${orderId} approuvée`;
+                        } else if (action === 'reject') {
+                            msg = `Commande #${orderId} rejetée`;
+                        }
                         if (data.receipt_url) {
-                            msg += ` - <a href='${data.receipt_url}' target='_blank'>Download Receipt</a>`;
+                            msg += ` - <a href='${data.receipt_url}' target='_blank'>Télécharger le reçu</a>`;
                             window.open(data.receipt_url, '_blank');
                         }
                         addScanHistory('success', msg);
@@ -344,9 +364,15 @@
                     }
                 })
                 .catch(error => {
-                    scanError.textContent = `Error trying to ${action} order`;
+                    let errMsg = '';
+                    if (action === 'approve') {
+                        errMsg = 'Erreur lors de la tentative d\'approbation de la commande';
+                    } else if (action === 'reject') {
+                        errMsg = 'Erreur lors de la tentative de rejet de la commande';
+                    }
+                    scanError.textContent = errMsg;
                     scanError.style.display = 'block';
-                    addScanHistory('error', `Error trying to ${action} order`);
+                    addScanHistory('error', errMsg);
                 });
             }
 
@@ -364,4 +390,4 @@
             }
         });
     </script>
-{% endblock %} 
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Edit Book{% endblock %}
+{% block title %}Modifier le livre{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -173,29 +173,29 @@
 {% block admin_content %}
     <div class="page-header">
         <i class="fas fa-edit text-warning"></i>
-        Edit Book Notice
+        Modifier le livre
     </div>
     
     <div class="form-container">
         {{ form_start(form, {'attr': {'data-controller': 'select2', 'multipart': true}}) }}
         
-        <!-- Section 1: Basic Information -->
+        <!-- Section 1: Informations de base -->
         <div class="form-section">
             <div class="section-title">
                 <i class="fas fa-book"></i>
-                Basic Information
+                Informations de base
             </div>
             <div class="row">
                 <div class="col-md-8">
                     {{ form_row(form.title, {
                         'label_attr': {'class': 'form-label required-field'},
-                        'attr': {'class': 'form-control', 'placeholder': 'Enter the book title'}
+                        'attr': {'class': 'form-control', 'placeholder': 'Entrez le titre du livre'}
                     }) }}
                 </div>
                 <div class="col-md-4">
                     {{ form_row(form.publicationYear, {
                         'label_attr': {'class': 'form-label'},
-                        'attr': {'class': 'form-control', 'placeholder': 'e.g., 2023'}
+                        'attr': {'class': 'form-control', 'placeholder': 'ex : 2023'}
                     }) }}
                 </div>
             </div>
@@ -209,17 +209,17 @@
                 <div class="col-md-6">
                     {{ form_row(form.isbn, {
                         'label_attr': {'class': 'form-label'},
-                        'attr': {'class': 'form-control', 'placeholder': 'e.g., 978-3-16-148410-0'}
+                        'attr': {'class': 'form-control', 'placeholder': 'ex : 978-3-16-148410-0'}
                     }) }}
                 </div>
             </div>
         </div>
         
-        <!-- Section 2: Authors & Publishers -->
+        <!-- Section 2: Auteurs & Éditeurs -->
         <div class="form-section">
             <div class="section-title">
                 <i class="fas fa-users"></i>
-                Authors & Publishers
+                Auteurs & Éditeurs
             </div>
             <div class="row">
                 <div class="col-md-6">
@@ -229,11 +229,11 @@
                             'class': 'form-select', 
                             'multiple': true, 
                             'data-select2-target': 'select',
-                            'data-placeholder': 'Search and select authors...'
+                            'data-placeholder': 'Recherchez et sélectionnez des auteurs...'
                         }
                     }) }}
                     <small class="form-text text-muted mt-2">
-                        <i class="fas fa-info-circle"></i> Type to search, click to select multiple authors
+                        <i class="fas fa-info-circle"></i> Tapez pour rechercher, cliquez pour sélectionner plusieurs auteurs
                     </small>
                 </div>
                 <div class="col-md-6">
@@ -243,21 +243,21 @@
                             'class': 'form-select', 
                             'multiple': true, 
                             'data-select2-target': 'select',
-                            'data-placeholder': 'Search and select publishers...'
+                            'data-placeholder': 'Recherchez et sélectionnez des éditeurs...'
                         }
                     }) }}
                     <small class="form-text text-muted mt-2">
-                        <i class="fas fa-info-circle"></i> Type to search, click to select multiple publishers
+                        <i class="fas fa-info-circle"></i> Tapez pour rechercher, cliquez pour sélectionner plusieurs éditeurs
                     </small>
                 </div>
             </div>
         </div>
         
-        <!-- Section 3: Description -->
+        <!-- Section 3: Description et Détails -->
         <div class="form-section">
             <div class="section-title">
                 <i class="fas fa-align-left"></i>
-                Description & Details
+                Description et Détails
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -266,25 +266,25 @@
                         'attr': {
                             'class': 'form-control', 
                             'rows': '4',
-                            'placeholder': 'Enter a detailed description of the book...'
+                            'placeholder': 'Entrez une description détaillée du livre...'
                         }
                     }) }}
                 </div>
             </div>
         </div>
         
-        <!-- Section 4: Cover Image -->
+        <!-- Section 4: Image de couverture -->
         <div class="form-section">
             <div class="section-title">
                 <i class="fas fa-image"></i>
-                Cover Image
+                Image de couverture
             </div>
             <div class="row">
                 <div class="col-md-12">
                     {% if book.coverImage %}
                         <div class="mb-3">
-                            <label class="form-label">Current Cover Image:</label><br>
-                            <img src="{{ book.coverImageUrl }}" alt="Current cover" class="current-image">
+                            <label class="form-label">Image de couverture actuelle :</label><br>
+                            <img src="{{ book.coverImageUrl }}" alt="Couverture actuelle" class="current-image">
                         </div>
                     {% endif %}
                     
@@ -297,7 +297,7 @@
                             }
                         }) }}
                         <small class="form-text text-muted mt-2">
-                            <i class="fas fa-upload"></i> Supported formats: JPG, PNG, GIF (Max: 5MB)
+                            <i class="fas fa-upload"></i> Formats supportés : JPG, PNG, GIF (Max : 5 Mo)
                         </small>
                     </div>
                 </div>
@@ -306,15 +306,13 @@
         
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Changes
+                <i class="fas fa-save"></i> Enregistrer les modifications
             </button>
             <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Books
+                <i class="fas fa-arrow-left"></i> Retour aux livres
             </a>
         </div>
         
         {{ form_end(form) }}
     </div>
-
-
-{% endblock %} 
+{% endblock %}

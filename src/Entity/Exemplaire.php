@@ -20,8 +20,9 @@ class Exemplaire
     #[ORM\Column(type: 'string', length: 50, unique: true, nullable: false)]
     private ?string $barcode = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $discipline_id = null;
+    #[ORM\ManyToOne(targetEntity: Discipline::class)]
+    #[ORM\JoinColumn(name: 'discipline_id', referencedColumnName: 'id', nullable: true)]
+    private ?Discipline $discipline = null;
 
     #[ORM\Column(type: 'string', length: 20, nullable: false)]
     private string $status = 'available';
@@ -71,14 +72,14 @@ class Exemplaire
         return $this;
     }
 
-    public function getDisciplineId(): ?int
+    public function getDiscipline(): ?Discipline
     {
-        return $this->discipline_id;
+        return $this->discipline;
     }
 
-    public function setDisciplineId(?int $discipline_id): self
+    public function setDiscipline(?Discipline $discipline): self
     {
-        $this->discipline_id = $discipline_id;
+        $this->discipline = $discipline;
         return $this;
     }
 
@@ -158,4 +159,4 @@ class Exemplaire
         $this->comment = $comment;
         return $this;
     }
-} 
+}

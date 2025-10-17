@@ -10,9 +10,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/disciplines', name: 'admin_disciplines_')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_DISCIPLINES')")]
 class DisciplineController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
@@ -53,7 +56,7 @@ class DisciplineController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gérer l'upload de l'image
+            // Handle image upload
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
                 try {
@@ -81,9 +84,12 @@ class DisciplineController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Discipline $discipline): Response
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function show(?Discipline $discipline): Response
     {
+        if (!$discipline) {
+            throw $this->createNotFoundException('Discipline not found.');
+        }
         return $this->render('admin/discipline/show.html.twig', [
             'discipline' => $discipline,
         ]);
@@ -92,16 +98,14 @@ class DisciplineController extends AbstractController
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Discipline $discipline, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
-        $oldImage = $discipline->getImage(); // Sauvegarder l'ancienne image
+        $oldImage = $discipline->getImage();
         $form = $this->createForm(DisciplineType::class, $discipline);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gérer l'upload de la nouvelle image
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
                 try {
-                    // Supprimer l'ancienne image si elle existe
                     if ($oldImage) {
                         $imageUploadService->deleteDiscipline($oldImage);
                     }
@@ -133,13 +137,11 @@ class DisciplineController extends AbstractController
     public function delete(Request $request, Discipline $discipline, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
         if ($this->isCsrfTokenValid('delete'.$discipline->getId(), $request->request->get('_token'))) {
-            // Check if discipline has books associated
             if ($discipline->getBooks()->count() > 0) {
                 $this->addFlash('error', 'Impossible de supprimer cette discipline car elle contient des livres. Veuillez d\'abord déplacer ou supprimer les livres associés.');
                 return $this->redirectToRoute('admin_disciplines_index');
             }
 
-            // Supprimer l'image associée
             if ($discipline->getImage()) {
                 $imageUploadService->deleteDiscipline($discipline->getImage());
             }
@@ -150,5 +152,32 @@ class DisciplineController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_disciplines_index');
+    }
+
+    #[Route('/export-csv', name: 'export_csv', methods: ['GET'])]
+    public function exportCsv(DisciplineRepository $disciplineRepository): Response
+    {
+        $disciplines = $disciplineRepository->findAll();
+
+        // Build CSV header and each discipline row
+        $csvData = "ID,Name,Number of Books\n";
+        foreach ($disciplines as $discipline) {
+            $csvData .= sprintf(
+                "%d,%s,%d\n",
+                $discipline->getId(),
+                str_replace([",", "\n"], [" ", " "], $discipline->getName()),
+                $discipline->getBooks()->count()
+            );
+        }
+
+        $response = new Response($csvData);
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'disciplines.csv'
+        );
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', 'text/csv');
+
+        return $response;
     }
 }

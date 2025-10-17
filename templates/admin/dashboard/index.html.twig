@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Tableau de bord Administrateur{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -284,10 +284,6 @@
             transform: translateY(-5px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .management-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
         .management-icon {
             font-size: 3em !important;
             color: #1a2e4f !important;
@@ -342,123 +338,171 @@
             font-weight: bold;
             margin-bottom: 1.5rem;
         }
+        
+        /* Grid container for management cards only */
+        .admin-cards-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+            gap: 20px !important;
+            margin-bottom: 30px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container dashboard-container">
         <h1 class="dashboard-header">Administration</h1>
-        <!-- Library Management Section -->
-        <div class="admin-management">
+        
+        <!-- Grid container for management cards only -->
+        <div class="admin-cards-grid">
             <div class="management-card">
                 <div class="management-icon">
                     <i class="fas fa-sitemap"></i>
                 </div>
-                <div class="management-title">Manage Disciplines</div>
+                <div class="management-title">Gérer les Disciplines</div>
                 <div class="management-description">
-                    Create, edit, and delete library disciplines
+                    Créer, modifier et supprimer des disciplines de la bibliothèque
                 </div>
-                <a href="{{ path('admin_disciplines_index') }}" class="btn-manage">Manage Disciplines</a>
+                <a href="{{ path('admin_disciplines_index') }}" class="btn-manage">Gérer les Disciplines</a>
             </div>
             
             <div class="management-card">
                 <div class="management-icon">
                     <i class="fas fa-user-edit"></i>
                 </div>
-                <div class="management-title">Manage Authors</div>
+                <div class="management-title">Gérer les Auteurs</div>
                 <div class="management-description">
-                    Add and manage book authors
+                    Ajouter et gérer les auteurs de livres
                 </div>
-                <a href="{{ path('admin_authors_index') }}" class="btn-manage">Manage Authors</a>
+                <a href="{{ path('admin_authors_index') }}" class="btn-manage">Gérer les Auteurs</a>
             </div>
             
             <div class="management-card">
                 <div class="management-icon">
                     <i class="fas fa-building"></i>
                 </div>
-                <div class="management-title">Manage Publishers</div>
+                <div class="management-title">Gérer les Éditeurs</div>
                 <div class="management-description">
-                    Add and manage book publishers
+                    Ajouter et gérer les éditeurs de livres
                 </div>
-                <a href="{{ path('admin_publishers_index') }}" class="btn-manage">Manage Publishers</a>
+                <a href="{{ path('admin_publishers_index') }}" class="btn-manage">Gérer les Éditeurs</a>
             </div>
             
             <div class="management-card">
                 <div class="management-icon">
                     <i class="fas fa-book"></i>
                 </div>
-                <div class="management-title">Manage Books</div>
+                <div class="management-title">Gérer les Livres</div>
                 <div class="management-description">
-                    Add, edit, and manage all books in the library
+                    Ajouter, modifier et gérer l'ensemble des livres
                 </div>
-                <a href="{{ path('admin_books_index') }}" class="btn-manage">Manage Books</a>
+                <a href="{{ path('admin_books_index') }}" class="btn-manage">Gérer les Livres</a>
             </div>
+            
             <div class="management-card">
                 <div class="management-icon">
                     <i class="fas fa-clipboard-list"></i>
                 </div>
-                <div class="management-title">Manage Orders</div>
+                <div class="management-title">Gérer les Commandes</div>
                 <div class="management-description">
-                    View and manage all orders
+                    Visualiser et gérer toutes les commandes
                 </div>
-                <a href="{{ path('admin_orders_index') }}" class="btn-manage">Manage Orders</a>
+                <a href="{{ path('admin_orders_index') }}" class="btn-manage">Gérer les Commandes</a>
             </div>
+            
             <div class="management-card">
                 <div class="management-icon">
                     <i class="fas fa-undo"></i>
                 </div>
-                <div class="management-title">Manage Returns</div>
+                <div class="management-title">Gérer les Retours</div>
                 <div class="management-description">
-                    View and manage all returns
+                    Visualiser et gérer tous les retours
                 </div>
-                <a href="{{ path('admin_returns_index') }}" class="btn-manage">Manage Returns</a>
+                <a href="{{ path('admin_returns_index') }}" class="btn-manage">Gérer les Retours</a>
+            </div>
+            
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="management-title">Gérer les Utilisateurs</div>
+                <div class="management-description">
+                    Créer, modifier, consulter et supprimer des utilisateurs
+                </div>
+                <a href="{{ path('admin_users_index') }}" class="btn-manage">Gérer les Utilisateurs</a>
+            </div>
+
+            <!-- New Historique des Emprunts Section -->
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="management-title">Historique des Emprunts</div>
+                <div class="management-description">
+                    Visualiser et exporter les emprunts approuvés
+                </div>
+                <a href="{{ path('admin_historique_index') }}" class="btn-manage">Voir l'Historique</a>
+            </div>
+
+            <!-- New Gérer les Lecteurs Section -->
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="management-title">Gérer les Lecteurs</div>
+                <div class="management-description">
+                    Ajouter, modifier, consulter et supprimer des étudiants.
+                </div>
+                <a href="{{ path('admin_lecteurs_index') }}" class="btn-manage">Gérer les Lecteurs</a>
             </div>
         </div>
-
-        <!-- Recent Orders Section -->
+        
+        <!-- Section des commandes récentes -->
         <div class="section">
             <div class="section-header">
-                <h2>Recent Orders</h2>
-                <a href="{{ path('admin_orders_index') }}" class="view-all">View All Orders</a>
+                <h2>Commandes Récentes</h2>
+                <a href="{{ path('admin_orders_index') }}" class="view-all">Voir toutes les commandes</a>
             </div>
             
             {% if recent_orders|length > 0 %}
                 {% for order in recent_orders %}
                     <div class="order-card">
                         <div class="order-info">
-                            <div class="order-id">Order #{{ order.id }}</div>
-                            <div class="order-date">{{ order.createdAt|date('M d, Y H:i') }}</div>
+                            <div class="order-id">Commande #{{ order.id }}</div>
+                            <div class="order-date">{{ order.createdAt|date('d M Y H:i') }}</div>
                             <div class="order-user">{{ order.user.email }}</div>
                         </div>
                         <div class="order-status status-{{ order.status|lower }}">
                             {{ order.status }}
                         </div>
                         <div class="order-action">
-                            <a href="{{ path('admin_orders_index') }}" class="btn-view">View Details</a>
+                            <a href="{{ path('admin_orders_index') }}" class="btn-view">Voir les détails</a>
                         </div>
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="no-orders">
                     <i class="fas fa-inbox fa-3x mb-3"></i>
-                    <p>No recent orders found</p>
+                    <p>Aucune commande récente trouvée</p>
                 </div>
             {% endif %}
         </div>
-
-        <!-- Statistics Section -->
+        
+        <!-- Section des statistiques -->
         <div class="stats-container">
             <div class="stat-card">
                 <div class="value">{{ total_books }}</div>
-                <div class="label">Total Books</div>
+                <div class="label">Total Livres</div>
             </div>
             <div class="stat-card">
                 <div class="value">{{ total_orders }}</div>
-                <div class="label">Total Orders</div>
+                <div class="label">Total Commandes</div>
             </div>
             <div class="stat-card">
                 <div class="value">{{ total_users }}</div>
-                <div class="label">Total Users</div>
+                <div class="label">Total Utilisateurs</div>
             </div>
             <div class="stat-card">
                 <div class="value">{{ total_disciplines }}</div>
@@ -471,12 +515,9 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        // Force proper layout reset on dashboard load
+        // Réinitialiser la mise en page du tableau de bord
         function resetDashboardLayout() {
-            // Add specific classes to body
             document.body.classList.add('admin-page', 'dashboard-page');
-            
-            // Force the header to stay left-aligned
             const dashboardHeader = document.querySelector('.dashboard-header');
             if (dashboardHeader) {
                 dashboardHeader.style.textAlign = 'left';
@@ -484,8 +525,6 @@
                 dashboardHeader.style.width = '100%';
                 dashboardHeader.style.fontFamily = "'Georgia', serif";
             }
-            
-            // Force proper container styling
             const dashboardContainer = document.querySelector('.dashboard-container');
             if (dashboardContainer) {
                 dashboardContainer.style.marginLeft = '0';
@@ -495,15 +534,11 @@
                 dashboardContainer.style.maxWidth = 'none';
                 dashboardContainer.style.textAlign = 'left';
             }
-            
-            // Force cards to stay centered
             const managementCards = document.querySelectorAll('.management-card');
             managementCards.forEach(card => {
                 card.style.textAlign = 'center';
                 card.style.fontFamily = "'Georgia', serif";
             });
-            
-            // Force management grid to stay stable
             const adminManagement = document.querySelector('.admin-management');
             if (adminManagement) {
                 adminManagement.style.display = 'grid';
@@ -511,7 +546,6 @@
                 adminManagement.style.gap = '20px';
                 adminManagement.style.width = '100%';
             }
-            
             const mainContent = document.querySelector('.dashboard-main-content');
             if (mainContent) {
                 mainContent.style.marginLeft = '250px';
@@ -519,35 +553,23 @@
                 mainContent.style.padding = '30px 30px 30px 0';
                 mainContent.style.boxSizing = 'border-box';
             }
-            
-            // Remove any admin-content-wrapper that might interfere
             const adminWrapper = document.querySelector('.admin-content-wrapper');
             if (adminWrapper && adminWrapper.parentNode) {
-                // Move children out of wrapper if it exists
                 while (adminWrapper.firstChild) {
                     adminWrapper.parentNode.insertBefore(adminWrapper.firstChild, adminWrapper);
                 }
                 adminWrapper.remove();
             }
-            
-            // Force layout recalculation
             document.body.style.display = 'none';
-            document.body.offsetHeight; // Trigger reflow
+            document.body.offsetHeight;
             document.body.style.display = '';
         }
         
-        // Run on page load
         document.addEventListener('DOMContentLoaded', resetDashboardLayout);
-        
-        // Run on Turbo navigation
         document.addEventListener('turbo:load', resetDashboardLayout);
-        
-        // Run after a short delay to catch any late-loading styles
         document.addEventListener('turbo:load', function() {
             setTimeout(resetDashboardLayout, 50);
         });
-        
-        // Reset on page focus (when returning from other tabs)
         window.addEventListener('focus', function() {
             setTimeout(resetDashboardLayout, 10);
         });

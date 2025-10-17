@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - Author Details{% endblock %}
+{% block title %}Admin - Détails de l'Auteur{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -114,7 +114,7 @@
             {% endfor %}
         {% endfor %}
         
-        <div class="page-header">Author Details</div>
+        <div class="page-header">Détails de l'Auteur</div>
 
         <div class="author-detail-card">
             <div class="author-name">{{ author.name }}</div>
@@ -123,16 +123,16 @@
             {% endif %}
 
             <div class="btn-group">
-                <a href="{{ path('admin_author_edit', {'id': author.id}) }}" class="btn btn-edit" title="Edit author">
-                    <i class="fas fa-edit"></i> Edit
+                <a href="{{ path('admin_author_edit', {'id': author.id}) }}" class="btn btn-edit" title="Modifier l'auteur">
+                    <i class="fas fa-edit"></i> Modifier
                 </a>
-                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete author">
-                    <i class="fas fa-trash-alt"></i> Delete
+                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Supprimer l'auteur">
+                    <i class="fas fa-trash-alt"></i> Supprimer
                 </button>
-        </div>
+            </div>
         
             <div class="books-list">
-                <strong>Books by this Author ({{ author.books|length }}):</strong>
+                <strong>Livres de cet auteur ({{ author.books|length }}) :</strong>
                 {% if author.books|length > 0 %}
                     <ul>
                         {% for book in author.books %}
@@ -143,40 +143,40 @@
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <div class="text-muted">No books found for this author.</div>
+                    <div class="text-muted">Aucun livre trouvé pour cet auteur.</div>
                 {% endif %}
             </div>
             
             <a href="{{ path('admin_authors_index') }}" class="btn btn-primary back-link">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
         </div>
     </div>
     
-    <!-- Delete Modal -->
+    <!-- Modal de suppression -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete the author "{{ author.name }}"?
+                    Êtes-vous sûr de vouloir supprimer l'auteur "{{ author.name }}" ?
                     {% if author.books|length > 0 %}
                         <div class="alert alert-warning mt-3">
-                            <strong>Warning:</strong> This author has {{ author.books|length }} books. Deleting this author may affect these books.
+                            <strong>Attention :</strong> Cet auteur possède {{ author.books|length }} livre(s). La suppression peut affecter ces livres.
                         </div>
                     {% endif %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <form method="post" action="{{ path('admin_author_delete', {'id': author.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

@@ -86,15 +86,54 @@
 {% endblock %}
 
 {% block content %}
-    <div class="admin-content-wrapper">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>{% block title %}Admin Dashboard{% endblock %}</title>
+            {# ... other head elements ... #}
+        </head>
+        <body>
+            <nav>
+                <ul>
+                    {% if is_granted('ROLE_GERER_AUTEURS') %}
+                        <li><a href="{{ path('admin_authors_index') }}">Gérer les Auteurs</a></li>
+                    {% endif %}
+                    {% if is_granted('ROLE_GERER_UTILISATEURS') %}
+                        <li><a href="{{ path('admin_users_index') }}">Gérer les Utilisateurs</a></li>
+                    {% endif %}
+                    {% if is_granted('ROLE_GERER_LIVRES') %}
+                        <li><a href="{{ path('admin_books_index') }}">Gérer les Livres</a></li>
+                    {% endif %}
+             
+                    {% if is_granted('ROLE_GERER_RETOURS') %}
+                        <li><a href="{{ path('admin_returns_index') }}">Gérer les Retours</a></li>
+                    {% endif %}
+
+                    {% if is_granted('ROLE_GERER_EDITEURS') %}
+                        <li><a href="{{ path('admin_publishers_index') }}">Gérer les Éditeurs</a></li>
+                    {% endif %}
+                    {% if is_granted('ROLE_GERER_DISCIPLINES') %}
+                        <li><a href="{{ path('admin_disciplines_index') }}">Gérer les Disciplines</a></li>
+                    {% endif %}
+                    {% if is_granted('ROLE_GERER_COMMANDES') %}
+                        <li><a href="{{ path('admin_orders_index') }}">Gérer les Commandes</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <main>
+                <div class="admin-content-wrapper">
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% block admin_content %}{% endblock %}
                 </div>
-            {% endfor %}
-        {% endfor %}
-        {% block admin_content %}{% endblock %}
-    </div>
-{% endblock %} 
+            </main>
+        </body>
+    </html>
+{% endblock %}

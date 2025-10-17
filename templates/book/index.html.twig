@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Books in {{ section.name }}{% endblock %}
+{% block title %}Livres dans {{ section.name }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -154,7 +154,7 @@
 {% block body %}
     <div class="books-container">
         <div class="header-container">
-            <h1 class="books-title">Books in {{ section.name }}</h1>
+            <h1 class="books-title">Livres dans {{ section.name }}</h1>
             <a href="{{ path('view_cart') }}" class="btn btn-primary cart-btn">
                 <i class="fas fa-shopping-cart"></i>
                 {% if cart_count() > 0 %}
@@ -164,7 +164,6 @@
                 {% endif %}
             </a>
         </div>
-
         <div class="books-grid">
             {% for book in books %}
                 <div class="book-card">
@@ -174,27 +173,27 @@
                              alt="{{ book.title }}">
                         <div class="book-title">{{ book.title }}</div>
                     </a>
-                    <div class="book-author">by {{ book.authorName }}</div>
+                    <div class="book-author">par {{ book.authorName }}</div>
                     <div class="book-availability">
-                        <span class="availability-label">Available Copies:</span>
+                        <span class="availability-label">Exemplaires disponibles:</span>
                         <span class="availability-count {% if book.availableCopies == 0 %}text-danger{% else %}text-success{% endif %}">
                             {{ book.availableCopies }}
                         </span>
                     </div>
                     <div class="book-actions">
                         <a href="{{ path('book_show', {'id': book.id}) }}" class="view-details">
-                            <i class="fas fa-eye"></i> Details
+                            <i class="fas fa-eye"></i> Détails
                         </a>
                         <form action="{{ path('add_to_cart', {'id': book.id}) }}" method="POST" class="add-to-cart-form">
                             <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart') }}">
                             <button type="submit">
-                                <i class="fas fa-cart-plus"></i> Add
+                                <i class="fas fa-cart-plus"></i> Ajouter
                             </button>
                         </form>
                     </div>
                 </div>
             {% else %}
-                <p class="no-books">No books found in this section.</p>
+                <p class="no-books">Aucun livre trouvé dans cette section.</p>
             {% endfor %}
         </div>
     </div>
@@ -209,7 +208,7 @@
 
                     try {
                         button.disabled = true;
-                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
 
                         const response = await fetch(this.action, {
                             method: 'POST',
@@ -222,7 +221,7 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+                            button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
                             updateCartCounter();
                             setTimeout(() => {
                                 button.innerHTML = originalHtml;
@@ -231,17 +230,17 @@
                         } else {
                             button.innerHTML = originalHtml;
                             button.disabled = false;
-                            alert('Error: ' + (result.message || 'Failed to add to cart'));
+                            alert('Erreur : ' + (result.message || 'Echec de l\'ajout au panier'));
                         }
                     } catch (error) {
                         console.error('Error:', error);
                         button.innerHTML = originalHtml;
                         button.disabled = false;
-                        alert('Network error - please try again');
+                        alert('Erreur réseau - veuillez réessayer');
                     }
                 });
             });
-            
+
             function updateCartCounter() {
                 const cartCountBadge = document.querySelector('.cart-count-badge');
                 if (cartCountBadge) {

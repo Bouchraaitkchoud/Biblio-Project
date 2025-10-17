@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - Book Details{% endblock %}
+{% block title %}Admin - Détails du Livre{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -8,9 +8,6 @@
         body {
             background-color: #fdfaf5 !important;
             font-family: 'Georgia', serif;
-            color: #4e4a45;
-            min-height: 100vh;
-        }
             color: #4e4a45;
             min-height: 100vh;
         }
@@ -113,13 +110,13 @@
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                 </div>
             {% endfor %}
         {% endfor %}
 
         <div class="page-header">
-            <span>Book Details</span>
+            <span>Détails du Livre</span>
         </div>
 
         <div class="book-detail-card">
@@ -135,55 +132,55 @@
             <div class="book-info">
                 <div class="book-title">{{ book.title }}</div>
                 <div class="book-meta">
-                    <span><strong>Publication Year:</strong> {{ book.publicationYear ?: 'Not specified' }}</span> |
-                    <span><strong>ISBN:</strong> {{ book.isbn ?: 'Not specified' }}</span> |
-                    <span><strong>Discipline:</strong> {{ book.discipline.name }}</span>
+                    <span><strong>Année de publication :</strong> {{ book.publicationYear ?: 'Non spécifiée' }}</span> |
+                    <span><strong>ISBN :</strong> {{ book.isbn ?: 'Non spécifié' }}</span> |
+                    <span><strong>Discipline :</strong> {{ book.discipline.name }}</span>
                 </div>
                 <div class="book-meta">
-                    <span><strong>Authors:</strong> 
+                    <span><strong>Auteurs :</strong> 
                         {% if book.authors|length > 0 %}
                             {{ book.authors|map(a => a.name)|join(', ') }}
                         {% else %}
-                            No authors assigned
+                            Aucun auteur assigné
                         {% endif %}
                     </span>
                 </div>
                 {% if book.description %}
                     <div class="book-meta">
-                        <span><strong>Description:</strong> {{ book.description }}</span>
+                        <span><strong>Description :</strong> {{ book.description }}</span>
                     </div>
                 {% endif %}
                 <div class="book-actions">
                     <a href="{{ path('admin_book_edit', {'id': book.id}) }}" class="btn btn-edit">
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit"></i> Modifier
                     </a>
                     <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteBookModal">
-                        <i class="fas fa-trash"></i> Delete
+                        <i class="fas fa-trash"></i> Supprimer
                     </button>
                 </div>
                 <a href="{{ path('admin_books_index') }}" class="btn btn-secondary back-link">
-                    <i class="fas fa-arrow-left"></i> Back to List
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
                 </a>
             </div>
         </div>
-        <!-- Exemplaires Table -->
+        <!-- Tableau des exemplaires -->
         <div class="book-detail-card" style="margin-top: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3 style="margin: 0; color: #1a2e4f;">Exemplaires</h3>
                 <a href="{{ path('admin_book_add_exemplaire', {'id': book.id}) }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add Exemplaire
+                    <i class="fas fa-plus"></i> Ajouter un exemplaire
                 </a>
             </div>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Barcode</th>
-                        <th>Status</th>
-                        <th>Location</th>
-                        <th>Call Number</th>
-                        <th>Acquisition Date</th>
-                        <th>Return Date</th>
-                        <th>Price</th>
+                        <th>Code barre</th>
+                        <th>Statut</th>
+                        <th>Emplacement</th>
+                        <th>Cote</th>
+                        <th>Date d'acquisition</th>
+                        <th>Date de retour</th>
+                        <th>Prix</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -205,21 +202,45 @@
                                 {% if exemplaire.status == 'borrowed' %}
                                     <form method="post" action="{{ path('admin_exemplaire_return', {'id': exemplaire.id}) }}" style="display:inline-block;">
                                         <input type="hidden" name="_token" value="{{ csrf_token('return' ~ exemplaire.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark this exemplaire as returned?')">
-                                            <i class="fas fa-undo"></i> Mark Returned
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Marquer cet exemplaire comme retourné ?')">
+                                            <i class="fas fa-undo"></i> Marquer comme retourné
                                         </button>
                                     </form>
                                 {% endif %}
                                 <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-edit"></i> Edit
+                                    <i class="fas fa-edit"></i> Modifier
                                 </a>
                             </td>
                         </tr>
                     {% else %}
-                        <tr><td colspan="8" class="text-center text-muted">No exemplaires found for this book.</td></tr>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">Aucun exemplaire trouvé pour ce livre.</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-{% endblock %} 
+
+    <!-- Modal de suppression du livre -->
+    <div class="modal fade" id="deleteBookModal" tabindex="-1" aria-labelledby="deleteBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteBookModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    Êtes-vous sûr de vouloir supprimer le livre "{{ book.title }}" ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" action="{{ path('admin_book_delete', {'id': book.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,26 +1,26 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Admin - New Author{% endblock %}
+{% block title %}Admin - Nouvel Auteur{% endblock %}
 
 {% block admin_content %}
-        <div class="page-header">
-            <h1>Create New Author</h1>
-        </div>
-        
-        <div class="form-container">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Author Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="bio" class="form-label">Biography</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="4"></textarea>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Create Author</button>
-                <a href="{{ path('admin_authors_index') }}" class="btn btn-secondary">Back to List</a>
-            </form>
-        </div>
-{% endblock %} 
+    <div class="page-header">
+        <h1>Créer un nouvel auteur</h1>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            <div class="mb-3">
+                <label for="name" class="form-label">Nom de l'auteur</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="bio" class="form-label">Biographie</label>
+                <textarea class="form-control" id="bio" name="bio" rows="4"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Créer l'auteur</button>
+            <a href="{{ path('admin_authors_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        </form>
+    </div>
+{% endblock %}

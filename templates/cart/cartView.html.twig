@@ -124,7 +124,7 @@
     <div class="container py-5 cart-container">
         <div class="cart-title">🛒 Mon Panier</div>
         
-        <!-- Alert for automatically removed items -->
+        <!-- Alerte pour les livres automatiquement retirés -->
         {% if removedItems is defined and removedItems|length > 0 %}
             <div class="alert alert-warning" role="alert">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -137,7 +137,7 @@
             </div>
         {% endif %}
         
-        <!-- Notification pour les messages -->
+        <!-- Notification des messages -->
         <div id="cart-notification" class="alert" style="display: none;"></div>
         
         <div class="cart-content" id="cart-content">
@@ -180,7 +180,7 @@
         const button = event.target.closest('.remove-btn');
         const cartItem = document.getElementById(`cart-item-${bookId}`);
         
-        // Visual feedback
+        // Feedback visuel
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
         button.disabled = true;
         
@@ -267,11 +267,9 @@
     }
 
     function updateCartBadge() {
-        // Use the global function
         if (typeof window.updateCartBadge === 'function') {
             window.updateCartBadge();
         } else {
-            // Fallback if global function not available
             const badge = document.querySelector('.cart-badge');
             if (badge) {
                 const currentCount = parseInt(badge.textContent) - 1;

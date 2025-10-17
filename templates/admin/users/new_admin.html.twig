@@ -1,0 +1,119 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\users\new_admin.html.twig #}
+
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Créer un nouvel utilisateur{% endblock %}
+
+{% block admin_content %}
+    <h1>Créer un nouvel utilisateur</h1>
+
+    <form method="post">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_user_new') }}">
+        
+        <!-- User type selection -->
+        <div class="mb-3">
+            <label class="form-label">Type d'utilisateur</label>
+            <div>
+                <input type="radio" id="normal" name="user_type" value="normal" checked onchange="togglePrivileges()">
+                <label for="normal">Utilisateur Normal</label>
+            </div>
+            <div>
+                <input type="radio" id="absolute" name="user_type" value="absolute" onchange="togglePrivileges()">
+                <label for="absolute">Admin Absolu</label>
+            </div>
+            <div>
+                <input type="radio" id="limited" name="user_type" value="limited" onchange="togglePrivileges()">
+                <label for="limited">Admin Limité</label>
+            </div>
+        </div>
+        
+        <!-- Basic information -->
+        <div class="mb-3">
+            <label for="login" class="form-label">Login</label>
+            <input type="text" id="login" name="login" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="nom" class="form-label">Nom</label>
+            <input type="text" id="nom" name="nom" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="prenom" class="form-label">Prénom</label>
+            <input type="text" id="prenom" name="prenom" class="form-control" required>
+        </div>
+        
+        <!-- Password with toggle -->
+        <div class="mb-3">
+            <label for="password" class="form-label">Mot de passe</label>
+            <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password')">
+                    <i id="password-icon" class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirmer le mot de passe</label>
+            <div class="input-group">
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirm_password')">
+                    <i id="confirm_password-icon" class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Privileges block, only for limited admins -->
+        <div class="mb-3" id="privileges_block" style="display:none;">
+            <label class="form-label">Privilèges</label>
+            <div class="form-check">
+                {% for privilege in privileges %}
+                    <div class="form-check">
+                        <input type="checkbox" id="privilege_{{ loop.index }}" name="privileges[]" value="{{ privilege }}" class="form-check-input">
+                        <label for="privilege_{{ loop.index }}" class="form-check-label">{{ privilege }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Créer</button>
+        <a href="{{ path('admin_users_index') }}" class="btn btn-secondary">Annuler</a>
+    </form>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '-icon');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Toggle privileges block based on user type selection
+        function togglePrivileges() {
+            const limitedRadio = document.getElementById('limited');
+            const privilegesBlock = document.getElementById('privileges_block');
+            privilegesBlock.style.display = limitedRadio.checked ? 'block' : 'none';
+        }
+
+        // Password confirmation validation
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Les mots de passe ne correspondent pas');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+
+    {# Optionally, conditionally display a link if the user has the ROLE_GERER_LIVRES privilege #}
+    {% if is_granted('ROLE_GERER_LIVRES') %}
+        <a href="{{ path('admin_books_index') }}">Gérer les Livres</a>
+    {% endif %}
+{% endblock %}
