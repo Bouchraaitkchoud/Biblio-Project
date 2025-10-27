@@ -87,9 +87,7 @@ class UserController extends AbstractController
             'Gérer les auteurs',
             'Gérer les utilisateurs',
             'Gérer les livres',
-            'Gérer les emprunts',
             'Gérer les retours',
-            'Voir les statistiques',
             'Gérer les éditeurs',
             'Gérer les disciplines',
             'Gérer les commandes'
@@ -129,6 +127,7 @@ class UserController extends AbstractController
                     'Gérer les retours'       => 'ROLE_GERER_RETOURS',
                     'Gérer les éditeurs'      => 'ROLE_GERER_EDITEURS',
                     'Gérer les disciplines'   => 'ROLE_GERER_DISCIPLINES',
+                    'Historique des Emprunts' => 'ROLE_GERER_HISTORIQUE',
                     'Gérer les commandes'     => 'ROLE_GERER_COMMANDES'
                 ];
 

@@ -115,5 +115,6 @@ security:
     - { path: ^/admin/returns, roles: [ROLE_ADMIN, ROLE_GERER_RETOURS] }
     - { path: ^/admin/publishers, roles: [ROLE_ADMIN, ROLE_GERER_EDITEURS] }
     - { path: ^/admin/disciplines, roles: [ROLE_ADMIN, ROLE_GERER_DISCIPLINES] }
+    - { path: ^/admin/historique, roles: [ROLE_ADMIN, ROLE_GERER_HISTORIQUE] }
     - { path: ^/admin/orders, roles: [ROLE_ADMIN, ROLE_GERER_COMMANDES] }
     - { path: ^/, roles: ROLE_USER }

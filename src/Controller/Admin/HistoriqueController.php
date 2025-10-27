@@ -9,7 +9,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_HISTORIQUE')")]
 class HistoriqueController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
