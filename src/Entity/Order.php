@@ -41,6 +41,9 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?Exemplaire $exemplaire = null;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $returnedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -131,6 +134,17 @@ class Order
     public function setExemplaire(?Exemplaire $exemplaire): self
     {
         $this->exemplaire = $exemplaire;
+        return $this;
+    }
+
+    public function getReturnedAt(): ?\DateTimeInterface
+    {
+        return $this->returnedAt;
+    }
+
+    public function setReturnedAt(?\DateTimeInterface $returnedAt): self
+    {
+        $this->returnedAt = $returnedAt;
         return $this;
     }
 }

@@ -53,53 +53,61 @@
 security:
   enable_authenticator_manager: true
   password_hashers:
-    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
+    App\Entity\User: "auto"
+    App\Entity\Lecteur: 'plaintext'
+
   providers:
-    app_user_provider:
+    admin_provider:
       entity:
         class: App\Entity\User
-        property: email
+        property: login               # admin form: <input name="login">
+    lecteur_provider:
+      entity:
+        class: App\Entity\Lecteur
+        property: codeAdmission    # lecteur form: <input name="code_d_admission">
 
   role_hierarchy:
-    # Full admin should automatically include basic user rights.
-    ROLE_ADMIN: [ROLE_USER]
-    # Limited admin may not have full admin rights, but you give it a base inheritance.
+    ROLE_ADMIN:    [ROLE_USER]
     ROLE_LIMITED_ADMIN: [ROLE_USER]
-    # Note: the extra roles (e.g., ROLE_GERER_UTILISATEURS) remain separate.
-  
+
   firewalls:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
-    main:
-      lazy: true
-      provider: app_user_provider
+
+    admin:
+      pattern: ^/admin
+      provider: admin_provider
       form_login:
-        login_path: app_login
-        check_path: app_login
-        default_target_path: home
-        enable_csrf: false
         success_handler: App\Security\LoginSuccessHandler
-        use_referer: true
-        always_use_default_target_path: false
-        target_path_parameter: _target_path
+        login_path: app_admin_login
+        check_path: app_admin_check
+        username_parameter: login
+        password_parameter: password
+        enable_csrf: true
+        default_target_path: admin_dashboard         # redirect admins here on success
+        use_referer: false
+      logout:
+        path: /admin/logout
+        target: app_admin_login
+
+    main:
+      provider: lecteur_provider
+      form_login:
+        success_handler: App\Security\LoginSuccessHandler
+        login_path: app_login          # GET page
+        check_path: app_login          # POST target (can be same route)
+        username_parameter: codeAdmission   # <-- must match form input name
+        password_parameter: password
+        enable_csrf: true
+        default_target_path: lecteur_dashboard       # redirect lecteurs here on success
+        use_referer: true 
       logout:
         path: app_logout
         target: app_login
-    admin:
-      pattern: ^/admin
-      provider: app_user_provider
-      form_login:
-        login_path: app_admin_login
-        check_path: app_admin_check
-        default_target_path: admin_dashboard
-        enable_csrf: true
-      logout:
-        path: /admin/logout
 
   access_control:
     - { path: ^/login, roles: PUBLIC_ACCESS }
-    - { path: ^/register, roles: PUBLIC_ACCESS }
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }
     - { path: ^/admin/authors, roles: [ROLE_ADMIN, ROLE_GERER_AUTEURS] }
     - { path: ^/admin/users, roles: [ROLE_ADMIN, ROLE_GERER_UTILISATEURS] }

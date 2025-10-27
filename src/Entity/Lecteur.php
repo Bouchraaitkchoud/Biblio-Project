@@ -1,13 +1,14 @@
 <?php
 
-
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\LecteurRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: LecteurRepository::class)]
-class Lecteur
+class Lecteur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,7 +21,7 @@ class Lecteur
     #[ORM\Column(type:"string", length:255)]
     private ?string $prenom = null;
 
-    #[ORM\Column(type:"string", length:255)]
+    #[ORM\Column(type:"string", length:255, unique: true)]
     private ?string $codeAdmission = null;
 
     #[ORM\Column(type:"string", length:255)]
@@ -37,6 +38,7 @@ class Lecteur
 
     #[ORM\Column(type:"string", length:255)]
     private ?string $password = null;
+
 
     public function getId(): ?int
     {
@@ -129,5 +131,30 @@ class Lecteur
     {
         $this->password = $password;
         return $this;
+    }
+
+    // --- UserInterface / PasswordAuthenticatedUserInterface methods ---
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->codeAdmission;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function setRoles(array $roles): self
+    {
+        return $this;
+    }
+
+       
+  
+
+    public function eraseCredentials(): void
+    {
+        // clear temporary sensitive data if any
     }
 }

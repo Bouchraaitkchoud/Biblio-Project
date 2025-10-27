@@ -25,22 +25,23 @@
                         </div>
                     {% endif %}
                     
-                    <form action="{{ path('app_login') }}" method="post" class="needs-validation" novalidate>
+                    <form method="post" action="{{ path('app_login') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                         <div class="mb-3">
                             <label for="username" class="form-label">Code d'admission :</label>
-                            <input type="text" id="username" name="_username" value="{{ last_username }}" class="form-control" placeholder="Votre code d'admission" required>
+                            <input type="text" id="username" name="codeAdmission" value="{{ app.request.get('_last_username') }}" class="form-control" placeholder="Votre code d'admission" required autofocus>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="password" class="form-label">Mot de passe :</label>
-                            <input type="password" id="password" name="_password" class="form-control" placeholder="Mot de passe" required>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Mot de passe" required>
                         </div>
-                        
+
                         <div class="mb-3 form-check">
                             <input type="checkbox" id="remember_me" name="_remember_me" class="form-check-input">
                             <label for="remember_me" class="form-check-label">Se souvenir de moi</label>
                         </div>
-                        
+
                         <button type="submit" class="btn btn-primary w-100">Se connecter</button>
                     </form>
                     
