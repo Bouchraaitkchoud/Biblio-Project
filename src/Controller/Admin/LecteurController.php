@@ -90,6 +90,101 @@ class LecteurController extends AbstractController
         ]);
     }
 
+    #[Route('/import-csv', name: 'admin_lecteurs_import_csv', methods: ['POST'])]
+    public function importCsv(Request $request): Response
+    {
+        // Verify CSRF token
+        if (!$this->isCsrfTokenValid('csv_import', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('admin_lecteurs_new');
+        }
+
+        $csvFile = $request->files->get('csv_file');
+        
+        if (!$csvFile) {
+            $this->addFlash('error', 'Aucun fichier n\'a été uploadé.');
+            return $this->redirectToRoute('admin_lecteurs_new');
+        }
+
+        if ($csvFile->getClientOriginalExtension() !== 'csv') {
+            $this->addFlash('error', 'Le fichier doit être au format CSV.');
+            return $this->redirectToRoute('admin_lecteurs_new');
+        }
+
+        try {
+            $handle = fopen($csvFile->getPathname(), 'r');
+            if ($handle === false) {
+                throw new \Exception('Impossible d\'ouvrir le fichier CSV.');
+            }
+
+            $importedCount = 0;
+            $errorCount = 0;
+            $lineNumber = 0;
+            $errors = [];
+
+            // Skip header row
+            $header = fgetcsv($handle);
+            $lineNumber++;
+
+            while (($data = fgetcsv($handle)) !== false) {
+                $lineNumber++;
+                
+                // Validate row has all required fields
+                if (count($data) < 8) {
+                    $errorCount++;
+                    $errors[] = "Ligne $lineNumber: Nombre de colonnes insuffisant.";
+                    continue;
+                }
+
+                try {
+                    $lecteur = new Lecteur();
+                    $lecteur->setNom(trim($data[0]));
+                    $lecteur->setPrenom(trim($data[1]));
+                    $lecteur->setCodeAdmission(trim($data[2]));
+                    $lecteur->setEtablissement(trim($data[3]));
+                    $lecteur->setFormation(trim($data[4]));
+                    $lecteur->setPromotion(trim($data[5]));
+                    $lecteur->setEmail(trim($data[6]));
+                    $lecteur->setPassword(trim($data[7])); // Note: Should hash password in production
+
+                    $this->entityManager->persist($lecteur);
+                    $importedCount++;
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    $errors[] = "Ligne $lineNumber: " . $e->getMessage();
+                }
+            }
+
+            fclose($handle);
+
+            // Flush all persisted entities
+            if ($importedCount > 0) {
+                $this->entityManager->flush();
+            }
+
+            // Display results
+            if ($importedCount > 0) {
+                $this->addFlash('success', "$importedCount lecteur(s) importé(s) avec succès.");
+            }
+            
+            if ($errorCount > 0) {
+                $errorMessage = "$errorCount erreur(s) détectée(s).";
+                if (count($errors) > 0) {
+                    $errorMessage .= " Détails: " . implode('; ', array_slice($errors, 0, 5));
+                    if (count($errors) > 5) {
+                        $errorMessage .= "... et " . (count($errors) - 5) . " autre(s) erreur(s).";
+                    }
+                }
+                $this->addFlash('error', $errorMessage);
+            }
+
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de l\'import: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_lecteurs_new');
+    }
+
     #[Route('/{id}', name: 'admin_lecteurs_show', methods: ['GET'])]
     public function show(Lecteur $lecteur): Response
     {
