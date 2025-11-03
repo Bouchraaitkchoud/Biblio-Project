@@ -182,7 +182,7 @@
                         <div class="book-title">{{ book.title }}</div>
                         <div class="book-meta">
                             <span><strong>Auteurs :</strong> {{ book.authorName }}</span> |
-                            <span><strong>Discipline :</strong> {{ book.discipline.name }}</span> |
+                            <span><strong>Disciplines :</strong> {{ book.disciplines|map(d => d.name)|join(', ')|default('Aucune') }}</span> |
                             <span><strong>Année :</strong> {{ book.publicationYear|default('-') }}</span> |
                             <span><strong>ISBN :</strong> {{ book.isbn|default('-') }}</span>
                         </div>

@@ -14,12 +14,9 @@ class AuthorType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Author Name',
-                'required' => true
-            ])
-            ->add('bio', TextType::class, [
-                'label' => 'Biography',
-                'required' => false
+                'label' => 'Nom de l\'auteur',
+                'required' => true,
+                'attr' => ['class' => 'form-control']
             ])
         ;
     }

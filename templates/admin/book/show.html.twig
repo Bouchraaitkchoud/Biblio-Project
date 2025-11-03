@@ -134,7 +134,13 @@
                 <div class="book-meta">
                     <span><strong>Année de publication :</strong> {{ book.publicationYear ?: 'Non spécifiée' }}</span> |
                     <span><strong>ISBN :</strong> {{ book.isbn ?: 'Non spécifié' }}</span> |
-                    <span><strong>Discipline :</strong> {{ book.discipline.name }}</span>
+                    <span><strong>Disciplines :</strong> 
+                        {% if book.disciplines|length > 0 %}
+                            {{ book.disciplines|map(d => d.name)|join(', ') }}
+                        {% else %}
+                            Aucune discipline assignée
+                        {% endif %}
+                    </span>
                 </div>
                 <div class="book-meta">
                     <span><strong>Auteurs :</strong> 
@@ -177,9 +183,8 @@
                         <th>Code barre</th>
                         <th>Statut</th>
                         <th>Emplacement</th>
-                        <th>Cote</th>
+                        <th>Mode d'acquisition</th>
                         <th>Date d'acquisition</th>
-                        <th>Date de retour</th>
                         <th>Prix</th>
                         <th>Actions</th>
                     </tr>
@@ -193,10 +198,9 @@
                                     {{ exemplaire.status|capitalize }}
                                 </span>
                             </td>
-                            <td>{{ exemplaire.locationId }}</td>
-                            <td>{{ exemplaire.callNumber }}</td>
+                            <td>{{ exemplaire.location ? exemplaire.location.name : '-' }}</td>
+                            <td>{{ exemplaire.acquisitionMode|default('-') }}</td>
                             <td>{{ exemplaire.acquisitionDate ? exemplaire.acquisitionDate|date('Y-m-d') : '-' }}</td>
-                            <td>{{ exemplaire.returnDate ? exemplaire.returnDate|date('Y-m-d') : '-' }}</td>
                             <td>{{ exemplaire.price ? exemplaire.price|number_format(2) : '-' }}</td>
                             <td>
                                 {% if exemplaire.status == 'borrowed' %}

@@ -34,10 +34,13 @@ class BookType extends AbstractType
             ->add('discipline', EntityType::class, [
                 'class' => Discipline::class,
                 'choice_label' => 'name',
-                'label' => 'Discipline',
-                'required' => true,
-                'placeholder' => 'Sélectionner une discipline',
-                'attr' => ['class' => 'form-select']
+                'label' => 'Disciplines',
+                'multiple' => true,
+                'expanded' => false,
+                'required' => false,
+                'placeholder' => 'Sélectionner des disciplines',
+                'attr' => ['class' => 'form-select select2-multiple'],
+                'property_path' => 'disciplines'
             ])
             ->add('authors', EntityType::class, [
                 'class' => Author::class,
@@ -105,41 +108,6 @@ class BookType extends AbstractType
                     'class' => 'form-control'
                 ]
             ])
-            ->add('edition', TextType::class, [
-                'label' => 'Édition',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'ex: 3ème édition',
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('price', TextType::class, [
-                'label' => 'Prix (€)',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'ex: 29.99',
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('acquisitionMode', ChoiceType::class, [
-                'label' => 'Mode d\'acquisition',
-                'required' => false,
-                'choices' => [
-                    'Achat' => 'achat',
-                    'Don' => 'don',
-                    'Échange' => 'echange',
-                    'Cadeau' => 'cadeau',
-                    'Prêt' => 'pret'
-                ],
-                'placeholder' => 'Sélectionner le mode d\'acquisition',
-                'attr' => ['class' => 'form-select']
-            ])
-            ->add('acquisitionDate', DateType::class, [
-                'label' => 'Date d\'acquisition',
-                'required' => false,
-                'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
-            ])
             ->add('documentType', ChoiceType::class, [
                 'label' => 'Type de document',
                 'required' => false,
@@ -162,14 +130,6 @@ class BookType extends AbstractType
                 ],
                 'placeholder' => 'Sélectionner le type de document',
                 'attr' => ['class' => 'form-select']
-            ])
-            ->add('location', TextType::class, [
-                'label' => 'Localisation dans la bibliothèque',
-                'required' => true,
-                'attr' => [
-                    'placeholder' => 'ex: A-12-3, Section B, Étage 2',
-                    'class' => 'form-control'
-                ]
             ])
         ;
     }

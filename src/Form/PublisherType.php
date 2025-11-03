@@ -14,12 +14,9 @@ class PublisherType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Publisher Name',
-                'required' => true
-            ])
-            ->add('comment', TextType::class, [
-                'label' => 'Comment',
-                'required' => false
+                'label' => 'Nom de l\'éditeur',
+                'required' => true,
+                'attr' => ['class' => 'form-control']
             ])
         ;
     }

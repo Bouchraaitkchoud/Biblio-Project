@@ -22,9 +22,9 @@ class Book
     #[ORM\JoinTable(name: 'book_author')]
     private Collection $authors;
 
-    #[ORM\ManyToOne(targetEntity: Discipline::class, inversedBy: 'books')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Discipline $discipline = null;
+    #[ORM\ManyToMany(targetEntity: Discipline::class, inversedBy: 'books')]
+    #[ORM\JoinTable(name: 'book_discipline')]
+    private Collection $disciplines;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $coverImage = null;
@@ -38,38 +38,22 @@ class Book
     #[ORM\Column(type: "string", length: 50, nullable: true)]
     private ?string $isbn = null;
     
-    #[ORM\ManyToMany(targetEntity: Publisher::class, mappedBy: 'books')]
+    #[ORM\ManyToMany(targetEntity: Publisher::class, inversedBy: 'books')]
+    #[ORM\JoinTable(name: 'book_publisher')]
     private Collection $publishers;
-
-    #[ORM\Column(type: 'integer')]
-    private $quantity = 0;
 
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Exemplaire::class, orphanRemoval: true)]
     private Collection $exemplaires;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $edition = null;
-
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
-    private ?string $price = null;
-
-    #[ORM\Column(name: 'acquisition_mode', length: 50, nullable: true)]
-    private ?string $acquisitionMode = null;
-
-    #[ORM\Column(name: 'acquisition_date', type: 'date', nullable: true)]
-    private ?\DateTimeInterface $acquisitionDate = null;
-
     #[ORM\Column(name: 'document_type', length: 50, nullable: true)]
     private ?string $documentType = null;
-
-    #[ORM\Column(length: 100)]
-    private ?string $location = null;
 
     public function __construct()
     {
         $this->authors = new ArrayCollection();
         $this->publishers = new ArrayCollection();
         $this->exemplaires = new ArrayCollection();
+        $this->disciplines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -128,14 +112,26 @@ class Book
         return implode(', ', $authorNames);
     }
 
-    public function getDiscipline(): ?Discipline
+    /**
+     * @return Collection<int, Discipline>
+     */
+    public function getDisciplines(): Collection
     {
-        return $this->discipline;
+        return $this->disciplines;
     }
 
-    public function setDiscipline(?Discipline $discipline): self
+    public function addDiscipline(Discipline $discipline): self
     {
-        $this->discipline = $discipline;
+        if (!$this->disciplines->contains($discipline)) {
+            $this->disciplines->add($discipline);
+        }
+        
+        return $this;
+    }
+
+    public function removeDiscipline(Discipline $discipline): self
+    {
+        $this->disciplines->removeElement($discipline);
         return $this;
     }
 
@@ -233,17 +229,6 @@ class Book
         return implode(', ', $publisherNames);
     }
 
-    public function getQuantity(): ?int
-    {
-        return $this->quantity;
-    }
-
-    public function setQuantity(int $quantity): self
-    {
-        $this->quantity = $quantity;
-        return $this;
-    }
-
     /**
      * @return Collection<int, Exemplaire>
      */
@@ -281,50 +266,6 @@ class Book
         })->count();
     }
 
-    public function getEdition(): ?string
-    {
-        return $this->edition;
-    }
-
-    public function setEdition(?string $edition): self
-    {
-        $this->edition = $edition;
-        return $this;
-    }
-
-    public function getPrice(): ?string
-    {
-        return $this->price;
-    }
-
-    public function setPrice(?string $price): self
-    {
-        $this->price = $price;
-        return $this;
-    }
-
-    public function getAcquisitionMode(): ?string
-    {
-        return $this->acquisitionMode;
-    }
-
-    public function setAcquisitionMode(?string $acquisitionMode): self
-    {
-        $this->acquisitionMode = $acquisitionMode;
-        return $this;
-    }
-
-    public function getAcquisitionDate(): ?\DateTimeInterface
-    {
-        return $this->acquisitionDate;
-    }
-
-    public function setAcquisitionDate(?\DateTimeInterface $acquisitionDate): self
-    {
-        $this->acquisitionDate = $acquisitionDate;
-        return $this;
-    }
-
     public function getDocumentType(): ?string
     {
         return $this->documentType;
@@ -333,17 +274,6 @@ class Book
     public function setDocumentType(?string $documentType): self
     {
         $this->documentType = $documentType;
-        return $this;
-    }
-
-    public function getLocation(): ?string
-    {
-        return $this->location;
-    }
-
-    public function setLocation(?string $location): self
-    {
-        $this->location = $location;
         return $this;
     }
 

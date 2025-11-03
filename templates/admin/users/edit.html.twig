@@ -1,0 +1,118 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Modifier l'utilisateur{% endblock %}
+
+{% block admin_content %}
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3">Modifier l'utilisateur</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('admin_user_edit') }}">
+                            
+                            <!-- Login (usually not editable) -->
+                            <div class="mb-3">
+                                <label for="login" class="form-label">Login</label>
+                                <input type="text" id="login" class="form-control" value="{{ user.login }}" disabled>
+                                <small class="text-muted">Le login ne peut pas être modifié</small>
+                            </div>
+
+                            <!-- Nom -->
+                            <div class="mb-3">
+                                <label for="nom" class="form-label">Nom</label>
+                                <input type="text" id="nom" name="nom" class="form-control" value="{{ user.nom }}" required>
+                            </div>
+
+                            <!-- Prénom -->
+                            <div class="mb-3">
+                                <label for="prenom" class="form-label">Prénom</label>
+                                <input type="text" id="prenom" name="prenom" class="form-control" value="{{ user.prenom }}" required>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+                            </div>
+
+                            <!-- Roles -->
+                            <div class="mb-3">
+                                <label for="roles" class="form-label">Rôles</label>
+                                <input type="text" id="roles" name="roles" class="form-control" 
+                                       value="{{ user.roles|join(', ') }}" 
+                                       placeholder="ROLE_ADMIN, ROLE_USER">
+                                <small class="text-muted">Séparez les rôles par des virgules</small>
+                            </div>
+
+                            <!-- Change Password (optional) -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Nouveau mot de passe (optionnel)</label>
+                                <div class="input-group">
+                                    <input type="password" id="password" name="password" class="form-control" 
+                                           placeholder="Laissez vide pour ne pas changer">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
+                                        <i id="password-icon" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer
+                                </button>
+                                <a href="{{ path('admin_users_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>ID:</strong> {{ user.id }}</p>
+                        <p><strong>Login:</strong> {{ user.login }}</p>
+                        <p><strong>Type:</strong> 
+                            {% if 'ROLE_ADMIN' in user.roles %}
+                                <span class="badge bg-danger">Administrateur</span>
+                            {% elseif 'ROLE_LIMITED_ADMIN' in user.roles %}
+                                <span class="badge bg-warning">Admin Limité</span>
+                            {% else %}
+                                <span class="badge bg-info">Utilisateur</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const field = document.getElementById('password');
+            const icon = document.getElementById('password-icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+{% endblock %}

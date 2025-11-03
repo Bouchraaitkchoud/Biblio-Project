@@ -20,27 +20,21 @@ class Exemplaire
     #[ORM\Column(type: 'string', length: 50, unique: true, nullable: false)]
     private ?string $barcode = null;
 
-    #[ORM\ManyToOne(targetEntity: Discipline::class)]
-    #[ORM\JoinColumn(name: 'discipline_id', referencedColumnName: 'id', nullable: true)]
-    private ?Discipline $discipline = null;
-
-    #[ORM\Column(type: 'string', length: 20, nullable: false)]
-    private string $status = 'available';
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $location_id = null;
+    #[ORM\ManyToOne(targetEntity: Location::class)]
+    #[ORM\JoinColumn(name: 'location_id', referencedColumnName: 'id', nullable: true)]
+    private ?Location $location = null;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
-    private ?string $call_number = null;
+    private ?string $acquisition_mode = null;
 
     #[ORM\Column(type: 'date', nullable: true)]
     private ?\DateTimeInterface $acquisition_date = null;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?\DateTimeInterface $returnDate = null;
-
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $price = null;
+
+    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    private ?string $status = 'available';
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $comment = null;
@@ -72,47 +66,25 @@ class Exemplaire
         return $this;
     }
 
-    public function getDiscipline(): ?Discipline
+    public function getLocation(): ?Location
     {
-        return $this->discipline;
+        return $this->location;
     }
 
-    public function setDiscipline(?Discipline $discipline): self
+    public function setLocation(?Location $location): self
     {
-        $this->discipline = $discipline;
+        $this->location = $location;
         return $this;
     }
 
-    public function getStatus(): string
+    public function getAcquisitionMode(): ?string
     {
-        return $this->status;
+        return $this->acquisition_mode;
     }
 
-    public function setStatus(string $status): self
+    public function setAcquisitionMode(?string $acquisition_mode): self
     {
-        $this->status = $status;
-        return $this;
-    }
-
-    public function getLocationId(): ?int
-    {
-        return $this->location_id;
-    }
-
-    public function setLocationId(?int $location_id): self
-    {
-        $this->location_id = $location_id;
-        return $this;
-    }
-
-    public function getCallNumber(): ?string
-    {
-        return $this->call_number;
-    }
-
-    public function setCallNumber(?string $call_number): self
-    {
-        $this->call_number = $call_number;
+        $this->acquisition_mode = $acquisition_mode;
         return $this;
     }
 
@@ -127,17 +99,6 @@ class Exemplaire
         return $this;
     }
 
-    public function getReturnDate(): ?\DateTimeInterface
-    {
-        return $this->returnDate;
-    }
-
-    public function setReturnDate(?\DateTimeInterface $returnDate): self
-    {
-        $this->returnDate = $returnDate;
-        return $this;
-    }
-
     public function getPrice(): ?string
     {
         return $this->price;
@@ -146,6 +107,17 @@ class Exemplaire
     public function setPrice(?string $price): self
     {
         $this->price = $price;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status ?? 'available';
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 

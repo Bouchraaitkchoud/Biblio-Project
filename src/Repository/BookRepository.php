@@ -38,7 +38,7 @@ class BookRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('b')
             ->leftJoin('b.authors', 'a')
-            ->leftJoin('b.discipline', 'd')
+            ->leftJoin('b.disciplines', 'd')
             ->orderBy('b.title', 'ASC');
             
         if ($searchTerm) {
@@ -66,7 +66,7 @@ class BookRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('b')
             ->leftJoin('b.authors', 'a')
-            ->leftJoin('b.discipline', 'd')
+            ->leftJoin('b.disciplines', 'd')
             ->where('LOWER(b.title) LIKE LOWER(:searchTerm)')
             ->orWhere('LOWER(b.isbn) LIKE LOWER(:searchTerm)')
             ->orWhere('LOWER(a.name) LIKE LOWER(:searchTerm)')
@@ -106,7 +106,8 @@ class BookRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('b')
             ->leftJoin('b.authors', 'a')
-            ->where('b.discipline = :discipline')
+            ->leftJoin('b.disciplines', 'd')
+            ->where(':discipline MEMBER OF b.disciplines')
             ->andWhere('(LOWER(b.title) LIKE LOWER(:searchTerm) OR LOWER(a.name) LIKE LOWER(:searchTerm) OR LOWER(b.isbn) LIKE LOWER(:searchTerm))')
             ->setParameter('discipline', $discipline)
             ->setParameter('searchTerm', '%' . $searchTerm . '%')

@@ -18,9 +18,6 @@ class Author
     #[ORM\Column(length: 255)]
     private ?string $name = null;
     
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $bio = null;
-    
     #[ORM\ManyToMany(targetEntity: Book::class, mappedBy: 'authors')]
     private Collection $books;
     
@@ -42,17 +39,6 @@ class Author
     public function setName(string $name): self
     {
         $this->name = $name;
-        return $this;
-    }
-    
-    public function getBio(): ?string
-    {
-        return $this->bio;
-    }
-    
-    public function setBio(?string $bio): self
-    {
-        $this->bio = $bio;
         return $this;
     }
     

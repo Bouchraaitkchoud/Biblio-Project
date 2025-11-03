@@ -193,9 +193,9 @@
                 <div class="meta-label">Année de publication :</div>
                 <div class="meta-value">{{ book.publicationYear }}</div>
             {% endif %}
-            {% if book.discipline %}
-                <div class="meta-label">Discipline :</div>
-                <div class="meta-value">{{ book.discipline.name }}</div>
+            {% if book.disciplines|length > 0 %}
+                <div class="meta-label">Disciplines :</div>
+                <div class="meta-value">{{ book.disciplines|map(d => d.name)|join(', ') }}</div>
             {% endif %}
         </div>
         {% if book.description %}

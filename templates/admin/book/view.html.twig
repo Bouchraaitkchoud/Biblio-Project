@@ -90,11 +90,11 @@
             </div>
             <div class="mb-3">
                 <label for="author" class="form-label">Auteur</label>
-                <input type="text" id="author" class="form-control" value="{{ book.author.name }}" readonly>
+                <input type="text" id="author" class="form-control" value="{{ book.authors|map(a => a.name)|join(', ') }}" readonly>
             </div>
             <div class="mb-3">
-                <label for="section" class="form-label">Discipline</label>
-                <input type="text" id="section" class="form-control" value="{{ book.discipline.name }}" readonly>
+                <label for="section" class="form-label">Disciplines</label>
+                <input type="text" id="section" class="form-control" value="{{ book.disciplines|map(d => d.name)|join(', ') }}" readonly>
             </div>
             <div style="display: flex; gap: 1rem; align-items: center;">
                 <a href="{{ path('admin_books_edit', {'id': book.id}) }}" class="btn btn-primary">

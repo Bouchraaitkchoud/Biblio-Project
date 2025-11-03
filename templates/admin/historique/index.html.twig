@@ -57,7 +57,7 @@
                         {{ order.exemplaire.book.title }}<br>
                         <small>Code: {{ order.exemplaire.barcode }}</small>
                     </td>
-                    <td>{{ order.exemplaire.discipline.name }}</td>
+                    <td>{{ order.exemplaire.book.disciplines|map(d => d.name)|join(', ')|default('N/A') }}</td>
                     <td>{{ order.adminEmail ? order.adminEmail : 'N/A' }}</td>
                 </tr>
             {% else %}

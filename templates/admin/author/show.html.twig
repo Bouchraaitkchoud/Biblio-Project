@@ -118,9 +118,6 @@
 
         <div class="author-detail-card">
             <div class="author-name">{{ author.name }}</div>
-            {% if author.bio is defined and author.bio %}
-                <div class="author-bio">{{ author.bio }}</div>
-            {% endif %}
 
             <div class="btn-group">
                 <a href="{{ path('admin_author_edit', {'id': author.id}) }}" class="btn btn-edit" title="Modifier l'auteur">
@@ -138,7 +135,7 @@
                         {% for book in author.books %}
                             <li>
                                 <a href="{{ path('book_show', {'id': book.id}) }}">{{ book.title }}</a>
-                                <span class="count-badge">({{ book.discipline.name }})</span>
+                                <span class="count-badge">({{ book.disciplines|map(d => d.name)|join(', ')|default('Aucune discipline') }})</span>
                             </li>
                         {% endfor %}
                     </ul>

@@ -30,7 +30,8 @@ class DisciplineController extends AbstractController
         if (!empty($searchQuery)) {
             $books = $bookRepository->searchInDiscipline($discipline, $searchQuery);
         } else {
-            $books = $bookRepository->findBy(['discipline' => $discipline]);
+            // Use the discipline's books collection since it's a ManyToMany relationship
+            $books = $discipline->getBooks()->toArray();
         }
 
         // Render the books in a template

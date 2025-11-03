@@ -21,7 +21,7 @@ class Discipline
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
-    #[ORM\OneToMany(mappedBy: 'discipline', targetEntity: Book::class)]
+    #[ORM\ManyToMany(targetEntity: Book::class, mappedBy: 'disciplines')]
     private Collection $books;
 
     public function __construct()
@@ -108,7 +108,7 @@ class Discipline
     {
         if (!$this->books->contains($book)) {
             $this->books[] = $book;
-            $book->setDiscipline($this);
+            $book->addDiscipline($this);
         }
         return $this;
     }
@@ -116,9 +116,7 @@ class Discipline
     public function removeBook(Book $book): self
     {
         if ($this->books->removeElement($book)) {
-            if ($book->getDiscipline() === $this) {
-                $book->setDiscipline(null);
-            }
+            $book->removeDiscipline($this);
         }
         return $this;
     }

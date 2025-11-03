@@ -183,7 +183,7 @@ class UserController extends AbstractController
 
             if (empty($email)) {
                 $this->addFlash('error', 'Email is required.');
-                return $this->render('admin/user/edit.html.twig', [
+                return $this->render('admin/users/edit.html.twig', [
                     'user' => $user
                 ]);
             }
@@ -197,7 +197,7 @@ class UserController extends AbstractController
             return $this->redirectToRoute('admin_users_index');
         }
 
-        return $this->render('admin/user/edit.html.twig', [
+        return $this->render('admin/users/edit.html.twig', [
             'user' => $user,
         ]);
     }

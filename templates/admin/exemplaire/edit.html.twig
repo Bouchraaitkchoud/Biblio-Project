@@ -106,25 +106,25 @@
             {{ form_start(form) }}
                 <div class="row">
                     <div class="col-md-6">
+                        {{ form_row(form.barcode, {
+                            'label_attr': {'class': 'form-label'},
+                            'attr': {'class': 'form-control'}
+                        }) }}
                         {{ form_row(form.status, {
                             'label_attr': {'class': 'form-label'},
                             'attr': {'class': 'form-control'}
                         }) }}
-                        {{ form_row(form.locationId, {
+                        {{ form_row(form.location, {
                             'label_attr': {'class': 'form-label'},
                             'attr': {'class': 'form-control'}
                         }) }}
-                        {{ form_row(form.callNumber, {
+                        {{ form_row(form.acquisition_mode, {
                             'label_attr': {'class': 'form-label'},
                             'attr': {'class': 'form-control'}
                         }) }}
                     </div>
                     <div class="col-md-6">
-                        {{ form_row(form.acquisitionDate, {
-                            'label_attr': {'class': 'form-label'},
-                            'attr': {'class': 'form-control'}
-                        }) }}
-                        {{ form_row(form.returnDate, {
+                        {{ form_row(form.acquisition_date, {
                             'label_attr': {'class': 'form-label'},
                             'attr': {'class': 'form-control'}
                         }) }}
@@ -132,30 +132,13 @@
                             'label_attr': {'class': 'form-label'},
                             'attr': {'class': 'form-control'}
                         }) }}
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        {{ form_row(form.barcode, {
-                            'label_attr': {'class': 'form-label'},
-                            'attr': {'class': 'form-control'}
-                        }) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.discipline_id, {
-                            'label_attr': {'class': 'form-label'},
-                            'attr': {'class': 'form-control'}
-                        }) }}
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-12">
                         {{ form_row(form.comment, {
                             'label_attr': {'class': 'form-label'},
-                            'attr': {'class': 'form-control'}
+                            'attr': {'class': 'form-control', 'rows': 3}
                         }) }}
                     </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Enregistrer les modifications

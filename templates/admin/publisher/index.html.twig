@@ -171,13 +171,6 @@
                 <div class="publisher-entry">
                     <div class="publisher-info">
                         <div class="publisher-name">{{ publisher.name }}</div>
-                        <div class="publisher-location">
-                            {% if publisher.city or publisher.country %}
-                                {{ [publisher.city, publisher.country]|filter(v => v)|join(', ') }}
-                            {% else %}
-                                <span class="text-muted">Non spécifié</span>
-                            {% endif %}
-                        </div>
                         <div class="publisher-books">Livres : {{ publisher.books|length }}</div>
                     </div>
                     <div class="publisher-actions">
