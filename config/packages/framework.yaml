@@ -14,23 +14,22 @@
 #         session:
 #             storage_factory_id: session.storage.factory.mock_file
 framework:
-    secret: '%env(APP_SECRET)%'
+  secret: "%env(APP_SECRET)%"
 
-    # Enable CSRF protection for forms
-    form:
-        csrf_protection:
-            enabled: true
-            field_name: _csrf_token  # Customize this if needed
+  # Enable CSRF protection for forms
+  form:
+    csrf_protection:
+      enabled: true
+      field_name: _csrf_token # Customize this if needed
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+  # Note that the session will be started ONLY if you read or write from it.
+  session: true
 
-    #esi: true
-    #fragments: true
+  #esi: true
+  #fragments: true
 
 when@test:
-    framework:
-        test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file
-
+  framework:
+    test: true
+    session:
+      storage_factory_id: session.storage.factory.mock_file

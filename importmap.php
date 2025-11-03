@@ -16,14 +16,13 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
-    // Temporarily commented out to bypass download issues
-    // '@hotwired/stimulus' => [
-    //     'version' => '3.2.2',
-    // ],
-    // '@symfony/stimulus-bundle' => [
-    //     'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
-    // ],
-    // '@hotwired/turbo' => [
-    //     'version' => '7.3.0',
-    // ],
+    '@symfony/stimulus-bundle' => [
+        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
+    ],
+    '@hotwired/turbo' => [
+        'version' => '7.3.0',
+    ],
+    '@hotwired/stimulus' => [
+        'version' => '3.2.2',
+    ],
 ];

@@ -1,0 +1,12 @@
+framework:
+  http_client:
+    max_host_connections: 10
+    default_options:
+      max_duration: 0
+      max_redirects: 20
+    scoped_clients:
+      # Scoped client for importmap downloads
+      importmap.http_client:
+        base_uri: "https://cdn.jsdelivr.net/"
+        max_duration: 0
+        max_redirects: 20
