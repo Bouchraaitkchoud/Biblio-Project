@@ -48,9 +48,9 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new RedirectResponse($this->router->generate('admin_dashboard'));
         }
 
-        // For limited admin, also redirect to dashboard
+        // For limited admin, redirect to limited admin panel
         if (in_array('ROLE_LIMITED_ADMIN', $roles, true) || !empty(array_intersect($roles, $adminRoles))) {
-            return new RedirectResponse($this->router->generate('admin_dashboard'));
+            return new RedirectResponse($this->router->generate('admin_limited_panel'));
         }
 
         // Fallback for normal lecteur / user: redirect to site root

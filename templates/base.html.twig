@@ -233,41 +233,60 @@
                         <h3><i class="fas fa-book-reader"></i> Admin Panel</h3>
                     </div>
                     <div class="sidebar-links">
-                        <a href="{{ path('admin_dashboard') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_dashboard' %} active{% endif %}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="{{ path('admin_orders_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_orders' %} active{% endif %}">
-                            <i class="fas fa-clipboard-list"></i>
-                            <span>Commandes</span>
-                        </a>
-                        <a href="{{ path('admin_returns_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_returns' %} active{% endif %}">
-                            <i class="fas fa-undo"></i>
-                            <span>Retours</span>
-                        </a>
-                        <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_disciplines' %} active{% endif %}">
-                            <i class="fas fa-sitemap"></i>
-                            <span>Disciplines</span>
-                        </a>
-                        <a href="{{ path('admin_authors_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_authors' %} active{% endif %}">
-                            <i class="fas fa-user-edit"></i>
-                            <span>Auteurs</span>
-                        </a>
-                        <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_publishers' %} active{% endif %}">
-                            <i class="fas fa-building"></i>
-                            <span>Éditeurs</span>
-                        </a>
-                        <a href="{{ path('admin_books_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_books' or app.request.get('_route') starts with 'admin_exemplaire' %} active{% endif %}">
-                            <i class="fas fa-book"></i>
-                            <span>Livres</span>
-                        </a>
-                        {% if is_granted('PRIVILEGE_GERER_LES_UTILISATEURS') %}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('admin_dashboard') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_dashboard' %} active{% endif %}">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        {% else %}
+                            <a href="{{ path('admin_limited_panel') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_limited_panel' %} active{% endif %}">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Mon Panel</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_COMMANDES') %}
+                            <a href="{{ path('admin_orders_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_orders' %} active{% endif %}">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Commandes</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_RETOURS') %}
+                            <a href="{{ path('admin_returns_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_returns' %} active{% endif %}">
+                                <i class="fas fa-undo"></i>
+                                <span>Retours</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_DISCIPLINES') %}
+                            <a href="{{ path('admin_disciplines_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_disciplines' %} active{% endif %}">
+                                <i class="fas fa-sitemap"></i>
+                                <span>Disciplines</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_AUTEURS') %}
+                            <a href="{{ path('admin_authors_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_authors' %} active{% endif %}">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Auteurs</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_EDITEURS') %}
+                            <a href="{{ path('admin_publishers_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_publishers' %} active{% endif %}">
+                                <i class="fas fa-building"></i>
+                                <span>Éditeurs</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_LIVRES') %}
+                            <a href="{{ path('admin_books_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_books' or app.request.get('_route') starts with 'admin_exemplaire' %} active{% endif %}">
+                                <i class="fas fa-book"></i>
+                                <span>Livres</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_UTILISATEURS') %}
                             <a href="{{ path('admin_users_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_users' %} active{% endif %}">
                                 <i class="fas fa-user-shield"></i>
                                 <span>Utilisateurs</span>
                             </a>
                         {% endif %}
-                        {% if is_granted('PRIVILEGE_GERER_LES_LECTEURS') %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_LECTEURS') %}
                             <a href="{{ path('admin_lecteurs_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_lecteurs' %} active{% endif %}">
                                 <i class="fas fa-user-graduate"></i>
                                 <span>Lecteurs</span>

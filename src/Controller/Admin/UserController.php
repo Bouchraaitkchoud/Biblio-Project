@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/users')]
-#[IsGranted('ROLE_ADMIN')]
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_UTILISATEURS')")]
 class UserController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}

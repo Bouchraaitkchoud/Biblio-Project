@@ -37,9 +37,16 @@ class AccessDeniedListener implements EventSubscriberInterface
         // Get user roles
         $roles = [];
         if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
-            // Any admin (full or limited) - redirect to dashboard
-            if ($this->authorizationChecker->isGranted('ROLE_ADMIN') || $this->authorizationChecker->isGranted('ROLE_LIMITED_ADMIN')) {
+            // Full admin - redirect to dashboard
+            if ($this->authorizationChecker->isGranted('ROLE_ADMIN')) {
                 $response = new RedirectResponse($this->router->generate('admin_dashboard'));
+                $event->setResponse($response);
+                return;
+            }
+            
+            // Limited admin - redirect to limited panel
+            if ($this->authorizationChecker->isGranted('ROLE_LIMITED_ADMIN')) {
+                $response = new RedirectResponse($this->router->generate('admin_limited_panel'));
                 $event->setResponse($response);
                 return;
             }

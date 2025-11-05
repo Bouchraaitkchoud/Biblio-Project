@@ -26,7 +26,7 @@ class DashboardController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_dashboard')]
-    #[IsGranted('ROLE_USER')] // Both ROLE_ADMIN and ROLE_LIMITED_ADMIN inherit from ROLE_USER
+    #[IsGranted('ROLE_ADMIN')] // Only full admins can access dashboard
     public function index(): Response
     {
         // Get total counts
