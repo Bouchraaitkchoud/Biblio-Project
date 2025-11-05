@@ -65,8 +65,8 @@ class ProfileController extends AbstractController
                 $errors[] = 'Le mot de passe actuel est incorrect.';
             }
 
-            if (strlen($newPassword) < 8) {
-                $errors[] = 'Le nouveau mot de passe doit contenir au moins 8 caractères.';
+            if (strlen($newPassword) < 6) {
+                $errors[] = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
             }
 
             if ($newPassword !== $confirmPassword) {

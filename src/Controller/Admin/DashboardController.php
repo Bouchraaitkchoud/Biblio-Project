@@ -7,6 +7,7 @@ use App\Repository\CartRepository;
 use App\Repository\ExemplaireRepository;
 use App\Repository\DisciplineRepository;
 use App\Repository\UserRepository;
+use App\Repository\LocationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +23,7 @@ class DashboardController extends AbstractController
         private ExemplaireRepository $exemplaireRepository,
         private DisciplineRepository $disciplineRepository,
         private UserRepository $userRepository,
+        private LocationRepository $locationRepository,
         private EntityManagerInterface $entityManager
     ) {}
 
@@ -34,6 +36,7 @@ class DashboardController extends AbstractController
         $total_orders = $this->cartRepository->count([]);
         $total_users = $this->userRepository->count([]);
         $total_disciplines = $this->disciplineRepository->count([]);
+        $total_locations = $this->locationRepository->count([]);
 
         // Get recent orders
         $recent_orders = $this->cartRepository->findBy(
@@ -47,6 +50,7 @@ class DashboardController extends AbstractController
             'total_orders' => $total_orders,
             'total_users' => $total_users,
             'total_disciplines' => $total_disciplines,
+            'total_locations' => $total_locations,
             'recent_orders' => $recent_orders
         ]);
     }

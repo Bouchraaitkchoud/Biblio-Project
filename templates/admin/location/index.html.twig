@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Emplacements{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0"><i class="fas fa-map-marker-alt"></i> Gestion des Emplacements</h1>
+            <a href="{{ path('admin_location_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvel Emplacement
+            </a>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" action="{{ path('admin_locations_index') }}" class="row g-3">
+                    <div class="col-md-10">
+                        <input type="text" name="search" class="form-control" placeholder="Rechercher un emplacement..." value="{{ search }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if locations|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Nombre d'exemplaires</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in locations %}
+                                    <tr>
+                                        <td>{{ item.location.id }}</td>
+                                        <td>
+                                            <strong>{{ item.location.name }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if item.exemplairesCount > 0 %}
+                                                <span class="badge bg-info">{{ item.exemplairesCount }} exemplaire(s)</span>
+                                            {% else %}
+                                                <span class="text-muted">Aucun exemplaire</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ path('admin_location_edit', {'id': item.location.id}) }}" class="btn btn-sm btn-primary" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if item.exemplairesCount == 0 %}
+                                                <form method="post" action="{{ path('admin_location_delete', {'id': item.location.id}) }}" style="display:inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'emplacement \'{{ item.location.name }}\' ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.location.id) }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <button type="button" class="btn btn-sm btn-secondary" disabled title="Impossible de supprimer (exemplaires liés)">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">
+                            {% if search %}
+                                Aucun emplacement trouvé pour "{{ search }}".
+                            {% else %}
+                                Aucun emplacement disponible. Créez-en un pour commencer.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

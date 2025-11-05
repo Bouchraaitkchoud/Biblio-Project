@@ -296,6 +296,17 @@
                 </div>
                 <a href="{{ path('admin_disciplines_index') }}" class="btn-manage">Gérer les Disciplines</a>
             </div>
+
+            <div class="management-card">
+                <div class="management-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="management-title">Gérer les Emplacements</div>
+                <div class="management-description">
+                    Créer, modifier et supprimer des emplacements pour les exemplaires
+                </div>
+                <a href="{{ path('admin_locations_index') }}" class="btn-manage">Gérer les Emplacements</a>
+            </div>
             
             <div class="management-card">
                 <div class="management-icon">
@@ -436,6 +447,10 @@
             <div class="stat-card">
                 <div class="value">{{ total_disciplines }}</div>
                 <div class="label">Total Disciplines</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ total_locations }}</div>
+                <div class="label">Total Emplacements</div>
             </div>
         </div>
     </div>

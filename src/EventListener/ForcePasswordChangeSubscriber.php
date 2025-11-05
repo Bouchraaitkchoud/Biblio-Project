@@ -20,7 +20,7 @@ class ForcePasswordChangeSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => ['onKernelRequest', 10],
+            KernelEvents::REQUEST => ['onKernelRequest', 7],
         ];
     }
 
@@ -34,11 +34,12 @@ class ForcePasswordChangeSubscriber implements EventSubscriberInterface
         $route = $request->attributes->get('_route');
 
         // Skip check for logout, password change, and assets routes
-        if (in_array($route, ['app_logout', 'profile_change_password', 'profile_index']) 
+        if (in_array($route, ['app_logout', 'profile_change_password']) 
             || str_starts_with($route, '_')
             || str_starts_with($request->getPathInfo(), '/assets/')
             || str_starts_with($request->getPathInfo(), '/css/')
             || str_starts_with($request->getPathInfo(), '/js/')
+            || str_starts_with($request->getPathInfo(), '/images/')
         ) {
             return;
         }
@@ -50,8 +51,16 @@ class ForcePasswordChangeSubscriber implements EventSubscriberInterface
 
         $user = $token->getUser();
         
+        // Debug: Log user info
+        error_log("DEBUG ForcePasswordChange - User: " . ($user ? get_class($user) : 'null'));
+        if ($user instanceof Lecteur) {
+            error_log("DEBUG ForcePasswordChange - Is Lecteur: YES");
+            error_log("DEBUG ForcePasswordChange - Force change: " . ($user->getForcePasswordChange() ? 'YES' : 'NO'));
+        }
+        
         // Only check for Lecteur entities (not Admin users)
         if ($user instanceof Lecteur && $user->getForcePasswordChange()) {
+            error_log("DEBUG ForcePasswordChange - REDIRECTING to change password");
             $session = $request->getSession();
             
             // Add flash message only once

@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Emplacement{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <h1 class="mb-4"><i class="fas fa-plus-circle"></i> Nouvel Emplacement</h1>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" action="{{ path('admin_location_new') }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nom de l'emplacement <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Ex: Salle A, Étage 2, Rayonnage 5...">
+                        <div class="form-text">Le nom doit être unique.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Créer
+                        </button>
+                        <a href="{{ path('admin_locations_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

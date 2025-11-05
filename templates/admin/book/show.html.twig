@@ -101,6 +101,176 @@
         .alert {
             border-radius: 8px;
         }
+        
+        /* Styles pour le tableau des exemplaires */
+        .exemplaires-section {
+            width: 100%;
+        }
+        .exemplaires-card {
+            background: #fff;
+            border-left: 4px solid #b2903e;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            overflow-x: auto;
+            max-width: 100%;
+            width: 100%;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .exemplaires-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #b2903e;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .exemplaires-title {
+            margin: 0;
+            color: #1a2e4f;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .btn-add-exemplaire {
+            background: #b2903e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.6rem 1.2rem;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+        }
+        .btn-add-exemplaire:hover {
+            background: #8d7230;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(178, 144, 62, 0.3);
+        }
+        .exemplaires-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .exemplaires-table thead {
+            background: linear-gradient(135deg, #1a2e4f 0%, #2a4a75 100%);
+            color: #fff;
+        }
+        .exemplaires-table thead th {
+            padding: 0.75rem 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.3px;
+            border: none;
+            white-space: nowrap;
+        }
+        .exemplaires-table tbody tr {
+            background: #fff;
+            transition: all 0.2s ease;
+        }
+        .exemplaires-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .exemplaires-table tbody tr:hover {
+            background: #f7f3ed;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .exemplaires-table tbody td {
+            padding: 0.7rem 0.4rem;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+        .exemplaires-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .barcode-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #1a2e4f;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-borrowed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-other {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .price-cell {
+            font-weight: 600;
+            color: #b2903e;
+        }
+        .actions-cell {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: nowrap;
+        }
+        .btn-action {
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-return {
+            background: #28a745;
+            color: #fff;
+        }
+        .btn-return:hover {
+            background: #218838;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .btn-action-edit {
+            background: #17a2b8;
+            color: #fff;
+        }
+        .btn-action-edit:hover {
+            background: #138496;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .no-exemplaires {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .no-exemplaires i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
     </style>
 {% endblock %}
 
@@ -170,59 +340,98 @@
             </div>
         </div>
         <!-- Tableau des exemplaires -->
-        <div class="book-detail-card" style="margin-top: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3 style="margin: 0; color: #1a2e4f;">Exemplaires</h3>
-                <a href="{{ path('admin_book_add_exemplaire', {'id': book.id}) }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Ajouter un exemplaire
-                </a>
+        <div class="exemplaires-card">
+            <div class="exemplaires-section">
+                <div class="exemplaires-header">
+                    <h3 class="exemplaires-title">
+                        <i class="fas fa-books"></i> Exemplaires ({{ exemplaires|length }})
+                    </h3>
+                    <a href="{{ path('admin_book_add_exemplaire', {'id': book.id}) }}" class="btn btn-add-exemplaire">
+                        <i class="fas fa-plus-circle"></i> Ajouter un exemplaire
+                    </a>
+                </div>
+                
+                {% if exemplaires|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="exemplaires-table">
+                            <thead>
+                                <tr>
+                                    <th>Code barre</th>
+                                    <th>Statut</th>
+                                    <th>Emplacement</th>
+                                    <th>Acquisition</th>
+                                    <th>Date</th>
+                                    <th>Prix</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exemplaire in exemplaires %}
+                                    <tr>
+                                        <td class="barcode-cell">
+                                            {{ exemplaire.barcode }}
+                                        </td>
+                                        <td>
+                                            <span class="status-badge {% if exemplaire.status == 'available' %}status-available{% elseif exemplaire.status == 'borrowed' %}status-borrowed{% else %}status-other{% endif %}">
+                                                {% if exemplaire.status == 'available' %}
+                                                    Disponible
+                                                {% elseif exemplaire.status == 'borrowed' %}
+                                                    Emprunté
+                                                {% else %}
+                                                    {{ exemplaire.status|capitalize }}
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if exemplaire.location %}
+                                                {{ exemplaire.location.name }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ exemplaire.acquisitionMode|default('-') }}</td>
+                                        <td>
+                                            {% if exemplaire.acquisitionDate %}
+                                                {{ exemplaire.acquisitionDate|date('d/m/Y') }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="price-cell">
+                                            {% if exemplaire.price %}
+                                                {{ exemplaire.price|number_format(2) }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="actions-cell">
+                                                {% if exemplaire.status == 'borrowed' %}
+                                                    <form method="post" action="{{ path('admin_exemplaire_return', {'id': exemplaire.id}) }}" style="display:inline-block;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('return' ~ exemplaire.id) }}">
+                                                        <button type="submit" class="btn btn-action btn-return" onclick="return confirm('Marquer cet exemplaire comme retourné ?')" title="Marquer comme retourné">
+                                                            <i class="fas fa-undo-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                                <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-action btn-action-edit" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="no-exemplaires">
+                        <i class="fas fa-book-open"></i>
+                        <p class="mb-2"><strong>Aucun exemplaire disponible</strong></p>
+                        <p class="text-muted">Cliquez sur le bouton ci-dessus pour ajouter le premier exemplaire de ce livre.</p>
+                    </div>
+                {% endif %}
             </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Code barre</th>
-                        <th>Statut</th>
-                        <th>Emplacement</th>
-                        <th>Mode d'acquisition</th>
-                        <th>Date d'acquisition</th>
-                        <th>Prix</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for exemplaire in exemplaires %}
-                        <tr>
-                            <td>{{ exemplaire.barcode }}</td>
-                            <td>
-                                <span class="badge {% if exemplaire.status == 'available' %}bg-success{% elseif exemplaire.status == 'borrowed' %}bg-danger{% else %}bg-warning{% endif %}">
-                                    {{ exemplaire.status|capitalize }}
-                                </span>
-                            </td>
-                            <td>{{ exemplaire.location ? exemplaire.location.name : '-' }}</td>
-                            <td>{{ exemplaire.acquisitionMode|default('-') }}</td>
-                            <td>{{ exemplaire.acquisitionDate ? exemplaire.acquisitionDate|date('Y-m-d') : '-' }}</td>
-                            <td>{{ exemplaire.price ? exemplaire.price|number_format(2) : '-' }}</td>
-                            <td>
-                                {% if exemplaire.status == 'borrowed' %}
-                                    <form method="post" action="{{ path('admin_exemplaire_return', {'id': exemplaire.id}) }}" style="display:inline-block;">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('return' ~ exemplaire.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Marquer cet exemplaire comme retourné ?')">
-                                            <i class="fas fa-undo"></i> Marquer comme retourné
-                                        </button>
-                                    </form>
-                                {% endif %}
-                                <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </a>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="8" class="text-center text-muted">Aucun exemplaire trouvé pour ce livre.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
 

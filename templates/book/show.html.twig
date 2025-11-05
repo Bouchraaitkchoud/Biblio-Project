@@ -89,8 +89,8 @@
             font-family: 'Georgia', serif;
             cursor: pointer;
             transition: background 0.3s;
-            margin-bottom: 1.2rem;
-            margin-right: 1rem;
+            flex: 1;
+            text-align: center;
         }
         .add-to-cart-btn:hover:not(:disabled) {
             background-color: #a07d33;
@@ -100,7 +100,9 @@
             cursor: not-allowed;
         }
         .view-cart-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background-color: #28a745;
             color: white;
             padding: 0.7rem 1.5rem;
@@ -109,8 +111,9 @@
             font-family: 'Georgia', serif;
             font-size: 1.1rem;
             transition: background 0.3s;
-            margin-bottom: 1.2rem;
             position: relative;
+            flex: 1;
+            text-align: center;
         }
         .view-cart-btn:hover {
             background-color: #218838;
@@ -131,18 +134,29 @@
             text-align: center;
         }
         .back-button {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background-color: #1a2e4f;
             color: white;
-            padding: 0.6rem 1.2rem;
+            padding: 0.7rem 1.5rem;
             border-radius: 6px;
             text-decoration: none;
-            font-weight: bold;
             font-family: 'Georgia', serif;
+            font-size: 1.1rem;
             transition: background 0.3s;
+            flex: 1;
+            text-align: center;
         }
         .back-button:hover {
             background-color: #13203a;
+            color: white;
+            text-decoration: none;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
         @media (max-width: 900px) {
             .book-detail-main {
@@ -150,12 +164,9 @@
                 padding: 1.5rem 0.7rem;
                 gap: 1.5rem;
             }
-            .add-to-cart-btn, .view-cart-btn {
-                display: block;
-                width: 100%;
-                margin-right: 0;
-                margin-bottom: 0.8rem;
-                text-align: center;
+            .buttons-container {
+                flex-direction: column;
+                gap: 0.8rem;
             }
             .book-detail-cover {
                 max-width: 100%;
@@ -221,26 +232,29 @@
             {% endif %}
         </div>
         
-        {% if book.isAvailable %}
-            <button id="add-to-cart-btn" class="add-to-cart-btn" onclick="window.addToCartGlobal({{ book.id }}, this); return false;">
-                <i class="fas fa-cart-plus"></i> Ajouter au panier
-            </button>
-        {% else %}
-            <button class="add-to-cart-btn" disabled style="background: #6c757d; cursor: not-allowed; opacity: 0.6;">
-                <i class="fas fa-ban"></i> Non disponible
-            </button>
-        {% endif %}
-        
-        <a href="{{ path('view_cart') }}" class="view-cart-btn">
-            <i class="fas fa-shopping-cart"></i> Voir mon panier
-            {% set cartCount = cart_count() %}
-            {% if cartCount > 0 %}
-                <span class="cart-count-badge">{{ cartCount }}</span>
+        <div class="buttons-container">
+            {% if book.isAvailable %}
+                <button id="add-to-cart-btn" class="add-to-cart-btn" onclick="window.addToCartGlobal({{ book.id }}, this); return false;">
+                    <i class="fas fa-cart-plus"></i> Ajouter au panier
+                </button>
+            {% else %}
+                <button class="add-to-cart-btn" disabled style="background: #6c757d; cursor: not-allowed; opacity: 0.6;">
+                    <i class="fas fa-ban"></i> Non disponible
+                </button>
             {% endif %}
-        </a>
-        <a href="{{ path('home') }}" class="back-button">
-            <i class="fas fa-arrow-left"></i> Retour au catalogue
-        </a>
+            
+            <a href="{{ path('view_cart') }}" class="view-cart-btn">
+                <i class="fas fa-shopping-cart"></i> Voir mon panier
+                {% set cartCount = cart_count() %}
+                {% if cartCount > 0 %}
+                    <span class="cart-count-badge">{{ cartCount }}</span>
+                {% endif %}
+            </a>
+            
+            <a href="{{ path('home') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Retour au catalogue
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}
