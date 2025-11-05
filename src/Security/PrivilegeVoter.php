@@ -22,28 +22,30 @@ class PrivilegeVoter extends Voter
             return false;
         }
 
-        // Map the attribute to the actual privilege label stored in User::getPrivileges()
+        // Map PRIVILEGE_* constants to actual ROLE_* in User::getRoles()
         $mapping = [
-            'PRIVILEGE_GERER_LES_AUTEURS'   => 'Gérer les auteurs',
-            'PRIVILEGE_GERER_LES_UTILISATEURS' => 'Gérer les utilisateurs',
-            'PRIVILEGE_GERER_LES_LIVRES'     => 'Gérer les livres',
-    
-            'PRIVILEGE_GERER_LES_RETOURS'    => 'Gérer les retours',
-            
-            'PRIVILEGE_GERER_LES_EDITEURS'   => 'Gérer les éditeurs',
-            'PRIVILEGE_GERER_LES_DISCIPLINES'=> 'Gérer les disciplines',
-            'PRIVILEGE_GERER_LES_COMMANDES'  => 'Gérer les commandes'
-        
-
+            'PRIVILEGE_GERER_LES_AUTEURS'   => 'ROLE_GERER_AUTEURS',
+            'PRIVILEGE_GERER_LES_UTILISATEURS' => 'ROLE_GERER_UTILISATEURS',
+            'PRIVILEGE_GERER_LES_LECTEURS' => 'ROLE_GERER_LECTEURS',
+            'PRIVILEGE_GERER_LES_LIVRES'     => 'ROLE_GERER_LIVRES',
+            'PRIVILEGE_GERER_LES_RETOURS'    => 'ROLE_GERER_RETOURS',
+            'PRIVILEGE_GERER_LES_EDITEURS'   => 'ROLE_GERER_EDITEURS',
+            'PRIVILEGE_GERER_LES_DISCIPLINES'=> 'ROLE_GERER_DISCIPLINES',
+            'PRIVILEGE_GERER_LES_COMMANDES'  => 'ROLE_GERER_COMMANDES'
         ];
 
         if (!isset($mapping[$attribute])) {
             return false;
         }
 
-        $requiredPrivilege = $mapping[$attribute];
-        $userPrivileges = $user->getPrivileges();
+        $requiredRole = $mapping[$attribute];
+        $userRoles = $user->getRoles();
 
-        return in_array($requiredPrivilege, $userPrivileges, true);
+        // Absolute admin (ROLE_ADMIN) has all permissions
+        if (in_array('ROLE_ADMIN', $userRoles, true)) {
+            return true;
+        }
+
+        return in_array($requiredRole, $userRoles, true);
     }
 }

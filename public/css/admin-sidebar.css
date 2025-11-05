@@ -1,0 +1,199 @@
+/* Admin Sidebar Styles - Unified for all admin pages */
+
+/* Reset any potential conflicts */
+.admin-layout {
+    display: flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Sidebar - Fixed width and position */
+.admin-sidebar {
+    width: 260px !important;
+    min-height: 100vh !important;
+    background: linear-gradient(180deg, #1a2e4f 0%, #0f1a2e 100%) !important;
+    color: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    z-index: 1000 !important;
+    box-shadow: 3px 0 15px rgba(0,0,0,0.1) !important;
+    overflow-y: auto !important;
+}
+
+/* Sidebar brand/logo area */
+.sidebar-brand {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.sidebar-brand h3 {
+    margin: 0;
+    color: #b2903e;
+    font-family: 'Georgia', serif;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+/* Sidebar navigation links container */
+.sidebar-links {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    margin-top: 20px !important;
+    padding: 0 15px !important;
+    flex: 1;
+}
+
+/* Individual navigation link */
+.admin-nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    padding: 14px 18px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    font-family: 'Segoe UI', 'Georgia', serif !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    font-size: 0.95em !important;
+    position: relative !important;
+}
+
+.admin-nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+/* Hover and active states */
+.admin-nav-link:hover {
+    background-color: rgba(178, 144, 62, 0.15) !important;
+    color: #fff !important;
+    transform: translateX(5px);
+    padding-left: 23px !important;
+}
+
+.admin-nav-link.active {
+    background: linear-gradient(135deg, #b2903e 0%, #d4af37 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 8px rgba(178, 144, 62, 0.3);
+    font-weight: 600 !important;
+}
+
+.admin-nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 70%;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+}
+
+/* User info section at bottom */
+.sidebar-user {
+    margin: 20px 0 !important;
+    padding: 15px 20px !important;
+    font-family: 'Georgia', serif !important;
+    font-size: 0.9em !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-user span {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* Logout link */
+.logout-link {
+    color: #b2903e !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 0.95em !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px;
+    border-radius: 6px;
+}
+
+.logout-link:hover {
+    color: #fff !important;
+    background: rgba(178, 144, 62, 0.2);
+    transform: translateX(3px);
+}
+
+.logout-link i {
+    font-size: 1em;
+}
+
+/* Main content area - adjusted for sidebar */
+.dashboard-main-content {
+    margin-left: 260px !important;
+    width: calc(100% - 260px) !important;
+    padding: 25px !important;
+    box-sizing: border-box !important;
+    min-height: 100vh !important;
+    background: #fdfaf5 !important;
+}
+
+/* Ensure containers don't interfere */
+.dashboard-main-content .admin-content-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    min-height: auto !important;
+}
+
+.dashboard-main-content .container-fluid {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Dashboard specific adjustments */
+.dashboard-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 70px !important;
+    }
+    
+    .admin-nav-link span {
+        display: none;
+    }
+    
+    .sidebar-brand h3 {
+        font-size: 0.9em;
+    }
+    
+    .sidebar-user span {
+        display: none;
+    }
+    
+    .dashboard-main-content {
+        margin-left: 70px !important;
+        width: calc(100% - 70px) !important;
+    }
+}

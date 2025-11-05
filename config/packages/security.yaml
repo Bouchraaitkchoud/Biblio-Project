@@ -65,6 +65,9 @@ security:
       entity:
         class: App\Entity\Lecteur
         property: codeAdmission # lecteur form: <input name="code_d_admission">
+    chain_provider:
+      chain:
+        providers: ["admin_provider", "lecteur_provider"]
 
   role_hierarchy:
     ROLE_ADMIN: [ROLE_USER]
@@ -77,49 +80,42 @@ security:
 
     admin:
       pattern: ^/admin
-      security: false
-      # AUTHENTICATION COMPLETELY DISABLED FOR DEBUGGING
-      # provider: admin_provider
-      # form_login:
-      #   success_handler: App\Security\LoginSuccessHandler
-      #   login_path: app_admin_login
-      #   check_path: app_admin_check
-      #   username_parameter: login
-      #   password_parameter: password
-      #   enable_csrf: true
-      #   default_target_path: admin_dashboard # redirect admins here on success
-      #   use_referer: false
-      # logout:
-      #   path: /admin/logout
-      #   target: app_admin_login
+      provider: admin_provider
+      context: shared_context
+      form_login:
+        success_handler: App\Security\LoginSuccessHandler
+        login_path: app_admin_login
+        check_path: app_admin_check
+        username_parameter: login
+        password_parameter: password
+        enable_csrf: true
+        default_target_path: admin_dashboard
+        use_referer: false
+      logout:
+        path: /admin/logout
+        target: app_admin_login
 
     main:
-      security: false
-      # AUTHENTICATION COMPLETELY DISABLED FOR DEBUGGING
-      # provider: lecteur_provider
-      # form_login:
-      #   success_handler: App\Security\LoginSuccessHandler
-      #   login_path: app_login # GET page
-      #   check_path: app_login # POST target (can be same route)
-      #   username_parameter: codeAdmission # <-- must match form input name
-      #   password_parameter: password
-      #   enable_csrf: true
-      #   default_target_path: lecteur_dashboard # redirect lecteurs here on success
-      #   use_referer: true
-      # logout:
-      #   path: app_logout
-      #   target: app_login
+      pattern: ^/
+      provider: chain_provider
+      context: shared_context
+      form_login:
+        success_handler: App\Security\LoginSuccessHandler
+        login_path: app_login
+        check_path: app_login
+        username_parameter: codeAdmission
+        password_parameter: password
+        enable_csrf: true
+        default_target_path: lecteur_dashboard
+        use_referer: true
+      logout:
+        path: app_logout
+        target: app_login
+      switch_user: true
 
   access_control:
-    # ALL ACCESS CONTROL TEMPORARILY DISABLED FOR DEBUGGING
-    # - { path: ^/login, roles: PUBLIC_ACCESS }
-    # - { path: ^/admin/login, roles: PUBLIC_ACCESS }
-    # - { path: ^/admin/authors, roles: [ROLE_ADMIN, ROLE_GERER_AUTEURS] }
-    # - { path: ^/admin/users, roles: [ROLE_ADMIN, ROLE_GERER_UTILISATEURS] }
-    # - { path: ^/admin/books, roles: [ROLE_ADMIN, ROLE_GERER_LIVRES] }
-    # - { path: ^/admin/returns, roles: [ROLE_ADMIN, ROLE_GERER_RETOURS] }
-    # - { path: ^/admin/publishers, roles: [ROLE_ADMIN, ROLE_GERER_EDITEURS] }
-    # - { path: ^/admin/disciplines, roles: [ROLE_ADMIN, ROLE_GERER_DISCIPLINES] }
-    # - { path: ^/admin/historique, roles: [ROLE_ADMIN, ROLE_GERER_HISTORIQUE] }
-    # - { path: ^/admin/orders, roles: [ROLE_ADMIN, ROLE_GERER_COMMANDES] }
-    # - { path: ^/, roles: ROLE_USER }
+    - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_LIMITED_ADMIN] }
+    - { path: ^/main-site, roles: [ROLE_USER, ROLE_ADMIN] }
+    - { path: ^/, roles: [ROLE_USER, ROLE_ADMIN] }

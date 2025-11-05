@@ -1,25 +1,102 @@
-{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\lecteur/show.html.twig #}
 {% extends 'admin/layout.html.twig' %}
 
 {% block title %}Détails du Lecteur{% endblock %}
 
 {% block admin_content %}
-    <h1>Détails du Lecteur</h1>
-    <div>
-        <p><strong>Nom:</strong> {{ lecteur.nom }}</p>
-        <p><strong>Prénom:</strong> {{ lecteur.prenom }}</p>
-        <p><strong>Email:</strong> {{ lecteur.email }}</p>
-        <p><strong>Code d'admission:</strong> {{ lecteur.codeAdmission }}</p>
-        <p><strong>Établissement:</strong> {{ lecteur.etablissement }}</p>
-        <p><strong>Formation:</strong> {{ lecteur.formation }}</p>
-        <p><strong>Promotion:</strong> {{ lecteur.promotion }}</p>
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-user"></i> Détails du Lecteur</h1>
+                <p class="text-muted">{{ lecteur.nom|upper }} {{ lecteur.prenom }}</p>
+            </div>
+            <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations personnelles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold text-muted">Nom complet</div>
+                            <div class="col-md-8">{{ lecteur.nom|upper }} {{ lecteur.prenom }}</div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold text-muted">Code d'admission</div>
+                            <div class="col-md-8"><code>{{ lecteur.codeAdmission }}</code></div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold text-muted">Email</div>
+                            <div class="col-md-8">
+                                <a href="mailto:{{ lecteur.email }}">{{ lecteur.email }}</a>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold text-muted">Établissement</div>
+                            <div class="col-md-8">{{ lecteur.etablissement }}</div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold text-muted">Formation</div>
+                            <div class="col-md-8">
+                                <span class="badge bg-secondary">{{ lecteur.formation }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold text-muted">Promotion</div>
+                            <div class="col-md-8">{{ lecteur.promotion }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_lecteurs_edit', { id: lecteur.id }) }}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <button 
+                                class="btn btn-warning"
+                                onclick="if(confirm('Voulez-vous réinitialiser le mot de passe de {{ lecteur.nom }} {{ lecteur.prenom }} ?')) { window.location.href='{{ path('admin_lecteurs_index') }}'; alert('Utilisez le bouton de réinitialisation dans la liste'); }">
+                                <i class="fas fa-key"></i> Réinitialiser le mot de passe
+                            </button>
+                            <form method="post" 
+                                  action="{{ path('admin_lecteurs_delete', { id: lecteur.id }) }}" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer {{ lecteur.nom }} {{ lecteur.prenom }} ?');"
+                                  style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecteur.id) }}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Informations sur l'activité du lecteur seront affichées ici (emprunts, réservations, etc.)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="btn-group" role="group" aria-label="Actions">
-        <a href="{{ path('admin_lecteurs_edit', { id: lecteur.id }) }}" class="btn btn-primary">Modifier</a>
-        <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-secondary">Retour à la liste</a>
-    </div>
-    <form method="post" action="{{ path('admin_lecteurs_delete', { id: lecteur.id }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce lecteur ?');" style="margin-top: 10px;">
-        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecteur.id) }}">
-        <button class="btn btn-danger">Supprimer</button>
-    </form>
 {% endblock %}

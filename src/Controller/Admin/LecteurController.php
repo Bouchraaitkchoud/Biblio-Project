@@ -9,22 +9,41 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/admin/lecteurs')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_LECTEURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class LecteurController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
 
     #[Route('/', name: 'admin_lecteurs_index', methods: ['GET'])]
-    public function index(LecteurRepository $lecteurRepository): Response
+    public function index(Request $request, LecteurRepository $lecteurRepository): Response
     {
-        $lecteurs = $lecteurRepository->findAll();
+        $search = trim($request->query->get('search', ''));
+        
+        if ($search !== '') {
+            $searchLower = strtolower($search);
+            $lecteurs = $lecteurRepository->createQueryBuilder('l')
+                ->where('LOWER(l.nom) LIKE :search 
+                    OR LOWER(l.prenom) LIKE :search 
+                    OR LOWER(l.codeAdmission) LIKE :search
+                    OR LOWER(l.email) LIKE :search')
+                ->setParameter('search', '%' . $searchLower . '%')
+                ->orderBy('l.nom', 'ASC')
+                ->getQuery()
+                ->getResult();
+        } else {
+            $lecteurs = $lecteurRepository->findBy([], ['nom' => 'ASC']);
+        }
+        
         return $this->render('admin/lecteur/index.html.twig', [
             'lecteurs' => $lecteurs,
+            'search' => $search,
         ]);
     }
     
@@ -33,8 +52,8 @@ class LecteurController extends AbstractController
     {
         $lecteurs = $lecteurRepository->findAll();
 
-        // Build CSV header and content, including the "Mot de passe" column
-        $csvData = "Nom,Prénom,Code d'admission,Établissement,Formation,Promotion,Email,Mot de passe\n";
+        // Build CSV header and content WITHOUT the password column
+        $csvData = "Nom,Prénom,Code d'admission,Établissement,Formation,Promotion,Email\n";
         foreach ($lecteurs as $lecteur) {
             $nom = str_replace([",", "\n"], [" ", " "], $lecteur->getNom());
             $prenom = str_replace([",", "\n"], [" ", " "], $lecteur->getPrenom());
@@ -43,18 +62,16 @@ class LecteurController extends AbstractController
             $formation = str_replace([",", "\n"], [" ", " "], $lecteur->getFormation());
             $promotion = str_replace([",", "\n"], [" ", " "], $lecteur->getPromotion());
             $email = str_replace([",", "\n"], [" ", " "], $lecteur->getEmail());
-            $motDePasse = str_replace([",", "\n"], [" ", " "], $lecteur->getPassword());
             
             // Surround fields with quotes to properly handle commas in data
-            $csvData .= sprintf('"%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
+            $csvData .= sprintf('"%s","%s","%s","%s","%s","%s","%s"' . "\n",
                 $nom,
                 $prenom,
                 $codeAdmission,
                 $etablissement,
                 $formation,
                 $promotion,
-                $email,
-                $motDePasse
+                $email
             );
         }
 
@@ -220,5 +237,58 @@ class LecteurController extends AbstractController
             $this->addFlash('success', 'Le lecteur a été supprimé avec succès.');
         }
         return $this->redirectToRoute('admin_lecteurs_index');
+    }
+
+    #[Route('/{id}/reset-password', name: 'admin_lecteurs_reset_password', methods: ['POST'])]
+    public function resetPassword(Lecteur $lecteur, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        try {
+            // Generate a random temporary password
+            $temporaryPassword = $this->generateRandomPassword();
+            
+            // For Lecteur, we use plaintext password (as configured in security.yaml)
+            // So we don't hash it
+            $lecteur->setPassword($temporaryPassword);
+            
+            // Mark that the user must change password on next login
+            $lecteur->setForcePasswordChange(true);
+            
+            $this->entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true,
+                'newPassword' => $temporaryPassword
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function generateRandomPassword(int $length = 12): string
+    {
+        $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        $numbers = '0123456789';
+        $special = '!@#$%';
+        
+        $allChars = $uppercase . $lowercase . $numbers . $special;
+        
+        // Ensure at least one of each type
+        $password = '';
+        $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+        $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+        $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        $password .= $special[random_int(0, strlen($special) - 1)];
+        
+        // Fill the rest randomly
+        for ($i = 4; $i < $length; $i++) {
+            $password .= $allChars[random_int(0, strlen($allChars) - 1)];
+        }
+        
+        // Shuffle the password
+        return str_shuffle($password);
     }
 }

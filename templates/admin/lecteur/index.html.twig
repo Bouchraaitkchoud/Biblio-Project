@@ -1,58 +1,232 @@
-{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\lecteur\index.html.twig #}
 {% extends 'admin/layout.html.twig' %}
 
 {% block title %}Gestion des Lecteurs{% endblock %}
 
 {% block admin_content %}
-    <h1>Liste des Lecteurs</h1>
-    <div class="mb-3">
-        <a href="{{ path('admin_lecteurs_export_csv') }}" class="btn btn-success me-2">
-            <i class="fas fa-file-csv"></i> Exporter CSV
-        </a>
-        <a href="{{ path('admin_lecteurs_new') }}" class="btn btn-primary">
-            Ajouter un nouveau Lecteur
-        </a>
+    <div class="container-fluid">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-user-graduate"></i> Gestion des Lecteurs</h1>
+                <p class="text-muted">Gérer les comptes des étudiants et lecteurs de la bibliothèque</p>
+            </div>
+            <div>
+                <a href="{{ path('admin_users_index') }}" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-user-shield"></i> Voir les Admins
+                </a>
+                <a href="{{ path('admin_lecteurs_export_csv') }}" class="btn btn-success me-2">
+                    <i class="fas fa-file-csv"></i> Exporter CSV
+                </a>
+                <a href="{{ path('admin_lecteurs_new') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Nouveau Lecteur
+                </a>
+            </div>
+        </div>
+
+        {# Search Bar #}
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get" action="{{ path('admin_lecteurs_index') }}" class="row g-3">
+                    <div class="col-md-9">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="form-control" 
+                            placeholder="Rechercher par nom, prénom, code d'admission ou email..." 
+                            value="{{ search }}"
+                        >
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {% if lecteurs is empty %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        {% if search %}
+                            Aucun résultat pour "{{ search }}"
+                        {% else %}
+                            Aucun lecteur trouvé.
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="mb-3 text-muted">
+                        <i class="fas fa-users"></i> {{ lecteurs|length }} lecteur(s) trouvé(s)
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nom Complet</th>
+                                    <th>Code</th>
+                                    <th>Établissement</th>
+                                    <th>Formation</th>
+                                    <th>Promotion</th>
+                                    <th>Email</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lecteur in lecteurs %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ lecteur.nom|upper }} {{ lecteur.prenom }}</strong>
+                                        </td>
+                                        <td>
+                                            <code>{{ lecteur.codeAdmission }}</code>
+                                        </td>
+                                        <td>{{ lecteur.etablissement|default('—') }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ lecteur.formation|default('Non spécifiée') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ lecteur.promotion|default('—') }}</td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ lecteur.email|default('—') }}
+                                            </small>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ path('admin_lecteurs_show', { id: lecteur.id }) }}" 
+                                                   class="btn btn-outline-info"
+                                                   title="Voir">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ path('admin_lecteurs_edit', { id: lecteur.id }) }}" 
+                                                   class="btn btn-outline-warning"
+                                                   title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button 
+                                                    class="btn btn-outline-secondary"
+                                                    onclick="resetPassword({{ lecteur.id }}, '{{ lecteur.nom }} {{ lecteur.prenom }}')"
+                                                    title="Réinitialiser le mot de passe">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
+                                                <form method="post" 
+                                                      action="{{ path('admin_lecteurs_delete', { id: lecteur.id }) }}" 
+                                                      style="display:inline;" 
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer {{ lecteur.nom }} {{ lecteur.prenom }} ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecteur.id) }}">
+                                                    <button class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    {% if lecteurs|length %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Code d'admission</th>
-                    <th>Établissement</th>
-                    <th>Formation</th>
-                    <th>Promotion</th>
-                    <th>Email</th>
-                    <th>Mot de passe</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lecteur in lecteurs %}
-                    <tr>
-                        <td>{{ lecteur.nom }}</td>
-                        <td>{{ lecteur.prenom }}</td>
-                        <td>{{ lecteur.codeAdmission }}</td>
-                        <td>{{ lecteur.etablissement }}</td>
-                        <td>{{ lecteur.formation }}</td>
-                        <td>{{ lecteur.promotion }}</td>
-                        <td>{{ lecteur.email }}</td>
-                        <td>{{ lecteur.password }}</td>
-                        <td>
-                            <a href="{{ path('admin_lecteurs_show', { id: lecteur.id }) }}" class="btn btn-sm">Voir</a>
-                            <a href="{{ path('admin_lecteurs_edit', { id: lecteur.id }) }}" class="btn btn-sm">Modifier</a>
-                            <form method="post" action="{{ path('admin_lecteurs_delete', { id: lecteur.id }) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce lecteur ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecteur.id) }}">
-                                <button class="btn btn-sm">Supprimer</button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Aucun lecteur trouvé.</p>
-    {% endif %}
+    {# Modal for Password Reset - Simple Bootstrap Modal #}
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key"></i> Nouveau Mot de Passe
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Mot de passe temporaire généré pour <strong id="lecteurName"></strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nouveau mot de passe :</label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="newPassword" 
+                                   readonly 
+                                   class="form-control form-control-lg text-center fw-bold" 
+                                   style="font-family: monospace; font-size: 1.2rem;">
+                            <button class="btn btn-primary" onclick="copyPassword()" title="Copier">
+                                <i class="fas fa-copy"></i> Copier
+                            </button>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Le lecteur devra changer ce mot de passe lors de sa prochaine connexion.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resetPassword(lecteurId, lecteurName) {
+            if (!confirm('Voulez-vous vraiment réinitialiser le mot de passe de ' + lecteurName + ' ?')) {
+                return;
+            }
+
+            fetch('{{ path('admin_lecteurs_reset_password', {id: '__ID__'}) }}'.replace('__ID__', lecteurId), {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Erreur serveur');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Simple alert with the password
+                    alert('Mot de passe temporaire pour ' + lecteurName + ' :\n\n' + data.newPassword + '\n\n⚠️ Le lecteur devra le changer à sa prochaine connexion.\n\nNote: Copiez ce mot de passe maintenant, il ne sera plus affiché.');
+                    
+                    // Try to copy to clipboard
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(data.newPassword).then(function() {
+                            alert('✓ Mot de passe copié dans le presse-papier !');
+                        }).catch(function() {
+                            // Silently fail if clipboard not available
+                        });
+                    }
+                } else {
+                    alert('Erreur lors de la réinitialisation du mot de passe: ' + (data.error || 'Erreur inconnue'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erreur lors de la réinitialisation du mot de passe: ' + error.message);
+            });
+        }
+
+        function copyPassword() {
+            const passwordField = document.getElementById('newPassword');
+            passwordField.select();
+            passwordField.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                alert('Mot de passe copié !');
+            } catch (err) {
+                alert('Erreur lors de la copie');
+            }
+        }
+    </script>
 {% endblock %}

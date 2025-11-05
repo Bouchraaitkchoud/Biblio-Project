@@ -17,7 +17,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[Route('/admin/scan')]
-// #[IsGranted('ROLE_ADMIN')] // DISABLED FOR DEBUGGING
+#[IsGranted('ROLE_ADMIN')]
 class ScanController extends AbstractController
 {
     public function __construct(

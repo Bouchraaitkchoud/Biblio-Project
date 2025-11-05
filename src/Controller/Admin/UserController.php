@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/users')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_UTILISATEURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class UserController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
@@ -25,56 +25,34 @@ class UserController extends AbstractController
     {
         $search = trim($request->query->get('search', ''));
         $userRepo = $this->entityManager->getRepository(User::class);
+        
+        // Only get admin users (exclude regular ROLE_USER only)
+        $qb = $userRepo->createQueryBuilder('u');
+        
         if ($search !== '') {
             $searchLower = strtolower($search);
-            $users = $userRepo->createQueryBuilder('u')
-                ->where('LOWER(u.email) LIKE :search')
-                ->setParameter('search', '%' . $searchLower . '%')
-                ->getQuery()
-                ->getResult();
-        } else {
-            $users = $userRepo->findAll();
+            $qb->where('LOWER(u.email) LIKE :search OR LOWER(u.login) LIKE :search OR LOWER(u.nom) LIKE :search OR LOWER(u.prenom) LIKE :search')
+               ->setParameter('search', '%' . $searchLower . '%');
         }
+        
+        $users = $qb->getQuery()->getResult();
+        
+        // Filter to only show admin users
+        $adminUsers = array_filter($users, function($user) {
+            $roles = $user->getRoles();
+            return in_array('ROLE_ADMIN', $roles) || in_array('ROLE_LIMITED_ADMIN', $roles);
+        });
+        
         return $this->render('admin/users/index.html.twig', [
-            'users' => $users,
+            'users' => $adminUsers,
         ]);
     }
 
     #[Route('/new', name: 'admin_user_new', methods: ['GET', 'POST'])]
     public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
-        // This method may be kept for generic "new" actions if needed.
-        // Otherwise, redirect to one of the two specialized actions.
-        return $this->redirectToRoute('admin_users_new_student');
-    }
-
-    // NEW ACTION: for creating a student user.
-    #[Route('/new/student', name: 'admin_users_new_student', methods: ['GET', 'POST'])]
-    public function newStudent(Request $request, UserPasswordHasherInterface $passwordHasher): Response
-    {
-        if ($request->isMethod('POST')) {
-            $email = $request->request->get('email');
-            $password = $request->request->get('password');
-            // Student users have their own fields (you can expand on this as needed)
-            if (empty($email) || empty($password)) {
-                $this->addFlash('error', 'Email et mot de passe requis.');
-                return $this->render('admin/users/new_student.html.twig');
-            }
-            $user = new User();
-            $user->setEmail($email);
-            // Give default ROLE_USER for a student.
-            $user->setRoles(['ROLE_USER']);
-            $hashedPassword = $passwordHasher->hashPassword($user, $password);
-            $user->setPassword($hashedPassword);
-            // Here you can also set additional student-specific fields.
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-
-            $this->addFlash('success', 'Utilisateur étudiant créé avec succès.');
-            return $this->redirectToRoute('admin_users_index');
-        }
-        return $this->render('admin/users/new_student.html.twig');
+        // Redirect to admin creation page
+        return $this->redirectToRoute('admin_users_new_admin');
     }
 
     // NEW ACTION: for creating an admin user.
@@ -86,6 +64,7 @@ class UserController extends AbstractController
         $privileges = [
             'Gérer les auteurs',
             'Gérer les utilisateurs',
+            'Gérer les lecteurs',
             'Gérer les livres',
             'Gérer les retours',
             'Gérer les éditeurs',
@@ -119,30 +98,11 @@ class UserController extends AbstractController
                 // Absolute admin: full access
                 $user->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
             } elseif ($userType === 'limited') {
-                // Limited admin: assign a base limited role and extra roles from privileges
-                $privilegeRoleMap = [
-                    'Gérer les auteurs'       => 'ROLE_GERER_AUTEURS',
-                    'Gérer les utilisateurs'  => 'ROLE_GERER_UTILISATEURS',
-                    'Gérer les livres'        => 'ROLE_GERER_LIVRES',
-                    'Gérer les retours'       => 'ROLE_GERER_RETOURS',
-                    'Gérer les éditeurs'      => 'ROLE_GERER_EDITEURS',
-                    'Gérer les disciplines'   => 'ROLE_GERER_DISCIPLINES',
-                    'Historique des Emprunts' => 'ROLE_GERER_HISTORIQUE',
-                    'Gérer les commandes'     => 'ROLE_GERER_COMMANDES'
-                ];
-
-                $selectedPrivileges = $request->request->all('privileges') ?? [];
-                $additionalRoles = [];
-                foreach ($selectedPrivileges as $privilege) {
-                    if (isset($privilegeRoleMap[$privilege])) {
-                        $additionalRoles[] = $privilegeRoleMap[$privilege];
-                    }
-                }
-                // For a limited admin, assign a base role plus extra privilege roles.
-                $roles = array_merge(['ROLE_LIMITED_ADMIN'], $additionalRoles);
+                // Limited admin: permissions are already sent as ROLE_XXX from checkboxes
+                $selectedRoles = $request->request->all('privileges') ?? [];
+                // Merge base LIMITED_ADMIN role with selected permissions
+                $roles = array_merge(['ROLE_LIMITED_ADMIN', 'ROLE_USER'], $selectedRoles);
                 $user->setRoles($roles);
-                // Optionally store privileges:
-                $user->setPrivileges($selectedPrivileges);
             } else {
                 // Normal user: assign standard user role
                 $user->setRoles(['ROLE_USER']);
@@ -174,26 +134,45 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'admin_user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user): Response
+    public function edit(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
     {
         if ($request->isMethod('POST')) {
+            $nom = $request->request->get('nom');
+            $prenom = $request->request->get('prenom');
             $email = $request->request->get('email');
-            $rolesInput = $request->request->get('roles', '');
-            $roles = array_map('trim', explode(',', $rolesInput));
+            $password = $request->request->get('password');
+            $adminType = $request->request->get('admin_type');
+            $selectedPermissions = $request->request->all('permissions') ?? [];
 
-            if (empty($email)) {
-                $this->addFlash('error', 'Email is required.');
-                return $this->render('admin/users/edit.html.twig', [
-                    'user' => $user
-                ]);
+            // Validation
+            if (empty($nom) || empty($prenom) || empty($email)) {
+                $this->addFlash('error', 'Nom, prénom et email sont requis.');
+                return $this->render('admin/users/edit.html.twig', ['user' => $user]);
             }
 
+            // Update basic info
+            $user->setNom($nom);
+            $user->setPrenom($prenom);
             $user->setEmail($email);
-            $user->setRoles($roles);
-            // Update additional properties as needed
+
+            // Update password if provided
+            if (!empty($password)) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $password);
+                $user->setPassword($hashedPassword);
+            }
+
+            // Set roles based on admin type
+            if ($adminType === 'absolute') {
+                $user->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
+            } elseif ($adminType === 'limited') {
+                $roles = array_merge(['ROLE_LIMITED_ADMIN', 'ROLE_USER'], $selectedPermissions);
+                $user->setRoles($roles);
+            } else {
+                $user->setRoles(['ROLE_USER']);
+            }
 
             $this->entityManager->flush();
-            $this->addFlash('success', 'User updated successfully.');
+            $this->addFlash('success', 'Administrateur modifié avec succès.');
             return $this->redirectToRoute('admin_users_index');
         }
 

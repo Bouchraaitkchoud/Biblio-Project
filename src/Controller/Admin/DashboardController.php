@@ -14,7 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin')]
-// #[IsGranted('ROLE_ADMIN')] // DISABLED FOR DEBUGGING
 class DashboardController extends AbstractController
 {
     public function __construct(
@@ -27,6 +26,7 @@ class DashboardController extends AbstractController
     ) {}
 
     #[Route('/', name: 'admin_dashboard')]
+    #[IsGranted('ROLE_USER')] // Both ROLE_ADMIN and ROLE_LIMITED_ADMIN inherit from ROLE_USER
     public function index(): Response
     {
         // Get total counts

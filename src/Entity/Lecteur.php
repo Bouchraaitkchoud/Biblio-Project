@@ -39,6 +39,9 @@ class Lecteur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type:"string", length:255)]
     private ?string $password = null;
 
+    #[ORM\Column(type:"boolean", options:["default" => false])]
+    private bool $forcePasswordChange = false;
+
 
     public function getId(): ?int
     {
@@ -130,6 +133,17 @@ class Lecteur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getForcePasswordChange(): bool
+    {
+        return $this->forcePasswordChange;
+    }
+
+    public function setForcePasswordChange(bool $forcePasswordChange): self
+    {
+        $this->forcePasswordChange = $forcePasswordChange;
         return $this;
     }
 

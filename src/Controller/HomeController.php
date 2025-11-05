@@ -34,10 +34,12 @@ class HomeController extends AbstractController
     public function mainSite(DisciplineRepository $disciplineRepository): Response
     {
         // This route always shows the main site, even for admins
+        // Allow both ROLE_ADMIN and ROLE_USER to access
         $disciplines = $disciplineRepository->findBy([], ['name' => 'ASC']);
 
         return $this->render('home/index.html.twig', [
             'disciplines' => $disciplines,
+            'show_admin_link' => $this->isGranted('ROLE_ADMIN'), // Show link back to admin panel
         ]);
     }
 }

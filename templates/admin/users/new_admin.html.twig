@@ -2,82 +2,299 @@
 
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Créer un nouvel utilisateur{% endblock %}
+{% block title %}Créer un nouvel administrateur{% endblock %}
 
 {% block admin_content %}
-    <h1>Créer un nouvel utilisateur</h1>
+<style>
+    .permission-card {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .permission-card:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+    }
+    .permission-card.selected {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+    .form-check-input:checked ~ .permission-label {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    .admin-type-card {
+        cursor: pointer;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s;
+    }
+    .admin-type-card:hover {
+        border-color: #0d6efd;
+        transform: translateY(-2px);
+    }
+    .admin-type-card.active {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+</style>
 
-    <form method="post">
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="fas fa-user-plus"></i> Créer un nouvel administrateur</h1>
+            <p class="text-muted mb-0">Ajouter un nouveau compte administrateur avec des permissions spécifiques</p>
+        </div>
+        <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <form method="post" id="newUserForm">
         <input type="hidden" name="_token" value="{{ csrf_token('admin_user_new') }}">
         
-        <!-- User type selection -->
-        <div class="mb-3">
-            <label class="form-label">Type d'utilisateur</label>
-
-            <div>
-                <input type="radio" id="absolute" name="user_type" value="absolute" onchange="togglePrivileges()">
-                <label for="absolute">Admin Absolu</label>
-            </div>
-            <div>
-                <input type="radio" id="limited" name="user_type" value="limited" onchange="togglePrivileges()">
-                <label for="limited">Admin Limité</label>
-            </div>
-        </div>
-        
-        <!-- Basic information -->
-        <div class="mb-3">
-            <label for="login" class="form-label">Login</label>
-            <input type="text" id="login" name="login" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="nom" class="form-label">Nom</label>
-            <input type="text" id="nom" name="nom" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="prenom" class="form-label">Prénom</label>
-            <input type="text" id="prenom" name="prenom" class="form-control" required>
-        </div>
-        
-        <!-- Password with toggle -->
-        <div class="mb-3">
-            <label for="password" class="form-label">Mot de passe</label>
-            <div class="input-group">
-                <input type="password" id="password" name="password" class="form-control" required>
-                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password')">
-                    <i id="password-icon" class="fas fa-eye"></i>
-                </button>
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="confirm_password" class="form-label">Confirmer le mot de passe</label>
-            <div class="input-group">
-                <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirm_password')">
-                    <i id="confirm_password-icon" class="fas fa-eye"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Privileges block, only for limited admins -->
-        <div class="mb-3" id="privileges_block" style="display:none;">
-            <label class="form-label">Privilèges</label>
-            <div class="form-check">
-                {% for privilege in privileges %}
-                    <div class="form-check">
-                        <input type="checkbox" id="privilege_{{ loop.index }}" name="privileges[]" value="{{ privilege }}" class="form-check-input">
-                        <label for="privilege_{{ loop.index }}" class="form-check-label">{{ privilege }}</label>
+        <div class="row">
+            <!-- Left Column: Basic Info -->
+            <div class="col-lg-8">
+                <!-- Basic Information Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-id-card"></i> Informations Personnelles</h5>
                     </div>
-                {% endfor %}
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nom" class="form-label fw-bold">Nom <span class="text-danger">*</span></label>
+                                <input type="text" id="nom" name="nom" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="prenom" class="form-label fw-bold">Prénom <span class="text-danger">*</span></label>
+                                <input type="text" id="prenom" name="prenom" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="login" class="form-label fw-bold">Login <span class="text-danger">*</span></label>
+                            <input type="text" id="login" name="login" class="form-control" required>
+                            <small class="text-muted"><i class="fas fa-info-circle"></i> Identifiant unique pour la connexion</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label fw-bold">Mot de passe <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" id="password" name="password" class="form-control" required>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password')">
+                                        <i id="password-icon" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Minimum 6 caractères</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confirm_password" class="form-label fw-bold">Confirmer <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirm_password')">
+                                        <i id="confirm_password-icon" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Type Selection -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-crown"></i> Type d'Administrateur</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="admin-type-card card h-100" onclick="selectAdminType('absolute')">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="user_type" value="absolute" id="type_absolute" class="d-none">
+                                        <i class="fas fa-crown fa-3x text-danger mb-3"></i>
+                                        <h5 class="card-title">Admin Absolu</h5>
+                                        <p class="card-text text-muted">Accès complet à toutes les fonctionnalités</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-type-card card h-100" onclick="selectAdminType('limited')">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="user_type" value="limited" id="type_limited" class="d-none">
+                                        <i class="fas fa-user-cog fa-3x text-warning mb-3"></i>
+                                        <h5 class="card-title">Admin Limité</h5>
+                                        <p class="card-text text-muted">Accès restreint selon les permissions</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permissions (Only for Limited Admin) -->
+                <div class="card shadow-sm mb-4" id="permissionsCard" style="display:none;">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-key"></i> Permissions</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Sélectionnez les permissions à accorder à cet administrateur :</p>
+                        
+                        <div class="row g-3">
+                            {% set permissions = {
+                                'Gérer les livres': {'role': 'ROLE_GERER_LIVRES', 'icon': 'fa-book', 'color': 'primary'},
+                                'Gérer les auteurs': {'role': 'ROLE_GERER_AUTEURS', 'icon': 'fa-user-edit', 'color': 'success'},
+                                'Gérer les utilisateurs': {'role': 'ROLE_GERER_UTILISATEURS', 'icon': 'fa-users-cog', 'color': 'danger'},
+                                'Gérer les lecteurs': {'role': 'ROLE_GERER_LECTEURS', 'icon': 'fa-user-graduate', 'color': 'info'},
+                                'Gérer les disciplines': {'role': 'ROLE_GERER_DISCIPLINES', 'icon': 'fa-tags', 'color': 'warning'},
+                                'Gérer les éditeurs': {'role': 'ROLE_GERER_EDITEURS', 'icon': 'fa-building', 'color': 'info'},
+                                'Gérer les retours': {'role': 'ROLE_GERER_RETOURS', 'icon': 'fa-undo', 'color': 'secondary'},
+                                'Gérer les commandes': {'role': 'ROLE_GERER_COMMANDES', 'icon': 'fa-shopping-cart', 'color': 'success'},
+                                'Historique des Emprunts': {'role': 'ROLE_GERER_HISTORIQUE', 'icon': 'fa-history', 'color': 'dark'}
+                            } %}
+
+                            {% for label, info in permissions %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card card h-100" onclick="togglePermission('{{ info.role }}')">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="privileges[]" value="{{ info.role }}" 
+                                                   id="perm_{{ info.role }}">
+                                            <label class="form-check-label permission-label w-100" for="perm_{{ info.role }}">
+                                                <i class="fas {{ info.icon }} text-{{ info.color }} me-2"></i>
+                                                <strong>{{ label }}</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Summary & Actions -->
+            <div class="col-lg-4">
+                <!-- Help Card -->
+                <div class="card shadow-sm mb-4 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-question-circle"></i> Aide</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold">Admin Absolu</h6>
+                        <p class="small text-muted">Accès complet sans restriction à toutes les fonctionnalités.</p>
+                        
+                        <h6 class="fw-bold mt-3">Admin Limité</h6>
+                        <p class="small text-muted">Accès uniquement aux sections sélectionnées dans les permissions.</p>
+                        
+                        <hr>
+                        
+                        <div class="alert alert-warning small mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> Choisissez soigneusement les permissions selon les responsabilités de l'administrateur.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus"></i> Créer l'administrateur
+                            </button>
+                            <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <button type="submit" class="btn btn-primary">Créer</button>
-        <a href="{{ path('admin_users_index') }}" class="btn btn-secondary">Annuler</a>
     </form>
+</div>
 
-    <script>
-        function togglePassword(fieldId) {
-            const field = document.getElementById(fieldId);
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + '-icon');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function selectAdminType(type) {
+    // Update radio buttons
+    document.getElementById('type_absolute').checked = (type === 'absolute');
+    document.getElementById('type_limited').checked = (type === 'limited');
+    
+    // Update card styling
+    document.querySelectorAll('.admin-type-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    // Show/hide permissions
+    const permissionsCard = document.getElementById('permissionsCard');
+    if (type === 'absolute') {
+        permissionsCard.style.display = 'none';
+        // Uncheck all permissions
+        document.querySelectorAll('input[name="privileges[]"]').forEach(cb => cb.checked = false);
+    } else {
+        permissionsCard.style.display = 'block';
+    }
+}
+
+function togglePermission(role) {
+    const checkbox = document.getElementById('perm_' + role);
+    const card = checkbox.closest('.permission-card');
+    
+    checkbox.checked = !checkbox.checked;
+    
+    if (checkbox.checked) {
+        card.classList.add('selected');
+    } else {
+        card.classList.remove('selected');
+    }
+}
+
+// Password validation
+document.getElementById('newUserForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    
+    if (password !== confirm) {
+        e.preventDefault();
+        alert('Les mots de passe ne correspondent pas !');
+        return false;
+    }
+    
+    if (password.length < 6) {
+        e.preventDefault();
+        alert('Le mot de passe doit contenir au moins 6 caractères !');
+        return false;
+    }
+    
+    const adminType = document.querySelector('input[name="user_type"]:checked');
+    if (!adminType) {
+        e.preventDefault();
+        alert('Veuillez sélectionner un type d\'administrateur !');
+        return false;
+    }
+});
+</script>
+{% endblock %}
             const icon = document.getElementById(fieldId + '-icon');
             if (field.type === 'password') {
                 field.type = 'text';

@@ -1,13 +1,108 @@
-{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\lecteur/edit.html.twig #}
 {% extends 'admin/layout.html.twig' %}
 
 {% block title %}Modifier le Lecteur{% endblock %}
 
 {% block admin_content %}
-    <h1>Modifier le Lecteur</h1>
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <button class="btn btn-primary" type="submit">Enregistrer</button>
-    {{ form_end(form) }}
-    <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-secondary">Retour à la liste</a>
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-user-edit"></i> Modifier le Lecteur</h1>
+                <p class="text-muted">Mettre à jour les informations du lecteur</p>
+            </div>
+            <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations du lecteur</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.nom, {'label': 'Nom', 'attr': {'class': 'form-control'}}) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.prenom, {'label': 'Prénom', 'attr': {'class': 'form-control'}}) }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.codeAdmission, {'label': 'Code d\'admission', 'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.email, {'label': 'Email', 'attr': {'class': 'form-control', 'type': 'email'}}) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.etablissement, {'label': 'Établissement', 'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.formation, {'label': 'Formation', 'attr': {'class': 'form-control'}}) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.promotion, {'label': 'Promotion', 'attr': {'class': 'form-control'}}) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_row(form.password, {'label': 'Mot de passe (laisser vide pour ne pas changer)', 'attr': {'class': 'form-control'}, 'required': false}) }}
+                            </div>
+
+                            {{ form_rest(form) }}
+                            
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer les modifications
+                                </button>
+                                <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Aide</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Champs obligatoires</h6>
+                        <ul class="small text-muted">
+                            <li>Nom et Prénom</li>
+                            <li>Code d'admission (unique)</li>
+                            <li>Email</li>
+                            <li>Établissement</li>
+                            <li>Formation et Promotion</li>
+                        </ul>
+                        
+                        <hr>
+                        
+                        <h6>Mot de passe</h6>
+                        <p class="small text-muted">
+                            Laissez le champ vide pour conserver le mot de passe actuel. 
+                            Si vous le modifiez, le lecteur devra utiliser le nouveau mot de passe à sa prochaine connexion.
+                        </p>
+
+                        <hr>
+
+                        <h6>Réinitialiser le mot de passe</h6>
+                        <p class="small text-muted">
+                            Pour générer un mot de passe temporaire, utilisez le bouton "Réinitialiser" depuis la liste des lecteurs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

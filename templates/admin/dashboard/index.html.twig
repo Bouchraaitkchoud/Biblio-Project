@@ -7,84 +7,10 @@
     <style>
         html, body {
             background: #fdfaf5 !important;
+            margin: 0;
+            padding: 0;
         }
-        .admin-layout {
-                 .admin-management {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
-            gap: 20px !important;
-            margin-bottom: 30px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }play: flex;
-        }
-        .admin-sidebar {
-            width: 230px;
-            min-height: 100vh;
-            background: #1a2e4f;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 100;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.07);
-        }
-        .sidebar-links {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .admin-nav-link {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 12px 24px;
-            border-radius: 6px;
-            transition: background 0.2s, color 0.2s;
-            font-family: 'Georgia', serif;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .admin-nav-link.active, .admin-nav-link:hover {
-            background-color: #b2903e;
-            color: #fff;
-        }
-        .sidebar-user {
-            margin: 30px 0 20px 0;
-            padding: 0 24px;
-            font-family: 'Georgia', serif;
-            font-size: 1em;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .logout-link {
-            color: #b2903e;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.95em;
-            transition: color 0.2s;
-        }
-        .logout-link:hover {
-            color: #fff;
-        }
-        .dashboard-main-content {
-            margin-left: 250px !important;
-            width: calc(100% - 250px) !important;
-            padding: 30px 30px 30px 0 !important;
-            box-sizing: border-box !important;
-        }
-        .dashboard-container {
-            padding: 20px !important;
-            margin: 0 !important;
-            max-width: none !important;
-        }
+        
         .dashboard-header {
             margin-bottom: 25px;
             margin-top: 0 !important;
@@ -279,6 +205,9 @@
             text-align: center !important;
             box-sizing: border-box !important;
             font-family: 'Georgia', serif !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
         }
         .management-card:hover {
             transform: translateY(-5px);

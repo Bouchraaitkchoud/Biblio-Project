@@ -42,17 +42,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     private ?string $password = null;
 
-    #[ORM\Column]
-    private bool $isVerified = false;
-
-
-    #[ORM\Column(type: 'json')]
-    private array $privileges = [];
-
     public function __construct()
     {
         $this->carts = new ArrayCollection();
-        $this->sections = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -146,25 +138,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
     }
 
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setIsVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function setCart(Cart $cart): self
-    {
-        $this->cart = $cart;
-        $cart->setUser($this);
-        return $this;
-    }
-
     public function getCarts(): Collection
     {
         return $this->carts;
@@ -184,18 +157,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->carts->last();
     }
 
- 
-
-
-
-    public function getPrivileges(): array
+    /**
+     * Get user admin type label
+     */
+    public function getAdminType(): string
     {
-        return $this->privileges ?? [];
+        if (in_array('ROLE_ADMIN', $this->roles)) {
+            return 'Admin Absolu';
+        } elseif (in_array('ROLE_LIMITED_ADMIN', $this->roles)) {
+            return 'Admin Limité';
+        }
+        return 'Utilisateur';
     }
 
-    public function setPrivileges(array $privileges): self
+    /**
+     * Get readable permission labels
+     */
+    public function getPermissionsLabels(): array
     {
-        $this->privileges = $privileges;
-        return $this;
+        $roleMap = [
+            'ROLE_GERER_LIVRES' => 'Livres',
+            'ROLE_GERER_AUTEURS' => 'Auteurs',
+            'ROLE_GERER_UTILISATEURS' => 'Utilisateurs',
+            'ROLE_GERER_LECTEURS' => 'Lecteurs',
+            'ROLE_GERER_DISCIPLINES' => 'Disciplines',
+            'ROLE_GERER_EDITEURS' => 'Éditeurs',
+            'ROLE_GERER_RETOURS' => 'Retours',
+            'ROLE_GERER_COMMANDES' => 'Commandes',
+            'ROLE_GERER_HISTORIQUE' => 'Historique',
+        ];
+
+        $labels = [];
+        foreach ($this->roles as $role) {
+            if (isset($roleMap[$role])) {
+                $labels[] = $roleMap[$role];
+            }
+        }
+        return $labels;
+    }
+
+    /**
+     * Check if user has a specific permission
+     */
+    public function hasPermission(string $role): bool
+    {
+        return in_array($role, $this->roles);
     }
 }

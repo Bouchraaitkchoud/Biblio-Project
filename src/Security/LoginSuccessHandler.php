@@ -48,31 +48,8 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new RedirectResponse($this->router->generate('admin_dashboard'));
         }
 
-        // For limited admin, check for specific privilege roles.
+        // For limited admin, also redirect to dashboard
         if (in_array('ROLE_LIMITED_ADMIN', $roles, true) || !empty(array_intersect($roles, $adminRoles))) {
-            if (in_array('ROLE_GERER_AUTEURS', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_authors_index'));
-            }
-            if (in_array('ROLE_GERER_UTILISATEURS', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_users_index'));
-            }
-            if (in_array('ROLE_GERER_LIVRES', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_books_index'));
-            }
-            if (in_array('ROLE_GERER_RETOURS', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_returns_index'));
-            }
-            if (in_array('ROLE_GERER_EDITEURS', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_publishers_index'));
-            }
-            if (in_array('ROLE_GERER_DISCIPLINES', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_disciplines_index'));
-            }
-            if (in_array('ROLE_GERER_COMMANDES', $roles, true)) {
-                return new RedirectResponse($this->router->generate('admin_orders_index'));
-            }
-
-            // fallback for other admin roles
             return new RedirectResponse($this->router->generate('admin_dashboard'));
         }
 

@@ -8,132 +8,25 @@
         html, body {
             background: #fdfaf5 !important;
         }
-        .admin-layout {
-            display: flex;
-        }
-        .admin-sidebar {
-            width: 230px;
-            min-height: 100vh;
-            background: #1a2e4f;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 100;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.07);
-        }
-        .sidebar-links {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .admin-nav-link {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 12px 24px;
-            border-radius: 6px;
-            transition: background 0.2s, color 0.2s;
-            font-family: 'Georgia', serif;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .admin-nav-link.active, .admin-nav-link:hover {
-            background-color: #b2903e;
-            color: #fff;
-        }
-        .sidebar-user {
-            margin: 30px 0 20px 0;
-            padding: 0 24px;
-            font-family: 'Georgia', serif;
-            font-size: 1em;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .logout-link {
-            color: #b2903e;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.95em;
-            transition: color 0.2s;
-        }
-        .logout-link:hover {
-            color: #fff;
-        }
-        .dashboard-main-content {
-            margin-left: 250px;
-            width: 100%;
-            padding: 30px 30px 30px 0;
-        }
         .admin-content-wrapper {
-            padding: 20px;
+            padding: 0;
             background: #fdfaf5;
             min-height: calc(100vh - 60px);
-        }
-        
-        /* Ensure layout styles don't interfere with dashboard */
-        body:not(.dashboard-page) .admin-content-wrapper {
-            padding: 20px;
+            max-width: 100%;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>{% block title %}Admin Dashboard{% endblock %}</title>
-            {# ... other head elements ... #}
-        </head>
-        <body>
-            <nav>
-                <ul>
-                    {% if is_granted('ROLE_GERER_AUTEURS') %}
-                        <li><a href="{{ path('admin_authors_index') }}">Gérer les Auteurs</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_GERER_UTILISATEURS') %}
-                        <li><a href="{{ path('admin_users_index') }}">Gérer les Utilisateurs</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_GERER_LIVRES') %}
-                        <li><a href="{{ path('admin_books_index') }}">Gérer les Livres</a></li>
-                    {% endif %}
-             
-                    {% if is_granted('ROLE_GERER_RETOURS') %}
-                        <li><a href="{{ path('admin_returns_index') }}">Gérer les Retours</a></li>
-                    {% endif %}
-
-                    {% if is_granted('ROLE_GERER_EDITEURS') %}
-                        <li><a href="{{ path('admin_publishers_index') }}">Gérer les Éditeurs</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_GERER_DISCIPLINES') %}
-                        <li><a href="{{ path('admin_disciplines_index') }}">Gérer les Disciplines</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_GERER_COMMANDES') %}
-                        <li><a href="{{ path('admin_orders_index') }}">Gérer les Commandes</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-            <main>
-                <div class="admin-content-wrapper">
-                    {% for label, messages in app.flashes %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ label }} alert-dismissible fade show">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    {% endfor %}
-                    {% block admin_content %}{% endblock %}
+    <div class="admin-content-wrapper">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </main>
-        </body>
-    </html>
+            {% endfor %}
+        {% endfor %}
+        {% block admin_content %}{% endblock %}
+    </div>
 {% endblock %}
