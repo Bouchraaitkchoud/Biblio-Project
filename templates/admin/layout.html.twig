@@ -2,17 +2,32 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/style1.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style1.css') }}?v={{ 'now'|date('U') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ 'now'|date('U') }}">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         html, body {
             background: #fdfaf5 !important;
+            width: 100%;
+            overflow-x: hidden;
         }
+        
         .admin-content-wrapper {
             padding: 0;
             background: #fdfaf5;
             min-height: calc(100vh - 60px);
             max-width: 100%;
+            width: 100%;
+        }
+        
+        .container-fluid {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
         }
     </style>
 {% endblock %}

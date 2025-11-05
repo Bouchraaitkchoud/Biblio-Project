@@ -293,41 +293,38 @@ document.getElementById('newUserForm').addEventListener('submit', function(e) {
         return false;
     }
 });
+
+// Toggle password visibility
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + '-icon');
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Toggle privileges block based on user type selection
+function togglePrivileges() {
+    const limitedRadio = document.getElementById('limited');
+    const privilegesBlock = document.getElementById('privileges_block');
+    privilegesBlock.style.display = limitedRadio.checked ? 'block' : 'none';
+}
+
+// Password confirmation validation
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    if (password !== confirmPassword) {
+        this.setCustomValidity('Les mots de passe ne correspondent pas');
+    } else {
+        this.setCustomValidity('');
+    }
+});
 </script>
-{% endblock %}
-            const icon = document.getElementById(fieldId + '-icon');
-            if (field.type === 'password') {
-                field.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                field.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        // Toggle privileges block based on user type selection
-        function togglePrivileges() {
-            const limitedRadio = document.getElementById('limited');
-            const privilegesBlock = document.getElementById('privileges_block');
-            privilegesBlock.style.display = limitedRadio.checked ? 'block' : 'none';
-        }
-
-        // Password confirmation validation
-        document.getElementById('confirm_password').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            if (password !== confirmPassword) {
-                this.setCustomValidity('Les mots de passe ne correspondent pas');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    </script>
-
-    {# Optionally, conditionally display a link if the user has the ROLE_GERER_LIVRES privilege #}
-    {% if is_granted('ROLE_GERER_LIVRES') %}
-        <a href="{{ path('admin_books_index') }}">Gérer les Livres</a>
-    {% endif %}
 {% endblock %}

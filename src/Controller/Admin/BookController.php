@@ -178,6 +178,12 @@ class BookController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_book_delete', methods: ['POST'])]
     public function delete(Request $request, Book $book): Response
     {
+        // Only ROLE_ADMIN can delete (not limited admins)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des livres. Seuls les administrateurs complets peuvent supprimer.');
+            return $this->redirectToRoute('admin_books_show', ['id' => $book->getId()]);
+        }
+        
         if ($this->isCsrfTokenValid('delete'.$book->getId(), $request->request->get('_token'))) {
             // Check if any exemplaires are in active carts
             $hasActiveCartItems = $this->entityManager->getRepository('App\Entity\CartItem')

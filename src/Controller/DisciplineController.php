@@ -16,6 +16,11 @@ class DisciplineController extends AbstractController
     #[Route('/discipline/{id}/books', name: 'discipline_books')]
     public function showBooks(int $id, Request $request, DisciplineRepository $disciplineRepository, BookRepository $bookRepository): Response
     {
+        // Block LIMITED_ADMIN from viewing discipline books
+        if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au site principal.');
+        }
+        
         // Fetch the discipline by ID
         $discipline = $disciplineRepository->find($id);
 

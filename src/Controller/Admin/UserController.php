@@ -184,6 +184,12 @@ class UserController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user): Response
     {
+        // Only ROLE_ADMIN can delete (not limited admins)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des utilisateurs.');
+            return $this->redirectToRoute('admin_users_index');
+        }
+        
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             $this->entityManager->remove($user);
             $this->entityManager->flush();

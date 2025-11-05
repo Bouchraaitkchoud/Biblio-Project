@@ -46,25 +46,15 @@ class PublisherController extends AbstractController
     {
         $publishers = $this->publisherRepository->findAll();
 
-        // Build CSV string. Adjust columns as needed.
-        $csvData = "ID,Name,Address,City,Country,Website,Comment\n";
+        // Build CSV string with only ID and Name
+        $csvData = "ID,Name\n";
         foreach ($publishers as $publisher) {
             // Replace commas and newlines to avoid breaking CSV format
-            $name    = str_replace([",", "\n"], [" ", " "], $publisher->getName());
-            $address = str_replace([",", "\n"], [" ", " "], $publisher->getAddress() ?: '');
-            $city    = str_replace([",", "\n"], [" ", " "], $publisher->getCity() ?: '');
-            $country = str_replace([",", "\n"], [" ", " "], $publisher->getCountry() ?: '');
-            $website = str_replace([",", "\n"], [" ", " "], $publisher->getWebsite() ?: '');
-            $comment = str_replace([",", "\n"], [" ", " "], $publisher->getComment() ?: '');
+            $name = str_replace([",", "\n"], [" ", " "], $publisher->getName());
             
-            $csvData .= sprintf("%d,%s,%s,%s,%s,%s,%s\n",
+            $csvData .= sprintf("%d,%s\n",
                 $publisher->getId(),
-                $name,
-                $address,
-                $city,
-                $country,
-                $website,
-                $comment
+                $name
             );
         }
 
@@ -84,11 +74,6 @@ class PublisherController extends AbstractController
     {
         if ($request->isMethod('POST')) {
             $name = $request->request->get('name');
-            $address = $request->request->get('address');
-            $city = $request->request->get('city');
-            $country = $request->request->get('country');
-            $website = $request->request->get('website');
-            $comment = $request->request->get('comment');
             
             if (empty($name)) {
                 $this->addFlash('error', 'Publisher name cannot be empty.');
@@ -97,11 +82,6 @@ class PublisherController extends AbstractController
             
             $publisher = new Publisher();
             $publisher->setName($name);
-            $publisher->setAddress($address);
-            $publisher->setCity($city);
-            $publisher->setCountry($country);
-            $publisher->setWebsite($website);
-            $publisher->setComment($comment);
             
             $this->entityManager->persist($publisher);
             $this->entityManager->flush();
@@ -151,6 +131,12 @@ class PublisherController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_publisher_delete', methods: ['POST'])]
     public function delete(Request $request, Publisher $publisher): Response
     {
+        // Only ROLE_ADMIN can delete (not limited admins)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des éditeurs.');
+            return $this->redirectToRoute('admin_publishers_index');
+        }
+        
         if ($this->isCsrfTokenValid('delete'.$publisher->getId(), $request->request->get('_token'))) {
             // Check if it has books
             if (!$publisher->getBooks()->isEmpty()) {
@@ -171,10 +157,6 @@ class PublisherController extends AbstractController
     public function quickCreate(Request $request): JsonResponse
     {
         $name = $request->request->get('name');
-        $address = $request->request->get('address', '');
-        $city = $request->request->get('city', '');
-        $country = $request->request->get('country', '');
-        $website = $request->request->get('website', '');
         
         if (empty($name)) {
             return new JsonResponse([
@@ -185,10 +167,6 @@ class PublisherController extends AbstractController
         
         $publisher = new Publisher();
         $publisher->setName($name);
-        $publisher->setAddress($address);
-        $publisher->setCity($city);
-        $publisher->setCountry($country);
-        $publisher->setWebsite($website);
         
         $this->entityManager->persist($publisher);
         $this->entityManager->flush();

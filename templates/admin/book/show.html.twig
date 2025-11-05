@@ -57,35 +57,58 @@
             margin-bottom: 1.2rem;
         }
         .book-actions {
-            display: flex;
-            gap: 0.7rem;
-            margin-bottom: 1.2rem;
+            display: flex !important;
+            gap: 0.7rem !important;
+            margin-bottom: 1.2rem !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+        }
+        .book-actions form {
+            display: inline-flex !important;
+            margin: 0 !important;
+        }
+        .btn-edit,
+        .btn-delete,
+        .back-link {
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 0.5rem 1.1rem !important;
+            font-weight: bold !important;
+            font-family: 'Georgia', serif !important;
+            transition: all 0.3s ease !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.3rem !important;
+            cursor: pointer !important;
+            font-size: 0.95rem !important;
         }
         .btn-edit {
-            background: #f7e7c1;
-            color: #b2903e;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
+            background: #f7e7c1 !important;
+            color: #b2903e !important;
         }
         .btn-edit:hover {
-            background: #b2903e;
-            color: #fff;
+            background: #b2903e !important;
+            color: #fff !important;
         }
         .btn-delete {
-            background: #f8d7da;
-            color: #dc3545;
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 1.1rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
+            background: #f8d7da !important;
+            color: #dc3545 !important;
         }
         .btn-delete:hover {
-            background: #dc3545;
-            color: #fff;
+            background: #dc3545 !important;
+            color: #fff !important;
+        }
+        .back-link {
+            background: #6c757d !important;
+            color: #fff !important;
+        }
+        .back-link:hover {
+            background: #5a6268 !important;
+            color: #fff !important;
+            text-decoration: none !important;
         }
         .book-info-label {
             font-weight: bold;
@@ -275,6 +298,42 @@
 {% endblock %}
 
 {% block body %}
+    <style>
+        /* Force layout - timestamp: {{ 'now'|date('U') }} */
+        div.book-actions {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 0.7rem !important;
+            margin-bottom: 1.2rem !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+        }
+        div.book-actions form {
+            display: inline-flex !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        div.book-actions .btn-edit,
+        div.book-actions .btn-delete,
+        div.book-actions .back-link {
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 0.5rem 1.1rem !important;
+            font-weight: bold !important;
+            font-family: 'Georgia', serif !important;
+            transition: all 0.3s ease !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.3rem !important;
+            cursor: pointer !important;
+            font-size: 0.95rem !important;
+            min-width: auto !important;
+            width: auto !important;
+        }
+    </style>
     <div class="container mt-4">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
@@ -326,17 +385,20 @@
                         <span><strong>Description :</strong> {{ book.description }}</span>
                     </div>
                 {% endif %}
-                <div class="book-actions">
-                    <a href="{{ path('admin_book_edit', {'id': book.id}) }}" class="btn btn-edit">
+                <div class="book-actions" style="display: flex !important; flex-direction: row !important; gap: 0.7rem !important; flex-wrap: nowrap !important; align-items: center !important;">
+                    <a href="{{ path('admin_book_edit', {'id': book.id}) }}" class="btn-edit" style="display: inline-flex !important; white-space: nowrap !important;">
                         <i class="fas fa-edit"></i> Modifier
                     </a>
-                    <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteBookModal">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </button>
+                    <form method="post" action="{{ path('admin_book_delete', {'id': book.id}) }}" style="display: inline-flex !important; margin: 0 !important;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le livre \'{{ book.title|escape('js') }}\' ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
+                        <button type="submit" class="btn-delete" style="display: inline-flex !important; white-space: nowrap !important;">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </form>
+                    <a href="{{ path('admin_books_index') }}" class="back-link" style="display: inline-flex !important; white-space: nowrap !important;">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
                 </div>
-                <a href="{{ path('admin_books_index') }}" class="btn btn-secondary back-link">
-                    <i class="fas fa-arrow-left"></i> Retour à la liste
-                </a>
             </div>
         </div>
         <!-- Tableau des exemplaires -->
@@ -431,28 +493,6 @@
                         <p class="text-muted">Cliquez sur le bouton ci-dessus pour ajouter le premier exemplaire de ce livre.</p>
                     </div>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de suppression du livre -->
-    <div class="modal fade" id="deleteBookModal" tabindex="-1" aria-labelledby="deleteBookModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteBookModalLabel">Confirmer la suppression</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    Êtes-vous sûr de vouloir supprimer le livre "{{ book.title }}" ?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <form method="post" action="{{ path('admin_book_delete', {'id': book.id}) }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
-                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>

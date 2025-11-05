@@ -71,7 +71,7 @@ security:
 
   role_hierarchy:
     ROLE_ADMIN: [ROLE_USER]
-    ROLE_LIMITED_ADMIN: [ROLE_USER]
+    # ROLE_LIMITED_ADMIN does NOT inherit ROLE_USER - they are restricted to admin panel only
 
   firewalls:
     dev:
@@ -114,8 +114,55 @@ security:
       switch_user: true
 
   access_control:
+    # Public routes
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin/logout, roles: PUBLIC_ACCESS }
+
+    # Admin routes - accessible to both ROLE_ADMIN and ROLE_LIMITED_ADMIN
+    - { path: ^/admin/panel, roles: ROLE_LIMITED_ADMIN }
     - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_LIMITED_ADMIN] }
-    - { path: ^/main-site, roles: [ROLE_USER, ROLE_ADMIN] }
-    - { path: ^/, roles: [ROLE_USER, ROLE_ADMIN] }
+
+    # Block LIMITED_ADMIN from accessing main site routes - also require authentication
+    - {
+        path: ^/main-site,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+    - {
+        path: ^/my-cart,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+    - {
+        path: ^/cart,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+    - {
+        path: ^/submit-cart,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+    - {
+        path: ^/add-to-cart,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+    - {
+        path: ^/remove-from-cart,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+    - {
+        path: ^/mon-compte,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }
+
+    # Main site - require authentication and block LIMITED_ADMIN
+    - {
+        path: ^/,
+        roles: IS_AUTHENTICATED_FULLY,
+        allow_if: "not is_granted('ROLE_LIMITED_ADMIN') or is_granted('ROLE_ADMIN')",
+      }

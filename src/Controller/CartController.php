@@ -35,8 +35,14 @@ class CartController extends AbstractController
     }
 
     #[Route('/add-to-cart/{id}', name: 'add_to_cart', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function addToCart(int $id, EntityManagerInterface $entityManager, Security $security): Response
     {
+        // Block LIMITED_ADMIN from accessing cart
+        if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+        
         try {
             // 1. Fetch the book
             $book = $entityManager->getRepository(Book::class)->find($id);
@@ -98,8 +104,14 @@ class CartController extends AbstractController
     }
 
     #[Route('/submit-cart', name: 'submit_cart', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function submitCart(EntityManagerInterface $em, Security $security, Request $request): Response
     {
+        // Block LIMITED_ADMIN from submitting cart
+        if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au panier.');
+        }
+        
         /** @var User $user */
         $user = $security->getUser();
         
@@ -270,9 +282,13 @@ class CartController extends AbstractController
     }
 
     #[Route('/my-cart', name: 'view_cart')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function viewCart(): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        // Block LIMITED_ADMIN from viewing cart
+        if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au panier.');
+        }
         
         // Validate cart and remove unavailable items
         $validation = $this->cartService->validateAndCleanCart();
@@ -303,8 +319,14 @@ class CartController extends AbstractController
     }
     
     #[Route('/remove-from-cart/{id}', name: 'remove_from_cart', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function removeFromCart(int $id, EntityManagerInterface $em): Response
     {
+        // Block LIMITED_ADMIN from removing from cart
+        if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+        
         $book = $em->getRepository(Book::class)->find($id);
         
         if (!$book) {

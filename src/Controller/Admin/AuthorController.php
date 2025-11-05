@@ -46,7 +46,6 @@ class AuthorController extends AbstractController
     {
         if ($request->isMethod('POST')) {
             $name = $request->request->get('name');
-            $bio = $request->request->get('bio');
             
             if (empty($name)) {
                 $this->addFlash('error', 'Author name cannot be empty.');
@@ -55,7 +54,6 @@ class AuthorController extends AbstractController
             
             $author = new Author();
             $author->setName($name);
-            $author->setBio($bio);
             
             $this->entityManager->persist($author);
             $this->entityManager->flush();
@@ -131,7 +129,6 @@ class AuthorController extends AbstractController
     public function quickCreate(Request $request): JsonResponse
     {
         $name = $request->request->get('name');
-        $bio = $request->request->get('bio');
 
         if (empty($name)) {
             return new JsonResponse(['success' => false, 'error' => 'Author name cannot be empty.'], Response::HTTP_BAD_REQUEST);
@@ -139,7 +136,6 @@ class AuthorController extends AbstractController
 
         $author = new Author();
         $author->setName($name);
-        $author->setBio($bio);
 
         $this->entityManager->persist($author);
         $this->entityManager->flush();
@@ -154,6 +150,12 @@ class AuthorController extends AbstractController
     #[Route('/{id}', name: 'admin_author_delete', methods: ['POST'])]
     public function delete(Request $request, Author $author): Response
     {
+        // Only ROLE_ADMIN can delete (not limited admins)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des auteurs.');
+            return $this->redirectToRoute('admin_authors_index');
+        }
+        
         if ($this->isCsrfTokenValid('delete'.$author->getId(), $request->request->get('_token'))) {
             
             // Check if it has books

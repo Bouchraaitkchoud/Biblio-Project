@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class SearchController extends AbstractController
 {
     #[Route('/search', name: 'search_results')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function search(
         Request $request,
         BookRepository $bookRepository,
@@ -21,6 +23,11 @@ class SearchController extends AbstractController
         PublisherRepository $publisherRepository,
         DisciplineRepository $disciplineRepository
     ): Response {
+        // Block LIMITED_ADMIN from accessing search
+        if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au site principal.');
+        }
+        
         $query = $request->query->get('q', '');
         $searchType = $request->query->get('search_type', 'title');
         

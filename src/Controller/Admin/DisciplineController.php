@@ -22,7 +22,7 @@ class DisciplineController extends AbstractController
     public function index(DisciplineRepository $disciplineRepository): Response
     {
         return $this->render('admin/discipline/index.html.twig', [
-            'disciplines' => $disciplineRepository->findAll(),
+            'disciplines' => $disciplineRepository->findBy([], ['name' => 'ASC']),
         ]);
     }
 
@@ -136,6 +136,12 @@ class DisciplineController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Discipline $discipline, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
+        // Only ROLE_ADMIN can delete (not limited admins)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des disciplines.');
+            return $this->redirectToRoute('admin_disciplines_index');
+        }
+        
         if ($this->isCsrfTokenValid('delete'.$discipline->getId(), $request->request->get('_token'))) {
             if ($discipline->getBooks()->count() > 0) {
                 $this->addFlash('error', 'Impossible de supprimer cette discipline car elle contient des livres. Veuillez d\'abord déplacer ou supprimer les livres associés.');

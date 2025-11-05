@@ -1,10 +1,24 @@
 /* Admin Sidebar Styles - Unified for all admin pages */
 
 /* Reset any potential conflicts */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
 .admin-layout {
     display: flex !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    min-height: 100vh !important;
 }
 
 /* Sidebar - Fixed width and position */
@@ -163,8 +177,9 @@
 
 .dashboard-main-content .container-fluid {
     max-width: 100% !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    margin: 0 !important;
 }
 
 /* Dashboard specific adjustments */

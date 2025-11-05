@@ -95,6 +95,12 @@ class LecteurController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Manually set the password since it's unmapped
+            $password = $form->get('password')->getData();
+            if (!empty($password)) {
+                $lecteur->setPassword($password);
+            }
+            
             $this->entityManager->persist($lecteur);
             $this->entityManager->flush();
 
@@ -214,10 +220,16 @@ class LecteurController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_lecteurs_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Lecteur $lecteur): Response
     {
-        $form = $this->createForm(LecteurType::class, $lecteur);
+        $form = $this->createForm(LecteurType::class, $lecteur, ['is_edit' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Only update password if a new one is provided
+            $newPassword = $form->get('password')->getData();
+            if (!empty($newPassword)) {
+                $lecteur->setPassword($newPassword);
+            }
+            
             $this->entityManager->flush();
             $this->addFlash('success', 'Le lecteur a été mis à jour avec succès.');
             return $this->redirectToRoute('admin_lecteurs_index');
@@ -232,6 +244,12 @@ class LecteurController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_lecteurs_delete', methods: ['POST'])]
     public function delete(Request $request, Lecteur $lecteur): Response
     {
+        // Only ROLE_ADMIN can delete (not limited admins)
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des lecteurs.');
+            return $this->redirectToRoute('admin_lecteurs_index');
+        }
+        
         if ($this->isCsrfTokenValid('delete' . $lecteur->getId(), $request->request->get('_token'))) {
             $this->entityManager->remove($lecteur);
             $this->entityManager->flush();
