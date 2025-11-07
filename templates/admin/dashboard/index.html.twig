@@ -411,8 +411,8 @@
                     <div class="order-card">
                         <div class="order-info">
                             <div class="order-id">Commande #{{ order.id }}</div>
-                            <div class="order-date">{{ order.createdAt|date('d M Y H:i') }}</div>
-                            <div class="order-user">{{ order.user.email }}</div>
+                            <div class="order-date">{{ order.placedAt|date('d M Y H:i') }}</div>
+                            <div class="order-user">{{ order.lecteur.email }}</div>
                         </div>
                         <div class="order-status status-{{ order.status|lower }}">
                             {{ order.status }}

@@ -24,6 +24,22 @@
         table th {
             background-color: #f4f4f4;
         }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .badge-returned {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-borrowed {
+            background-color: #ffc107;
+            color: #000;
+        }
     </style>
 {% endblock %}
 
@@ -40,26 +56,41 @@
                 <th>Date de commande</th>
                 <th>Date de retour</th>
                 <th>Exemplaire</th>
-                <th>Discipline</th>
+                <th>Emplacement</th>
                 <th>Admin traitant</th>
             </tr>
         </thead>
         <tbody>
             {% for order in approvedOrders %}
+                {% for item in order.items %}
                 <tr>
                     <td>
-                        {{ order.user.nom }} {{ order.user.prenom }}<br>
-                        <small>{{ order.user.email }}</small>
+                        {{ order.lecteur.nom }} {{ order.lecteur.prenom }}<br>
+                        <small>{{ order.lecteur.email }}</small>
                     </td>
                     <td>{{ order.placedAt|date('d/m/Y H:i') }}</td>
                     <td>{{ order.returnedAt ? order.returnedAt|date('d/m/Y H:i') : 'Non retourné' }}</td>
                     <td>
-                        {{ order.exemplaire.book.title }}<br>
-                        <small>Code: {{ order.exemplaire.barcode }}</small>
+                        {{ item.exemplaire.book.title }}<br>
+                        <small>Code: {{ item.exemplaire.barcode }}</small>
+                        {% if item.exemplaire.status == 'available' %}
+                            <span class="status-badge badge-returned">Retourné</span>
+                        {% elseif item.exemplaire.status == 'borrowed' %}
+                            <span class="status-badge badge-borrowed">En prêt</span>
+                        {% endif %}
                     </td>
-                    <td>{{ order.exemplaire.book.disciplines|map(d => d.name)|join(', ')|default('N/A') }}</td>
-                    <td>{{ order.adminEmail ? order.adminEmail : 'N/A' }}</td>
+                    <td>{{ item.exemplaire.location ? item.exemplaire.location.name : 'N/A' }}</td>
+                    <td>
+                        {% if order.processedBy %}
+                            {{ order.processedBy.email }}
+                        {% elseif order.adminEmail %}
+                            {{ order.adminEmail }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
                 </tr>
+                {% endfor %}
             {% else %}
                 <tr>
                     <td colspan="6">Aucun emprunt trouvé.</td>

@@ -4,6 +4,7 @@ namespace App\Twig;
 
 use App\Service\CartService;
 use App\Entity\Cart;
+use App\Entity\Order;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -30,19 +31,23 @@ class CartExtension extends AbstractExtension
     }
 
     /**
-     * Check if all items in a cart are still available
+     * Check if all items in a cart/order are still available
      */
-    public function checkCartAvailability(Cart $cart): array
+    public function checkCartAvailability(Cart|Order $cartOrOrder): array
     {
         $unavailableBooks = [];
         $availableCount = 0;
         $totalCount = 0;
 
-        foreach ($cart->getItems() as $item) {
+        foreach ($cartOrOrder->getItems() as $item) {
             $totalCount++;
             $exemplaire = $item->getExemplaire();
             
-            if ($exemplaire->getStatus() !== 'available') {
+            // For orders, 'reserved' status is also considered available
+            $isAvailable = $exemplaire->getStatus() === 'available' || 
+                          ($cartOrOrder instanceof Order && $exemplaire->getStatus() === 'reserved');
+            
+            if (!$isAvailable) {
                 $unavailableBooks[] = $exemplaire->getBook()->getTitle();
             } else {
                 $availableCount++;

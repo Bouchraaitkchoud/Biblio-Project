@@ -15,22 +15,16 @@ class Cart
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'carts')]
+    #[ORM\ManyToOne(targetEntity: Lecteur::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private ?Lecteur $lecteur = null;
     
 
     #[ORM\Column(type: 'string', length: 20)]
-    private string $status = 'draft'; // Can be: draft, pending, approved// 'draft', 'pending', 'approved'
+    private string $status = 'draft'; // Can be: draft, pending, approved
 
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt;
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?User $processedBy = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $processedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class, cascade: ['persist', 'remove'])]
     private Collection $items;
@@ -47,14 +41,14 @@ class Cart
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getLecteur(): ?Lecteur
     {
-        return $this->user;
+        return $this->lecteur;
     }
 
-    public function setUser(?User $user): self
+    public function setLecteur(?Lecteur $lecteur): self
     {
-        $this->user = $user;
+        $this->lecteur = $lecteur;
         return $this;
     }
 
@@ -104,28 +98,6 @@ class Cart
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getProcessedBy(): ?User
-    {
-        return $this->processedBy;
-    }
-
-    public function setProcessedBy(?User $processedBy): self
-    {
-        $this->processedBy = $processedBy;
-        return $this;
-    }
-
-    public function getProcessedAt(): ?\DateTimeInterface
-    {
-        return $this->processedAt;
-    }
-
-    public function setProcessedAt(?\DateTimeInterface $processedAt): self
-    {
-        $this->processedAt = $processedAt;
         return $this;
     }
 }

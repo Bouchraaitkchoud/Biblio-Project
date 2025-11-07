@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use App\Entity\Book;
 use App\Entity\Cart;
+use App\Entity\Order;
 use App\Entity\User;
 use App\Entity\Receipt;
 use App\Service\CartService;
@@ -112,42 +113,47 @@ class CartController extends AbstractController
             throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au panier.');
         }
         
-        /** @var User $user */
-        $user = $security->getUser();
+        /** @var \App\Entity\Lecteur $lecteur */
+        $lecteur = $security->getUser();
         
-        if (!$user) {
+        if (!$lecteur) {
             return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
         }
         
         try {
-            // Convert cookie cart to database entity
-            $cart = $this->cartService->convertCookieCartToEntity($user);
+            // Convert cookie cart to database order entity
+            $order = $this->cartService->convertCookieCartToEntity($lecteur);
             
-            if (!$cart) {
+            if (!$order) {
                 return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
             }
 
-            // If it's an AJAX request, return success message without PDF
-            if ($request->isXmlHttpRequest()) {
-                // Clear the cookie cart
-                $response = new JsonResponse([
-                    'success' => true,
-                    'message' => 'Demande envoyée avec succès ! Vous serez redirigé vers l\'accueil.'
-                ]);
-                
-                $response->headers->setCookie($this->cartService->clearDraftCart());
-                
-                return $response;
-            }
-
+            // Generate the PDF receipt
             try {
-                // Generate request receipt for non-AJAX requests
-                $pdfContent = $this->receiptGenerator->generateRequestReceipt($cart);
+                $pdfContent = $this->receiptGenerator->generateRequestReceipt($order);
                 
-                // Clear the cookie cart
+                // If it's an AJAX request, return success with PDF URL or data
+                if ($request->isXmlHttpRequest()) {
+                    // Store PDF temporarily or return base64
+                    $pdfBase64 = base64_encode($pdfContent);
+                    
+                    $response = new JsonResponse([
+                        'success' => true,
+                        'message' => 'Demande envoyée avec succès !',
+                        'receiptCode' => $order->getReceiptCode(),
+                        'orderId' => $order->getId(),
+                        'pdfData' => $pdfBase64
+                    ]);
+                    
+                    $response->headers->setCookie($this->cartService->clearDraftCart());
+                    
+                    return $response;
+                }
+
+                // For non-AJAX requests, return PDF directly
                 $response = new Response($pdfContent, 200, [
                     'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="request_receipt.pdf"'
+                    'Content-Disposition' => 'attachment; filename="receipt_' . $order->getReceiptCode() . '.pdf"'
                 ]);
                 
                 $response->headers->setCookie($this->cartService->clearDraftCart());
@@ -156,8 +162,8 @@ class CartController extends AbstractController
             } catch (\Exception $e) {
                 $this->logger->error('Error generating PDF receipt: ' . $e->getMessage(), [
                     'exception' => $e,
-                    'cart_id' => $cart->getId(),
-                    'user_id' => $user->getId()
+                    'order_id' => $order->getId(),
+                    'lecteur_id' => $lecteur->getId()
                 ]);
                 
                 return new JsonResponse([
@@ -168,7 +174,7 @@ class CartController extends AbstractController
         } catch (\Exception $e) {
             $this->logger->error('Error submitting cart: ' . $e->getMessage(), [
                 'exception' => $e,
-                'user_id' => $user->getId()
+                'lecteur_id' => $lecteur->getId()
             ]);
             
             return new JsonResponse([
@@ -182,20 +188,20 @@ class CartController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function approveCart(int $id, EntityManagerInterface $em, Request $request)
     {
-        $cart = $em->getRepository(Cart::class)->find($id);
+        $order = $em->getRepository(Order::class)->find($id);
         
-        if (!$cart || $cart->getStatus() !== 'pending') {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid cart for approval']);
+        if (!$order || $order->getStatus() !== 'pending') {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid order for approval']);
         }
 
         // Verify CSRF token if coming from web form
-        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('approve'.$order->getId(), $request->request->get('_token'))) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
         }
 
         // CRITICAL: Check if all exemplaires are still available
         $unavailableBooks = [];
-        foreach ($cart->getItems() as $item) {
+        foreach ($order->getItems() as $item) {
             $exemplaire = $item->getExemplaire();
             if ($exemplaire->getStatus() !== 'available') {
                 $unavailableBooks[] = $exemplaire->getBook()->getTitle();
@@ -217,37 +223,34 @@ class CartController extends AbstractController
             $em->beginTransaction();
 
             // Update exemplaire statuses
-            foreach ($cart->getItems() as $item) {
+            foreach ($order->getItems() as $item) {
                 $exemplaire = $item->getExemplaire();
                 $exemplaire->setStatus('borrowed');
                 $em->persist($exemplaire);
             }
 
-            // Generate receipt
-            $receipt = new Receipt();
-            $receipt->setCart($cart);
-            $receipt->setCode('RCPT-' . date('Ymd') . '-' . strtoupper(uniqid()));
-            $receipt->setGeneratedAt(new \DateTime());
+            // Generate receipt code
+            $receiptCode = 'RCPT-' . date('Ymd') . '-' . strtoupper(uniqid());
             
-            // Update cart with approval info
-            $cart->setStatus('approved');
-            $cart->setProcessedBy($this->getUser());
-            $cart->setProcessedAt(new \DateTime());
+            // Update order with approval info
+            $order->setStatus('approved');
+            $order->setProcessedAt(new \DateTime());
+            $order->setReceiptCode($receiptCode);
             
-            $em->persist($receipt);
+            $em->persist($order);
             $em->flush();
 
             // Commit transaction
             $em->commit();
 
-            return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
+            return $this->redirectToRoute('receipt_show', ['id' => $order->getId()]);
         } catch (\Exception $e) {
             // Rollback transaction on error
             $em->rollback();
             
             return new JsonResponse([
                 'success' => false,
-                'message' => 'An error occurred while approving the cart'
+                'message' => 'An error occurred while approving the order'
             ], 500);
         }
     }
@@ -256,28 +259,36 @@ class CartController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function rejectCart(int $id, EntityManagerInterface $em, Request $request): JsonResponse
     {
-        $cart = $em->getRepository(Cart::class)->find($id);
+        $order = $em->getRepository(Order::class)->find($id);
         
-        if (!$cart || $cart->getStatus() !== 'pending') {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid cart for rejection']);
+        if (!$order || $order->getStatus() !== 'pending') {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid order for rejection']);
         }
 
         // Verify CSRF token if coming from web form
-        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('reject'.$cart->getId(), $request->request->get('_token'))) {
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('reject'.$order->getId(), $request->request->get('_token'))) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
         }
 
-        // Update cart with rejection info
-        $cart->setStatus('rejected');
-        $cart->setProcessedBy($this->getUser());
-        $cart->setProcessedAt(new \DateTime());
+        // Release all exemplaires back to available status
+        foreach ($order->getItems() as $item) {
+            $exemplaire = $item->getExemplaire();
+            if ($exemplaire->getStatus() === 'reserved') {
+                $exemplaire->setStatus('available');
+                $em->persist($exemplaire);
+            }
+        }
+
+        // Update order with rejection info
+        $order->setStatus('rejected');
+        $order->setProcessedAt(new \DateTime());
         
         $em->flush();
 
         return new JsonResponse([
             'success' => true,
-            'message' => 'Cart rejected',
-            'cart_id' => $cart->getId()
+            'message' => 'Order rejected',
+            'order_id' => $order->getId()
         ]);
     }
 
@@ -299,7 +310,10 @@ class CartController extends AbstractController
         // Get a valid discipline (first book in cart)
         $discipline = null;
         if (!empty($items)) {
-            $discipline = $items[0]->getBook()->getDiscipline();
+            $disciplines = $items[0]->getBook()->getDisciplines();
+            if (!$disciplines->isEmpty()) {
+                $discipline = $disciplines->first();
+            }
         }
 
         $response = $this->render('cart/cartView.html.twig', [

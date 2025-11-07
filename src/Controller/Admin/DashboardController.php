@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Repository\BookRepository;
 use App\Repository\CartRepository;
+use App\Repository\OrderRepository;
 use App\Repository\ExemplaireRepository;
 use App\Repository\DisciplineRepository;
 use App\Repository\UserRepository;
@@ -20,6 +21,7 @@ class DashboardController extends AbstractController
     public function __construct(
         private BookRepository $bookRepository,
         private CartRepository $cartRepository,
+        private OrderRepository $orderRepository,
         private ExemplaireRepository $exemplaireRepository,
         private DisciplineRepository $disciplineRepository,
         private UserRepository $userRepository,
@@ -33,15 +35,15 @@ class DashboardController extends AbstractController
     {
         // Get total counts
         $total_books = $this->bookRepository->count([]);
-        $total_orders = $this->cartRepository->count([]);
+        $total_orders = $this->orderRepository->count([]);
         $total_users = $this->userRepository->count([]);
         $total_disciplines = $this->disciplineRepository->count([]);
         $total_locations = $this->locationRepository->count([]);
 
         // Get recent orders
-        $recent_orders = $this->cartRepository->findBy(
+        $recent_orders = $this->orderRepository->findBy(
             [],
-            ['createdAt' => 'DESC'],
+            ['placedAt' => 'DESC'],
             5
         );
 

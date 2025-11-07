@@ -285,7 +285,7 @@
 {% endblock %}
 
 {% block admin_content %}
-    <div data-controller="order-filter">
+    <div>
         {% for message in app.flashes('success') %}
             <div class="alert alert-success mt-3">{{ message|raw }}</div>
         {% endfor %}
@@ -300,10 +300,10 @@
 
         <div class="filters-container">
             <div class="filter-buttons">
-                <button class="filter-btn filter-btn-all active" data-status="all" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">Toutes les commandes</button>
-                <button class="filter-btn filter-btn-pending" data-status="pending" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">En attente</button>
-                <button class="filter-btn filter-btn-approved" data-status="approved" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">Approuvées</button>
-                <button class="filter-btn filter-btn-rejected" data-status="rejected" data-order-filter-target="filterButton" data-action="click->order-filter#filterOrders">Rejetées</button>
+                <button class="filter-btn filter-btn-all active" data-status="all">Toutes les commandes</button>
+                <button class="filter-btn filter-btn-pending" data-status="pending">En attente</button>
+                <button class="filter-btn filter-btn-approved" data-status="approved">Approuvées</button>
+                <button class="filter-btn filter-btn-rejected" data-status="rejected">Rejetées</button>
             </div>
             <div class="order-stats">
                 <div class="stat-item">
@@ -329,25 +329,35 @@
         </div>
 
         <div class="orders-container">
-            {% if carts is empty %}
+            {% if orders is empty %}
                 <div class="no-orders">
                     <i class="fas fa-inbox"></i>
                     <p>Aucune commande trouvée</p>
                 </div>
             {% else %}
-                {% for cart in carts %}
-                    {% set availability = check_cart_availability(cart) %}
-                    <div class="order-item status-{{ cart.status|lower }}" data-status="{{ cart.status|lower }}" data-order-filter-target="orderItem">
+                {% for order in orders %}
+                    {% set availability = check_cart_availability(order) %}
+                    <div class="order-item status-{{ order.status|lower }}" data-status="{{ order.status|lower }}" data-order-filter-target="orderItem">
                         <div class="order-header">
-                            <div class="order-id">Commande #{{ cart.id }}</div>
-                            <div class="order-date">{{ cart.createdAt|date('M d, Y H:i') }}</div>
+                            <div class="order-id">Commande #{{ order.id }}</div>
+                            <div class="order-date">{{ order.placedAt|date('M d, Y H:i') }}</div>
                         </div>
                         <div class="user-info">
                             <i class="fas fa-user"></i>
-                            {{ cart.user.email }}
+                            {{ order.lecteur.email }}
                         </div>
                         
-                        {% if cart.status == 'pending' and not availability.all_available %}
+                        {% if order.status != 'pending' and order.processedBy %}
+                            <div class="user-info" style="font-size: 0.9em; color: #7a6b52;">
+                                <i class="fas fa-user-check"></i>
+                                Traité par: {{ order.processedBy.email }}
+                                {% if order.processedAt %}
+                                    le {{ order.processedAt|date('d/m/Y à H:i') }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if order.status == 'pending' and not availability.all_available %}
                             <div class="availability-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 <strong>Attention :</strong> {{ availability.unavailable_books|length }} livre(s) ne sont plus disponibles pour cette commande.
@@ -356,8 +366,8 @@
                         {% endif %}
                         
                         <div class="books-list">
-                            {% for item in cart.items %}
-                                {% set isAvailable = item.exemplaire.status == 'available' %}
+                            {% for item in order.items %}
+                                {% set isAvailable = item.exemplaire.status == 'available' or item.exemplaire.status == 'reserved' %}
                                 <div class="book-item {{ not isAvailable ? 'unavailable' : '' }}">
                                     <div class="book-info">
                                         <div class="book-title">
@@ -373,9 +383,9 @@
                             {% endfor %}
                         </div>
                         <div class="action-buttons">
-                            {% if cart.status == 'pending' %}
+                            {% if order.status == 'pending' %}
                                 {% if availability.all_available %}
-                                    <button type="button" class="btn-approve" onclick="showApprovalModal({{ cart.id }}, '{{ cart.user.email }}')">
+                                    <button type="button" class="btn-approve" onclick="showApprovalModal({{ order.id }}, '{{ order.lecteur.email }}')">
                                         <i class="fas fa-check"></i> Approuver
                                     </button>
                                 {% else %}
@@ -383,15 +393,15 @@
                                         <i class="fas fa-ban"></i> Impossibilité d'approuver
                                     </button>
                                 {% endif %}
-                                <form action="{{ path('admin_order_reject', {'id': cart.id}) }}" method="POST" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ cart.id) }}">
+                                <form action="{{ path('admin_order_reject', {'id': order.id}) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ order.id) }}">
                                     <button type="submit" class="btn-reject">
                                         <i class="fas fa-times"></i> Rejeter
                                     </button>
                                 </form>
                             {% else %}
-                                <span class="status-badge badge-{{ cart.status|lower }}">
-                                    {{ cart.status|upper }}
+                                <span class="status-badge badge-{{ order.status|lower }}">
+                                    {{ order.status|upper }}
                                 </span>
                             {% endif %}
                         </div>
@@ -412,17 +422,7 @@
             </div>
             <form id="approvalForm" method="POST">
                 <div class="modal-body">
-                    <p>Approuver la commande pour : <strong id="userEmail"></strong></p>
-                    <div class="mb-3">
-                        <label for="loanDuration" class="form-label">Durée du prêt</label>
-                        <select class="form-select" id="loanDuration" name="loan_duration" required>
-                            <option value="">Sélectionnez une durée...</option>
-                            <option value="7">1 semaine</option>
-                            <option value="14">2 semaines</option>
-                            <option value="21">3 semaines</option>
-                            <option value="30">1 mois</option>
-                        </select>
-                    </div>
+                    <p>Êtes-vous sûr de vouloir approuver la commande pour : <strong id="userEmail"></strong> ?</p>
                     <input type="hidden" name="_token" id="approvalToken">
                 </div>
                 <div class="modal-footer">
@@ -435,6 +435,64 @@
 </div>
 
 <script>
+// Filter and sort functionality (vanilla JS replacement for Stimulus)
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const orderItems = document.querySelectorAll('.order-item');
+    const sortSelect = document.querySelector('.sort-select');
+    
+    // Filter orders
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const status = this.dataset.status;
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter orders
+            orderItems.forEach(item => {
+                if (status === 'all' || item.dataset.status === status) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Sort orders
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const ordersContainer = document.querySelector('.orders-container');
+            const orders = Array.from(orderItems);
+            
+            orders.sort((a, b) => {
+                const dateA = new Date(a.querySelector('.order-date').textContent.trim());
+                const dateB = new Date(b.querySelector('.order-date').textContent.trim());
+                
+                return this.value === 'newest' ? dateB - dateA : dateA - dateB;
+            });
+            
+            // Re-append in sorted order
+            orders.forEach(order => ordersContainer.appendChild(order));
+            
+            // Re-apply current filter
+            const activeButton = document.querySelector('.filter-btn.active');
+            if (activeButton) {
+                const currentStatus = activeButton.dataset.status;
+                orderItems.forEach(item => {
+                    if (currentStatus === 'all' || item.dataset.status === currentStatus) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    }
+});
+
 function showApprovalModal(cartId, userEmail) {
     // Définir l'action du formulaire
     document.getElementById('approvalForm').action = '{{ path('admin_order_approve', {'id': '__CART_ID__'}) }}'.replace('__CART_ID__', cartId);

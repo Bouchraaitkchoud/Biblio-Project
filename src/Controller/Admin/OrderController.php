@@ -5,8 +5,10 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Cart;
+use App\Entity\Order;
 use App\Entity\Receipt;
 use App\Repository\CartRepository;
+use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +25,7 @@ class OrderController extends AbstractController
 {
     public function __construct(
         private CartRepository $cartRepository,
+        private OrderRepository $orderRepository,
         private EntityManagerInterface $em,
         private UrlGeneratorInterface $urlGenerator,
         private CsrfTokenManagerInterface $csrfTokenManager,
@@ -33,26 +36,30 @@ class OrderController extends AbstractController
     public function index(Request $request): Response
     {
         $status = $request->query->get('status', '');
-        $orderBy = $request->query->get('orderBy', 'createdAt');
+        $orderBy = $request->query->get('orderBy', 'placedAt');
         $order = $request->query->get('order', 'DESC');
         
-        $criteria = [];
+        $qb = $this->orderRepository->createQueryBuilder('o')
+            ->leftJoin('o.lecteur', 'l')
+            ->leftJoin('o.processedBy', 'u')
+            ->addSelect('l', 'u');
+        
         if (!empty($status)) {
-            $criteria['status'] = $status;
+            $qb->where('o.status = :status')
+               ->setParameter('status', $status);
         }
         
-        $carts = $this->cartRepository->findBy(
-            $criteria, 
-            [$orderBy => $order]
-        );
+        $qb->orderBy('o.' . $orderBy, $order);
+        
+        $orders = $qb->getQuery()->getResult();
         
         // Get count by status for the statistics
-        $pendingCount = $this->cartRepository->count(['status' => 'pending']);
-        $approvedCount = $this->cartRepository->count(['status' => 'approved']);
-        $rejectedCount = $this->cartRepository->count(['status' => 'rejected']);
+        $pendingCount = $this->orderRepository->count(['status' => 'pending']);
+        $approvedCount = $this->orderRepository->count(['status' => 'approved']);
+        $rejectedCount = $this->orderRepository->count(['status' => 'rejected']);
         
         return $this->render('admin/order/index.html.twig', [
-            'carts' => $carts,
+            'orders' => $orders,
             'currentStatus' => $status,
             'pendingCount' => $pendingCount,
             'approvedCount' => $approvedCount,
@@ -63,53 +70,34 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}/approve', name: 'admin_order_approve', methods: ['POST'])]
-    public function approve(Request $request, Cart $cart, EntityManagerInterface $em): Response 
+    public function approve(Request $request, Order $order, EntityManagerInterface $em): Response 
     {
-        if ($this->isCsrfTokenValid('approve'.$cart->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('approve'.$order->getId(), $request->request->get('_token'))) {
             try {
                 // Start transaction
                 $em->beginTransaction();
 
-                // Update exemplaire statuses and book quantities
-                foreach ($cart->getItems() as $item) {
+                // Update exemplaire statuses
+                foreach ($order->getItems() as $item) {
                     $exemplaire = $item->getExemplaire();
-                    $book = $exemplaire->getBook();
                     
-                    // Update exemplaire status
+                    // Update exemplaire status from reserved to borrowed
                     $exemplaire->setStatus('borrowed');
                     $em->persist($exemplaire);
-                    
-                    // Update book quantity
-                    $currentQuantity = $book->getQuantity();
-                    if ($currentQuantity > 0) {
-                        $book->setQuantity($currentQuantity - 1);
-                        $em->persist($book);
-                    }
                 }
 
-                // Generate receipt
-                $receipt = new Receipt();
-                $receipt->setCart($cart);
-                $receipt->setCode('REC-'.date('Ymd').'-'.strtoupper(uniqid()));
-                $receipt->setGeneratedAt(new \DateTime());
+                // Update order with approval info
+                $order->setStatus('approved');
+                $order->setProcessedAt(new \DateTime());
+                $order->setProcessedBy($this->getUser());
                 
-                // Update cart with approval info
-                $cart->setStatus('approved');
-                $cart->setProcessedBy($this->getUser());
-                $cart->setProcessedAt(new \DateTime());
-                
-                $em->persist($receipt);
+                $em->persist($order);
                 $em->flush();
 
                 // Commit transaction
                 $em->commit();
 
-                // Redirect directly to the receipt PDF if it exists
-                $receipt = $em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
-                if ($receipt) {
-                    return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
-                }
-                // Fallback: redirect to orders list
+                $this->addFlash('success', 'Order approved successfully.');
                 return $this->redirectToRoute('admin_orders_index', ['status' => 'approved']);
             } catch (\Exception $e) {
                 // Rollback transaction on error
@@ -117,7 +105,7 @@ class OrderController extends AbstractController
                 
                 $this->logger->error('Error approving order: ' . $e->getMessage(), [
                     'exception' => $e,
-                    'cart_id' => $cart->getId()
+                    'order_id' => $order->getId()
                 ]);
                 
                 $this->addFlash('error', 'Failed to approve order. Please try again.');
@@ -129,12 +117,21 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}/reject', name: 'admin_order_reject', methods: ['POST'])]
-    public function reject(Request $request, Cart $cart): Response
+    public function reject(Request $request, Order $order): Response
     {
-        if ($this->isCsrfTokenValid('reject'.$cart->getId(), $request->request->get('_token'))) {
-            $cart->setStatus('rejected');
-            $cart->setProcessedBy($this->getUser());
-            $cart->setProcessedAt(new \DateTime());
+        if ($this->isCsrfTokenValid('reject'.$order->getId(), $request->request->get('_token'))) {
+            // Release all exemplaires back to available status
+            foreach ($order->getItems() as $item) {
+                $exemplaire = $item->getExemplaire();
+                if ($exemplaire->getStatus() === 'reserved') {
+                    $exemplaire->setStatus('available');
+                    $this->em->persist($exemplaire);
+                }
+            }
+            
+            $order->setStatus('rejected');
+            $order->setProcessedAt(new \DateTime());
+            $order->setProcessedBy($this->getUser());
             
             $this->em->flush();
 

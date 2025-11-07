@@ -1,9 +1,10 @@
 <?php
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\OrderRepository;
-use App\Entity\Exemplaire;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: "orders")]
@@ -14,9 +15,9 @@ class Order
     #[ORM\Column(type:"integer")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: Lecteur::class)]
     #[ORM\JoinColumn(nullable:false)]
-    private ?User $user = null;
+    private ?Lecteur $lecteur = null;
 
     #[ORM\Column(type:"datetime")]
     private ?\DateTimeInterface $placedAt = null;
@@ -24,11 +25,12 @@ class Order
     #[ORM\Column(type:"datetime", nullable:true)]
     private ?\DateTimeInterface $processedAt = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable:true)]
+    private ?User $processedBy = null;
+
     #[ORM\Column(type:"string", length:20)]
     private ?string $status = null;
-
-    #[ORM\Column(type:"string", length:50, nullable:true)]
-    private ?string $receiptCode = null;
 
     // This field can store details of the order (for example, an array of items or a JSON snapshot)
     #[ORM\Column(type:"json", nullable:true)]
@@ -37,26 +39,35 @@ class Order
     #[ORM\Column(type:"string", length:100, nullable:true)]
     private ?string $adminEmail = null;
 
-    #[ORM\ManyToOne(targetEntity: Exemplaire::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Exemplaire $exemplaire = null;
-
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $returnedAt = null;
+
+    #[ORM\Column(type:"string", length:50, nullable:true)]
+    private ?string $receiptCode = null;
+
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItem::class, cascade: ['persist', 'remove'])]
+    private Collection $items;
+
+    public function __construct()
+    {
+        $this->items = new ArrayCollection();
+        $this->placedAt = new \DateTime();
+        $this->status = 'pending';
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getLecteur(): ?Lecteur
     {
-        return $this->user;
+        return $this->lecteur;
     }
 
-    public function setUser(?User $user): self
+    public function setLecteur(?Lecteur $lecteur): self
     {
-        $this->user = $user;
+        $this->lecteur = $lecteur;
         return $this;
     }
 
@@ -79,6 +90,17 @@ class Order
     public function setProcessedAt(?\DateTimeInterface $processedAt): self
     {
         $this->processedAt = $processedAt;
+        return $this;
+    }
+
+    public function getProcessedBy(): ?User
+    {
+        return $this->processedBy;
+    }
+
+    public function setProcessedBy(?User $processedBy): self
+    {
+        $this->processedBy = $processedBy;
         return $this;
     }
 
@@ -126,17 +148,6 @@ class Order
         return $this;
     }
 
-    public function getExemplaire(): ?Exemplaire
-    {
-        return $this->exemplaire;
-    }
-
-    public function setExemplaire(?Exemplaire $exemplaire): self
-    {
-        $this->exemplaire = $exemplaire;
-        return $this;
-    }
-
     public function getReturnedAt(): ?\DateTimeInterface
     {
         return $this->returnedAt;
@@ -145,6 +156,33 @@ class Order
     public function setReturnedAt(?\DateTimeInterface $returnedAt): self
     {
         $this->returnedAt = $returnedAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrderItem>
+     */
+    public function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    public function addItem(OrderItem $item): self
+    {
+        if (!$this->items->contains($item)) {
+            $this->items->add($item);
+            $item->setOrder($this);
+        }
+        return $this;
+    }
+
+    public function removeItem(OrderItem $item): self
+    {
+        if ($this->items->removeElement($item)) {
+            if ($item->getOrder() === $this) {
+                $item->setOrder(null);
+            }
+        }
         return $this;
     }
 }

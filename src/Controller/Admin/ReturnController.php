@@ -29,10 +29,19 @@ class ReturnController extends AbstractController
     public function index(EntityManagerInterface $entityManager): Response
     {
         // Retrieve orders that are approved and have not been marked returned
-        $pendingOrders = $entityManager->getRepository(Order::class)->findBy([
-            'status' => 'approved',
-            'returnedAt' => null,
-        ]);
+        $pendingOrders = $entityManager->getRepository(Order::class)
+            ->createQueryBuilder('o')
+            ->leftJoin('o.lecteur', 'l')
+            ->leftJoin('o.items', 'oi')
+            ->leftJoin('oi.exemplaire', 'e')
+            ->leftJoin('e.location', 'loc')
+            ->leftJoin('o.processedBy', 'u')
+            ->addSelect('l', 'oi', 'e', 'loc', 'u')
+            ->where('o.status = :status')
+            ->andWhere('o.returnedAt IS NULL')
+            ->setParameter('status', 'approved')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('admin/return/index.html.twig', [
             'pendingOrders' => $pendingOrders,
@@ -78,27 +87,30 @@ class ReturnController extends AbstractController
                 ], 400);
             }
 
-            // Get the cart item for this exemplaire
-            $cartItem = $this->entityManager->getRepository('App\Entity\CartItem')
-                ->createQueryBuilder('ci')
-                ->select('ci', 'c', 'u')
-                ->join('ci.cart', 'c')
-                ->join('c.user', 'u')
-                ->where('ci.exemplaire = :exemplaire')
-                ->andWhere('c.status = :status')
+            // Get the order item for this exemplaire
+            $orderItem = $this->entityManager->getRepository('App\Entity\OrderItem')
+                ->createQueryBuilder('oi')
+                ->select('oi', 'o', 'l', 'e', 'loc')
+                ->join('oi.order', 'o')
+                ->join('o.lecteur', 'l')
+                ->join('oi.exemplaire', 'e')
+                ->leftJoin('e.location', 'loc')
+                ->where('oi.exemplaire = :exemplaire')
+                ->andWhere('o.status = :status')
+                ->andWhere('o.returnedAt IS NULL')
                 ->setParameter('exemplaire', $exemplaire)
                 ->setParameter('status', 'approved')
                 ->getQuery()
                 ->getOneOrNullResult();
 
-            if (!$cartItem) {
+            if (!$orderItem) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'No approved borrowing record found for this exemplaire'
                 ], 404);
             }
 
-            $cart = $cartItem->getCart();
+            $order = $orderItem->getOrder();
 
             // Return the response
             return new JsonResponse([
@@ -107,8 +119,9 @@ class ReturnController extends AbstractController
                     'id' => $exemplaire->getId(),
                     'barcode' => $exemplaire->getBarcode(),
                     'book_title' => $exemplaire->getBook()->getTitle(),
-                    'borrowed_by' => $cart->getUser()->getEmail(),
-                    'borrowed_date' => $cart->getProcessedAt()->format('Y-m-d')
+                    'borrowed_by' => $order->getLecteur()->getEmail(),
+                    'borrowed_date' => $order->getProcessedAt()->format('Y-m-d'),
+                    'location' => $exemplaire->getLocation() ? $exemplaire->getLocation()->getName() : 'N/A'
                 ]
             ]);
 
@@ -153,17 +166,46 @@ class ReturnController extends AbstractController
                 throw new \Exception('This exemplaire is not currently borrowed');
             }
 
+            // Find the order for this exemplaire
+            $orderItem = $this->entityManager->getRepository('App\Entity\OrderItem')
+                ->createQueryBuilder('oi')
+                ->select('oi', 'o', 'oi2', 'e2')
+                ->join('oi.order', 'o')
+                ->leftJoin('o.items', 'oi2')
+                ->leftJoin('oi2.exemplaire', 'e2')
+                ->where('oi.exemplaire = :exemplaire')
+                ->andWhere('o.status = :status')
+                ->andWhere('o.returnedAt IS NULL')
+                ->setParameter('exemplaire', $exemplaire)
+                ->setParameter('status', 'approved')
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if (!$orderItem) {
+                throw new \Exception('No active order found for this exemplaire');
+            }
+
+            $order = $orderItem->getOrder();
+
             // Update exemplaire status
             $exemplaire->setStatus('available');
-            $exemplaire->setReturnDate(new \DateTime());
-
-            // Update book quantity
-            $book = $exemplaire->getBook();
-            $currentQuantity = $book->getQuantity();
-            $book->setQuantity($currentQuantity + 1);
-
             $this->entityManager->persist($exemplaire);
-            $this->entityManager->persist($book);
+
+            // Check if all items in the order have been returned
+            $allReturned = true;
+            foreach ($order->getItems() as $item) {
+                if ($item->getExemplaire()->getStatus() === 'borrowed') {
+                    $allReturned = false;
+                    break;
+                }
+            }
+
+            // If all books returned, mark the order as returned
+            if ($allReturned) {
+                $order->setReturnedAt(new \DateTime());
+                $this->entityManager->persist($order);
+            }
+
             $this->entityManager->flush();
 
             // Commit transaction
@@ -171,7 +213,12 @@ class ReturnController extends AbstractController
 
             return new JsonResponse([
                 'success' => true,
-                'message' => 'Book returned successfully'
+                'message' => 'Book returned successfully',
+                'exemplaire' => [
+                    'id' => $exemplaire->getId(),
+                    'barcode' => $exemplaire->getBarcode(),
+                    'book_title' => $exemplaire->getBook()->getTitle(),
+                ]
             ]);
         } catch (\Exception $e) {
             // Rollback transaction on error

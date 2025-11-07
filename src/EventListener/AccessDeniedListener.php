@@ -4,24 +4,25 @@ namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Twig\Environment;
 
 class AccessDeniedListener implements EventSubscriberInterface
 {
-    public function __construct(
-        private RouterInterface $router,
-        private AuthorizationCheckerInterface $authorizationChecker
-    ) {}
+    private Environment $twig;
+
+    public function __construct(Environment $twig)
+    {
+        $this->twig = $twig;
+    }
 
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::EXCEPTION => ['onKernelException', 2],
+            KernelEvents::EXCEPTION => ['onKernelException', 10],
         ];
     }
 
@@ -29,38 +30,20 @@ class AccessDeniedListener implements EventSubscriberInterface
     {
         $exception = $event->getThrowable();
 
-        // Only handle AccessDeniedException
-        if (!$exception instanceof AccessDeniedException) {
+        // Check if it's an AccessDeniedException or AccessDeniedHttpException
+        if (!$exception instanceof AccessDeniedException && !$exception instanceof AccessDeniedHttpException) {
             return;
         }
 
-        // Get user roles
-        $roles = [];
-        if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
-            // Full admin - redirect to dashboard
-            if ($this->authorizationChecker->isGranted('ROLE_ADMIN')) {
-                $response = new RedirectResponse($this->router->generate('admin_dashboard'));
-                $event->setResponse($response);
-                return;
-            }
+        // Render the custom 403 error page
+        try {
+            $content = $this->twig->render('bundles/TwigBundle/Exception/error403.html.twig');
             
-            // Limited admin - redirect to limited panel
-            if ($this->authorizationChecker->isGranted('ROLE_LIMITED_ADMIN')) {
-                $response = new RedirectResponse($this->router->generate('admin_limited_panel'));
-                $event->setResponse($response);
-                return;
-            }
-
-            // Regular user (lecteur) - redirect to home
-            if ($this->authorizationChecker->isGranted('ROLE_USER')) {
-                $response = new RedirectResponse('/');
-                $event->setResponse($response);
-                return;
-            }
+            $response = new Response($content, Response::HTTP_FORBIDDEN);
+            $event->setResponse($response);
+        } catch (\Exception $e) {
+            // If template rendering fails, let Symfony handle it
+            return;
         }
-
-        // Not authenticated - redirect to login
-        $response = new RedirectResponse($this->router->generate('app_admin_login'));
-        $event->setResponse($response);
     }
 }

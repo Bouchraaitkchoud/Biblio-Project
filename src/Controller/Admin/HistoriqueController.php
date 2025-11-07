@@ -24,15 +24,18 @@ class HistoriqueController extends AbstractController
     #[Route('/admin/historique', name: 'admin_historique_index', methods: ['GET'])]
     public function index(): Response
     {
-        $query = $this->entityManager->createQueryBuilder()
-            ->select('l.email AS lecteurEmail, o.placedAt AS createdAt, o.status, o.receiptCode, o.processedAt, o.adminEmail')
-            ->from(Order::class, 'o')
-            ->join('o.user', 'l')
+        $approvedOrders = $this->entityManager->getRepository(Order::class)
+            ->createQueryBuilder('o')
+            ->leftJoin('o.lecteur', 'l')
+            ->leftJoin('o.items', 'oi')
+            ->leftJoin('oi.exemplaire', 'e')
+            ->leftJoin('e.location', 'loc')
+            ->leftJoin('o.processedBy', 'u')
+            ->addSelect('l', 'oi', 'e', 'loc', 'u')
             ->where('o.status = :status')
             ->setParameter('status', 'approved')
-            ->getQuery();
-
-        $approvedOrders = $query->getResult();
+            ->getQuery()
+            ->getResult();
 
         if (!$approvedOrders) {
             $this->addFlash('warning', 'Aucun emprunt approuvé trouvé.');
@@ -53,20 +56,22 @@ class HistoriqueController extends AbstractController
                 o.returnedAt, 
                 b.title AS bookTitle, 
                 e.barcode AS bookBarcode, 
-                d.name AS disciplineName,
-                o.adminEmail 
+                loc.name AS locationName,
+                u.email AS adminEmail 
              FROM App\Entity\Order o
-             JOIN o.user l
-             JOIN o.exemplaire e
+             JOIN o.lecteur l
+             JOIN o.items oi
+             JOIN oi.exemplaire e
              JOIN e.book b
-             JOIN e.discipline d
+             LEFT JOIN e.location loc
+             LEFT JOIN o.processedBy u
              WHERE o.status = :status'
         );
         $query->setParameter('status', 'approved');
         $orders = $query->getResult();
         
         // Build CSV content from $orders data...
-        $csvData = "Lecteur,Date de commande,Date de retour,Exemplaire,Discipline,Admin traitant\n";
+        $csvData = "Lecteur,Date de commande,Date de retour,Exemplaire,Emplacement,Admin traitant\n";
         foreach ($orders as $order) {
             $csvData .= sprintf(
                 "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
@@ -74,7 +79,7 @@ class HistoriqueController extends AbstractController
                 isset($order['placedAt']) ? $order['placedAt']->format('d/m/Y H:i') : '',
                 isset($order['returnedAt']) ? $order['returnedAt']->format('d/m/Y H:i') : 'Non retourné',
                 $order['bookTitle'].' ('.$order['bookBarcode'].')',
-                $order['disciplineName'],
+                $order['locationName'] ?? 'N/A',
                 $order['adminEmail'] ?? 'N/A'
             );
         }

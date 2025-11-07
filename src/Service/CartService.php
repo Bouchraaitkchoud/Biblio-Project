@@ -4,9 +4,11 @@ namespace App\Service;
 
 use App\Entity\Book;
 use App\Entity\Cart;
-use App\Entity\User;
+use App\Entity\Lecteur;
 use App\Entity\Exemplaire;
 use App\Entity\CartItem;
+use App\Entity\Order;
+use App\Entity\OrderItem;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -171,13 +173,13 @@ class CartService
     }
 
     /**
-     * Convert cookie cart to database cart entity
+     * Convert cookie cart to database order entity
      * 
-     * @param User $user The user who owns the cart
-     * @return Cart|null The created cart, or null if cart is empty
+     * @param Lecteur $lecteur The lecteur who owns the order
+     * @return Order|null The created order, or null if cart is empty
      * @throws \Exception If any exemplaire is no longer available
      */
-    public function convertCookieCartToEntity(User $user): ?Cart
+    public function convertCookieCartToEntity(Lecteur $lecteur): ?Order
     {
         $exemplaires = $this->getCartItems();
         if (empty($exemplaires)) {
@@ -199,21 +201,32 @@ class CartService
             );
         }
 
-        $cart = new Cart();
-        $cart->setUser($user);
-        $cart->setCreatedAt(new \DateTime());
-        $cart->setStatus('pending');
+        // Create the order
+        $order = new Order();
+        $order->setLecteur($lecteur);
+        $order->setPlacedAt(new \DateTime());
+        $order->setStatus('pending');
+        
+        // Generate receipt code
+        $receiptCode = 'RCPT-' . date('Ymd') . '-' . strtoupper(uniqid());
+        $order->setReceiptCode($receiptCode);
 
+        // Add order items and mark exemplaires as reserved
         foreach ($exemplaires as $exemplaire) {
-            $item = new CartItem();
+            $item = new OrderItem();
             $item->setExemplaire($exemplaire);
-            $cart->addItem($item);
+            $item->setAddedAt(new \DateTime());
+            $order->addItem($item);
+            
+            // Mark exemplaire as reserved so other students can't order it
+            $exemplaire->setStatus('reserved');
+            $this->entityManager->persist($exemplaire);
         }
 
-        $this->entityManager->persist($cart);
+        $this->entityManager->persist($order);
         $this->entityManager->flush();
         
-        return $cart;
+        return $order;
     }
 
     /**

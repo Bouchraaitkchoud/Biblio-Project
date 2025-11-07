@@ -7,6 +7,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
@@ -43,18 +44,32 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new RedirectResponse($this->router->generate('app_admin_login'));
         }
 
+        // Clear cart cookie on login to prevent cart sharing between users
+        $clearCartCookie = Cookie::create('draft_cart')
+            ->withValue('')
+            ->withExpires(time() - 3600)
+            ->withPath('/')
+            ->withSecure(false)
+            ->withHttpOnly(true)
+            ->withSameSite(Cookie::SAMESITE_LAX);
+
         // If full admin, redirect to admin dashboard.
         if (in_array('ROLE_ADMIN', $roles, true)) {
-            return new RedirectResponse($this->router->generate('admin_dashboard'));
+            $response = new RedirectResponse($this->router->generate('admin_dashboard'));
+            $response->headers->setCookie($clearCartCookie);
+            return $response;
         }
 
         // For limited admin, redirect to limited admin panel
         if (in_array('ROLE_LIMITED_ADMIN', $roles, true) || !empty(array_intersect($roles, $adminRoles))) {
-            return new RedirectResponse($this->router->generate('admin_limited_panel'));
+            $response = new RedirectResponse($this->router->generate('admin_limited_panel'));
+            $response->headers->setCookie($clearCartCookie);
+            return $response;
         }
 
-        // Fallback for normal lecteur / user: redirect to site root
-        // redirect to the site root ("/") as lecteur home
-        return new RedirectResponse('/');
+        // Fallback for normal lecteur / user: redirect to site root and clear cart
+        $response = new RedirectResponse('/');
+        $response->headers->setCookie($clearCartCookie);
+        return $response;
     }
 }

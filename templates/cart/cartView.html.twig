@@ -254,16 +254,35 @@
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
         button.disabled = true;
         
+        console.log('Submitting cart...');
+        
         fetch('/submit-cart', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
-                showNotification('Demande envoyée avec succès !', 'success');
+                showNotification('Demande envoyée avec succès ! Téléchargement du reçu...', 'success');
+                
+                // Download the PDF receipt
+                if (data.pdfData) {
+                    const linkSource = `data:application/pdf;base64,${data.pdfData}`;
+                    const downloadLink = document.createElement('a');
+                    const fileName = `receipt_${data.receiptCode}.pdf`;
+                    
+                    downloadLink.href = linkSource;
+                    downloadLink.download = fileName;
+                    downloadLink.click();
+                }
+                
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 2000);
@@ -274,9 +293,10 @@
             }
         })
         .catch(error => {
+            console.error('Submit cart error:', error);
             button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
             button.disabled = false;
-            showNotification('Une erreur est survenue', 'error');
+            showNotification('Une erreur est survenue: ' + error.message, 'error');
         });
     }
 

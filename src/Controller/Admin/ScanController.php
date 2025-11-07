@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Cart;
+use App\Entity\Order;
 use App\Entity\Exemplaire;
 use App\Entity\CartItem;
 use App\Service\ReceiptGeneratorService;
@@ -37,46 +38,52 @@ class ScanController extends AbstractController
     public function scanOrderBarcode(Request $request): JsonResponse
     {
         try {
-            // Accept both 'barcode' and 'order_id' parameters
-            $orderId = $request->request->get('barcode') ?? $request->request->get('order_id');
-            if (!$orderId) {
+            // Accept both 'barcode' and 'order_id' parameters (barcode = receipt_code)
+            $receiptCode = $request->request->get('barcode') ?? $request->request->get('order_id');
+            if (!$receiptCode) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => 'No order ID provided'
+                    'message' => 'No receipt code provided'
                 ], 400);
             }
-            $orderId = trim($orderId);
+            $receiptCode = trim($receiptCode);
             $this->logger->info('Processing order scan request', [
-                'order_id' => $orderId,
+                'receipt_code' => $receiptCode,
                 'received_params' => $request->request->all()
             ]);
-            // Find cart by ID and status pending
-            $cart = $this->entityManager->getRepository(Cart::class)->find($orderId);
-            if (!$cart || $cart->getStatus() !== 'pending') {
+            
+            // Find order by receipt_code and status pending
+            $order = $this->entityManager->getRepository(Order::class)->findOneBy([
+                'receiptCode' => $receiptCode,
+                'status' => 'pending'
+            ]);
+            
+            if (!$order) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => 'No pending order found with this ID'
+                    'message' => 'No pending order found with this receipt code'
                 ], 404);
             }
-            // Return cart details for approval, including CSRF token
+            
+            // Return order details for approval, including CSRF token
             return new JsonResponse([
                 'success' => true,
-                'cart_id' => $cart->getId(),
-                'student' => $cart->getUser()->getEmail(),
-                'request_date' => $cart->getCreatedAt()->format('Y-m-d H:i:s'),
+                'cart_id' => $order->getId(),
+                'student' => $order->getLecteur()->getEmail(),
+                'request_date' => $order->getPlacedAt()->format('Y-m-d H:i:s'),
                 'items' => array_map(function($item) {
                     return [
                         'book_title' => $item->getExemplaire()->getBook()->getTitle(),
                         'barcode' => $item->getExemplaire()->getBarcode()
                     ];
-                }, $cart->getItems()->toArray()),
-                'csrf_token' => $this->csrfTokenManager->getToken('approve' . $cart->getId())->getValue()
+                }, $order->getItems()->toArray()),
+                'csrf_token' => $this->csrfTokenManager->getToken('approve' . $order->getId())->getValue()
             ]);
         } catch (\Exception $e) {
             $this->logger->error('Error in scanOrderBarcode', [
                 'error_message' => $e->getMessage(),
                 'error_trace' => $e->getTraceAsString(),
-                'order_id' => $orderId ?? null
+                'receipt_code' => $receiptCode ?? null
             ]);
             return new JsonResponse([
                 'success' => false,
@@ -144,19 +151,19 @@ class ScanController extends AbstractController
     public function approveScannedCart(int $id, Request $request): Response
     {
         try {
-            $cart = $this->entityManager->getRepository(Cart::class)->find($id);
+            $order = $this->entityManager->getRepository(Order::class)->find($id);
 
             // Add debug logging
             $this->logger->info('Approve attempt', [
-                'cart_id' => $id,
-                'cart_found' => $cart ? 'yes' : 'no',
-                'cart_status' => $cart ? $cart->getStatus() : 'n/a'
+                'order_id' => $id,
+                'order_found' => $order ? 'yes' : 'no',
+                'order_status' => $order ? $order->getStatus() : 'n/a'
             ]);
             
-            if (!$cart || $cart->getStatus() !== 'pending') {
+            if (!$order || $order->getStatus() !== 'pending') {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => 'Invalid cart for approval'
+                    'message' => 'Invalid order for approval'
                 ], 400);
             }
 
@@ -164,49 +171,29 @@ class ScanController extends AbstractController
             $this->entityManager->beginTransaction();
 
             // Update exemplaire statuses
-            foreach ($cart->getItems() as $item) {
+            foreach ($order->getItems() as $item) {
                 $exemplaire = $item->getExemplaire();
-                $book = $exemplaire->getBook();
                 
-                // Update exemplaire status
+                // Update exemplaire status from reserved to borrowed
                 $exemplaire->setStatus('borrowed');
                 $this->entityManager->persist($exemplaire);
-                
-                // Update book quantity
-                $currentQuantity = $book->getQuantity();
-                if ($currentQuantity > 0) {
-                    $book->setQuantity($currentQuantity - 1);
-                    $this->entityManager->persist($book);
-                }
             }
 
-            // Update cart with approval info
-            $cart->setStatus('approved');
-            $cart->setProcessedBy($this->getUser());
-            $cart->setProcessedAt(new \DateTime());
+            // Update order with approval info
+            $order->setStatus('approved');
+            $order->setProcessedBy($this->getUser());
+            $order->setProcessedAt(new \DateTime());
             
+            $this->entityManager->persist($order);
             $this->entityManager->flush();
-
-            // Create and persist Receipt entity
-            $receipt = new \App\Entity\Receipt();
-            $receipt->setCart($cart);
-            $receipt->setCode('REC-'.date('Ymd').'-'.strtoupper(uniqid()));
-            $receipt->setGeneratedAt(new \DateTime());
-            $this->entityManager->persist($receipt);
-            $this->entityManager->flush();
-
-            // Generate approval receipt PDF (optional, for download)
-            $pdfContent = $this->receiptGenerator->generateApprovalReceipt($cart);
 
             // Commit transaction
             $this->entityManager->commit();
 
-            // Fetch the Receipt entity for this cart (now guaranteed to exist)
-            $receiptUrl = $this->generateUrl('receipt_show', ['id' => $receipt->getId()]);
             return $this->json([
                 'success' => true,
-                'message' => 'Order approved and receipt generated.',
-                'receipt_url' => $receiptUrl
+                'message' => 'Order approved successfully.',
+                'order_id' => $order->getId()
             ]);
 
         } catch (\Exception $e) {
@@ -217,12 +204,12 @@ class ScanController extends AbstractController
             $this->logger->error('Error in approveScannedCart', [
                 'error_message' => $e->getMessage(),
                 'error_trace' => $e->getTraceAsString(),
-                'cart_id' => $id
+                'order_id' => $id
             ]);
             
             return new JsonResponse([
                 'success' => false,
-                'message' => 'An error occurred while approving the cart'
+                'message' => 'An error occurred while approving the order: ' . $e->getMessage()
             ], 500);
         }
     }
