@@ -32,6 +32,8 @@ class LecteurController extends AbstractController
             $lecteurs = $lecteurRepository->createQueryBuilder('l')
                 ->where('LOWER(l.nom) LIKE :search 
                     OR LOWER(l.prenom) LIKE :search 
+                    OR LOWER(CONCAT(l.nom, \' \', l.prenom)) LIKE :search
+                    OR LOWER(CONCAT(l.prenom, \' \', l.nom)) LIKE :search
                     OR LOWER(l.codeAdmission) LIKE :search
                     OR LOWER(l.email) LIKE :search')
                 ->setParameter('search', '%' . $searchLower . '%')

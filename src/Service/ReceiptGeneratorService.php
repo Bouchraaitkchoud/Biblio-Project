@@ -10,13 +10,14 @@ class ReceiptGeneratorService
 {
     public function generateRequestReceipt(Order $order): string
     {
-        $pdf = new TCPDF('P', 'mm', [58, 150], true, 'UTF-8', false); // 58mm width, typical receipt 
+        $pdf = new TCPDF('P', 'mm', [58, 200], true, 'UTF-8', false); // 58mm width, increased height
         $pdf->SetCreator(PDF_CREATOR);
         $pdf->SetAuthor('Système Bibliothèque');
         $pdf->SetTitle('Reçu d\'Emprunt Bibliothèque');
         $pdf->SetMargins(4, 4, 4);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
+        $pdf->SetAutoPageBreak(true, 4);
         $pdf->AddPage();
 
         // Title
@@ -46,14 +47,30 @@ class ReceiptGeneratorService
         // Table header
         $pdf->SetFont('helvetica', 'B', 8);
         $pdf->Cell(32, 5, 'Livre', 1, 0, 'L');
-        $pdf->Cell(20, 5, 'Code-barres', 1, 1, 'L');
+        $pdf->Cell(18, 5, 'Code-barres', 1, 1, 'L');
 
-        // Table rows
-        $pdf->SetFont('helvetica', '', 8);
+        // Table rows - each book gets its own properly sized row with text wrapping
+        $pdf->SetFont('helvetica', '', 7);
+        
         foreach ($order->getItems() as $item) {
             $ex = $item->getExemplaire();
-            $pdf->Cell(32, 5, mb_strimwidth($ex->getBook()->getTitle(), 0, 20, '...'), 1, 0, 'L');
-            $pdf->Cell(20, 5, $ex->getBarcode(), 1, 1, 'L');
+            $bookTitle = $ex->getBook()->getTitle();
+            $barcode = $ex->getBarcode();
+            
+            // Save current position
+            $currentX = $pdf->GetX();
+            $currentY = $pdf->GetY();
+            
+            // Calculate how many lines the book title will need (considering padding)
+            $numLines = $pdf->getNumLines($bookTitle, 30); // Slightly less than 32 for padding
+            $rowHeight = ($numLines * 3.5) + 2; // 3.5mm per line + 2mm padding
+            $rowHeight = max($rowHeight, 8); // Minimum height of 8mm
+            
+            // Draw book title with MultiCell (enables text wrapping)
+            $pdf->MultiCell(32, $rowHeight, $bookTitle, 1, 'L', false, 0, $currentX, $currentY, true, 0, false, true, $rowHeight, 'T', false);
+            
+            // Draw barcode cell with same height, centered
+            $pdf->MultiCell(18, $rowHeight, $barcode, 1, 'C', false, 1, $currentX + 32, $currentY, true, 0, false, true, $rowHeight, 'M', false);
         }
 
         $pdf->Ln(2);

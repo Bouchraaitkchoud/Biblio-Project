@@ -19,17 +19,20 @@
             text-align: center;
         }
         .return-container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px 0;
+            padding: 20px;
         }
         .scanner-section, .return-history, .book-details, .pending-orders {
             background: #fff;
             border-left: 4px solid #b2903e;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            padding: 2rem 2.5rem;
+            padding: 1.5rem 2rem;
             margin-bottom: 2rem;
+        }
+        .pending-orders {
+            overflow-x: auto;
         }
         .scanner-section h3, .pending-orders h3 {
             color: #1a2e4f;
@@ -78,16 +81,32 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
+            font-size: 0.9em;
         }
         table th,
         table td {
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ddd;
             text-align: left;
             font-family: 'Georgia', serif;
+            vertical-align: top;
         }
         table th {
-            background-color: #f4f4f4;
+            background-color: #1a2e4f;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        table td {
+            font-size: 0.9em;
+        }
+        table td small {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+        .text-muted {
+            color: #6c757d !important;
         }
         .status-badge {
             display: inline-block;
@@ -113,6 +132,26 @@
         .btn-success:hover {
             background: #b2903e;
             color: #fff;
+        }
+        .quick-return-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.8em;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .quick-return-btn:hover {
+            background: #218838;
+        }
+        .quick-return-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
         }
         .alert {
             border-radius: 8px;
@@ -141,10 +180,10 @@
                 <thead>
                     <tr>
                         <th>Lecteur</th>
-                        <th>Date de commande</th>
-                        <th>Exemplaire</th>
+                        <th>Date</th>
+                        <th>Livre</th>
+                        <th>Code-barres</th>
                         <th>Emplacement</th>
-                        <th>Admin traitant</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -153,26 +192,24 @@
                         {% for item in order.items %}
                         <tr>
                             <td>
-                                {{ order.lecteur.nom }} {{ order.lecteur.prenom }}<br>
-                                <small>{{ order.lecteur.email }}</small>
+                                <strong>{{ order.lecteur.nom }} {{ order.lecteur.prenom }}</strong><br>
+                                <small class="text-muted">{{ order.lecteur.email }}</small>
                             </td>
-                            <td>{{ order.placedAt|date('d/m/Y H:i') }}</td>
-                            <td>
-                                {{ item.exemplaire.book.title }}<br>
-                                <small>Code: {{ item.exemplaire.barcode }}</small>
-                            </td>
+                            <td style="white-space: nowrap;">{{ order.placedAt|date('d/m/Y') }}<br><small>{{ order.placedAt|date('H:i') }}</small></td>
+                            <td>{{ item.exemplaire.book.title }}</td>
+                            <td style="font-family: monospace; font-weight: bold; color: #b2903e;">{{ item.exemplaire.barcode }}</td>
                             <td>{{ item.exemplaire.location ? item.exemplaire.location.name : 'N/A' }}</td>
-                            <td>
-                                {% if order.processedBy %}
-                                    {{ order.processedBy.email }}
-                                {% elseif order.adminEmail %}
-                                    {{ order.adminEmail }}
+                            <td style="text-align: center;">
+                                {% if item.exemplaire.status == 'borrowed' %}
+                                <button class="btn btn-sm btn-success quick-return-btn" 
+                                        data-exemplaire-id="{{ item.exemplaire.id }}"
+                                        data-barcode="{{ item.exemplaire.barcode }}"
+                                        data-title="{{ item.exemplaire.book.title }}">
+                                    <i class="fas fa-undo"></i> Retour
+                                </button>
                                 {% else %}
-                                    N/A
+                                <span class="badge bg-success">Retourné</span>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <small class="text-muted">Scanner le code-barres</small>
                             </td>
                         </tr>
                         {% endfor %}
@@ -218,6 +255,19 @@
             let currentExemplaireId = null;
 
             barcodeInput.focus();
+
+            // Handle quick return buttons
+            document.querySelectorAll('.quick-return-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const exemplaireId = this.getAttribute('data-exemplaire-id');
+                    const barcode = this.getAttribute('data-barcode');
+                    const title = this.getAttribute('data-title');
+                    
+                    if (confirm(`Êtes-vous sûr de vouloir traiter le retour de:\n${title}\n(Code: ${barcode})`)) {
+                        quickReturn(exemplaireId, barcode, title, this);
+                    }
+                });
+            });
 
             // Handle Enter key in barcode input
             barcodeInput.addEventListener('keypress', function(e) {
@@ -303,6 +353,51 @@
                 })
                 .catch(error => {
                     showMessage('Erreur lors du traitement : ' + error.message, 'error');
+                });
+            }
+
+            function quickReturn(exemplaireId, barcode, title, buttonElement) {
+                // Disable button during processing
+                buttonElement.disabled = true;
+                buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+
+                const formData = new FormData();
+                formData.append('exemplaire_id', exemplaireId);
+
+                fetch('{{ path('admin_returns_process') }}', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Retour traité avec succès !', 'success');
+                        // Replace button with success badge
+                        buttonElement.parentElement.innerHTML = '<span class="badge bg-success">Retourné</span>';
+                        // Add to history
+                        addToReturnHistory({
+                            book_title: title,
+                            barcode: barcode,
+                            id: exemplaireId
+                        });
+                    } else {
+                        showMessage(data.message || 'Erreur lors du traitement', 'error');
+                        // Re-enable button
+                        buttonElement.disabled = false;
+                        buttonElement.innerHTML = '<i class="fas fa-undo"></i> Retour rapide';
+                    }
+                })
+                .catch(error => {
+                    showMessage('Erreur lors du traitement : ' + error.message, 'error');
+                    // Re-enable button
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="fas fa-undo"></i> Retour rapide';
                 });
             }
 
