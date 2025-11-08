@@ -1,0 +1,96 @@
+/* Login Page Styles */
+
+body {
+    background: url('/images/library-background.png') center center no-repeat !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    min-height: 100vh;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    z-index: 0;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+.admin-login-link a {
+    color: #2C3E50 !important;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+}
+
+.admin-login-link a:hover {
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.login-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-header {
+    color: #2C3E50;
+    font-weight: 600;
+    font-size: 1.8rem;
+}
+
+.form-label {
+    color: #2C3E50;
+    font-weight: 500;
+}
+
+.form-control {
+    border: 2px solid #E0E6ED;
+    border-radius: 8px;
+    padding: 12px;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    border-color: #5A9BB5;
+    box-shadow: 0 0 0 0.2rem rgba(90, 155, 181, 0.25);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #17A2B8, #16A085);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #16A085, #1ABC9C);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+}
+
+.illustration-section {
+    padding: 2rem;
+}
+
+.illustration-section img {
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
+}
