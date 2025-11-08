@@ -352,6 +352,12 @@
                             </a>
                         {% endif %}
                         {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('admin_maintenance') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_maintenance' %} active{% endif %}">
+                                <i class="fas fa-database"></i>
+                                <span>Maintenance</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('main_site') }}" class="admin-nav-link">
                                 <i class="fas fa-globe"></i>
                                 <span>Site Principal</span>
