@@ -55,8 +55,8 @@ class LecteurController extends AbstractController
     {
         $lecteurs = $lecteurRepository->findAll();
 
-        // Build CSV header and content WITHOUT the password column
-        $csvData = "Nom,Prénom,Code d'admission,Établissement,Formation,Promotion,Email\n";
+        // Build CSV header and content - INCLUDES password to match import format
+        $csvData = "Nom,Prénom,Code d'admission,Établissement,Formation,Promotion,Email,Mot de passe\n";
         foreach ($lecteurs as $lecteur) {
             $nom = str_replace([",", "\n"], [" ", " "], $lecteur->getNom());
             $prenom = str_replace([",", "\n"], [" ", " "], $lecteur->getPrenom());
@@ -65,16 +65,18 @@ class LecteurController extends AbstractController
             $formation = str_replace([",", "\n"], [" ", " "], $lecteur->getFormation());
             $promotion = str_replace([",", "\n"], [" ", " "], $lecteur->getPromotion());
             $email = str_replace([",", "\n"], [" ", " "], $lecteur->getEmail());
+            $password = str_replace([",", "\n"], [" ", " "], $lecteur->getPassword());
             
             // Surround fields with quotes to properly handle commas in data
-            $csvData .= sprintf('"%s","%s","%s","%s","%s","%s","%s"' . "\n",
+            $csvData .= sprintf('"%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
                 $nom,
                 $prenom,
                 $codeAdmission,
                 $etablissement,
                 $formation,
                 $promotion,
-                $email
+                $email,
+                $password
             );
         }
 
