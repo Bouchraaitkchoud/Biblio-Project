@@ -31,12 +31,12 @@ class ReceiptRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findByCartId(int $cartId): ?Receipt
+    public function findByOrderId(int $orderId): ?Receipt
     {
         return $this->createQueryBuilder('r')
-            ->join('r.cart', 'c')
-            ->where('c.id = :cartId')
-            ->setParameter('cartId', $cartId)
+            ->join('r.order', 'o')
+            ->where('o.id = :orderId')
+            ->setParameter('orderId', $orderId)
             ->getQuery()
             ->getOneOrNullResult();
     }

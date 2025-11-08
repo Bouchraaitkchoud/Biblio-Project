@@ -211,16 +211,12 @@ class CartService
         $receiptCode = 'RCPT-' . date('Ymd') . '-' . strtoupper(uniqid());
         $order->setReceiptCode($receiptCode);
 
-        // Add order items and mark exemplaires as reserved
+        // Add order items (exemplaires stay available until admin approves)
         foreach ($exemplaires as $exemplaire) {
             $item = new OrderItem();
             $item->setExemplaire($exemplaire);
             $item->setAddedAt(new \DateTime());
             $order->addItem($item);
-            
-            // Mark exemplaire as reserved so other students can't order it
-            $exemplaire->setStatus('reserved');
-            $this->entityManager->persist($exemplaire);
         }
 
         $this->entityManager->persist($order);

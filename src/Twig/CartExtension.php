@@ -43,9 +43,8 @@ class CartExtension extends AbstractExtension
             $totalCount++;
             $exemplaire = $item->getExemplaire();
             
-            // For orders, 'reserved' status is also considered available
-            $isAvailable = $exemplaire->getStatus() === 'available' || 
-                          ($cartOrOrder instanceof Order && $exemplaire->getStatus() === 'reserved');
+            // Exemplaire is available if status is 'available'
+            $isAvailable = $exemplaire->getStatus() === 'available';
             
             if (!$isAvailable) {
                 $unavailableBooks[] = $exemplaire->getBook()->getTitle();

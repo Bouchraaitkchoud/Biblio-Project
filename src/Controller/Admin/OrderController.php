@@ -77,11 +77,11 @@ class OrderController extends AbstractController
                 // Start transaction
                 $em->beginTransaction();
 
-                // Update exemplaire statuses
+                // Update exemplaire statuses from available to borrowed
                 foreach ($order->getItems() as $item) {
                     $exemplaire = $item->getExemplaire();
                     
-                    // Update exemplaire status from reserved to borrowed
+                    // Update exemplaire status to borrowed
                     $exemplaire->setStatus('borrowed');
                     $em->persist($exemplaire);
                 }

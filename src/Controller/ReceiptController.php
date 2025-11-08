@@ -32,7 +32,7 @@ class ReceiptController extends AbstractController
             
             // Check if the user is allowed to view this receipt
             $user = $this->getUser();
-            if (!in_array('ROLE_ADMIN', $user->getRoles()) && $receipt->getCart()->getUser() !== $user) {
+            if (!in_array('ROLE_ADMIN', $user->getRoles()) && $receipt->getOrder()->getLecteur() !== $user) {
                 throw $this->createAccessDeniedException('You are not authorized to view this receipt.');
             }
             

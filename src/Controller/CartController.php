@@ -39,9 +39,20 @@ class CartController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function addToCart(int $id, EntityManagerInterface $entityManager, Security $security): Response
     {
-        // Block LIMITED_ADMIN from accessing cart
+        // Block admins from accessing cart - only students (lecteurs) can order books
+        $user = $security->getUser();
+        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+            return new JsonResponse([
+                'success' => false, 
+                'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
+            ], 403);
+        }
+        
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
-            return new JsonResponse(['success' => false, 'message' => 'Accès refusé'], 403);
+            return new JsonResponse([
+                'success' => false, 
+                'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
+            ], 403);
         }
         
         try {
@@ -127,6 +138,15 @@ class CartController extends AbstractController
             if (!$order) {
                 return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
             }
+
+            // Create and save Receipt entity to database
+            $receipt = new \App\Entity\Receipt();
+            $receipt->setOrder($order);
+            $receipt->setCode($order->getReceiptCode());
+            $receipt->setGeneratedAt(new \DateTime());
+            
+            $em->persist($receipt);
+            $em->flush();
 
             // Generate the PDF receipt
             try {
@@ -296,9 +316,16 @@ class CartController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function viewCart(): Response
     {
-        // Block LIMITED_ADMIN from viewing cart
+        // Block admins from viewing cart - redirect with message
+        $user = $this->getUser();
+        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+            $this->addFlash('error', 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres. Connectez-vous avec un compte étudiant pour accéder au panier.');
+            return $this->redirectToRoute('admin_dashboard');
+        }
+        
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au panier.');
+            $this->addFlash('error', 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres. Connectez-vous avec un compte étudiant pour accéder au panier.');
+            return $this->redirectToRoute('admin_limited_panel');
         }
         
         // Validate cart and remove unavailable items
@@ -336,9 +363,20 @@ class CartController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function removeFromCart(int $id, EntityManagerInterface $em): Response
     {
-        // Block LIMITED_ADMIN from removing from cart
+        // Block admins from removing from cart
+        $user = $this->getUser();
+        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+            return new JsonResponse([
+                'success' => false, 
+                'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
+            ], 403);
+        }
+        
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
-            return new JsonResponse(['success' => false, 'message' => 'Accès refusé'], 403);
+            return new JsonResponse([
+                'success' => false, 
+                'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
+            ], 403);
         }
         
         $book = $em->getRepository(Book::class)->find($id);

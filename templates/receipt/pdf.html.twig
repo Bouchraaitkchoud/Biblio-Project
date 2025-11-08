@@ -79,7 +79,7 @@
     <div class="receipt-info">
         <p><strong>N° de reçu :</strong> {{ receipt.code }}</p>
         <p><strong>Date :</strong> {{ receipt.generatedAt|date('d/m/Y H:i') }}</p>
-        <p><strong>Utilisateur :</strong> {{ receipt.cart.user.email }}</p>
+        <p><strong>Utilisateur :</strong> {{ receipt.order.lecteur.email }}</p>
     </div>
     
     <div class="barcode">
@@ -89,17 +89,17 @@
     
     <div class="items">
         <h3>Livres empruntés :</h3>
-        {% for item in receipt.cart.items %}
+        {% for item in receipt.order.items %}
         <div class="item">
             <span>{{ item.exemplaire.book.title }}</span>
-            <span>par {{ item.exemplaire.book.authorName }}</span>
+            <span>par {{ item.exemplaire.book.author.nom }}</span>
         </div>
         {% endfor %}
     </div>
     
     <div class="footer">
-        <p><span class="status">Statut : {{ receipt.cart.status|upper }}</span></p>
-        <p>Traité par : {{ receipt.cart.processedBy ? receipt.cart.processedBy.email : 'SYSTEM' }}</p>
+        <p><span class="status">Statut : {{ receipt.order.status|upper }}</span></p>
+        <p>Traité par : {{ receipt.order.processedBy ? receipt.order.processedBy.email : 'EN ATTENTE' }}</p>
         <p>Merci pour votre emprunt !</p>
     </div>
 </body>
