@@ -2,42 +2,58 @@
 
 {% block title %}Connexion Lecteur{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/templates/login/login.css') }}">
+{% endblock %}
+
 {% block body %}
-    <div class="admin-login-link" style="position: absolute; top: 10px; right: 10px;">
-        <a href="{{ path('app_admin_login') }}" style="font-size: 0.8em; color: #555;">Espace Administrateur</a>
+    <div class="admin-login-link" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
+        <a href="{{ path('app_admin_login') }}">
+            <i class="fas fa-user-shield"></i> Espace Administrateur
+        </a>
     </div>
+    
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="row w-100 align-items-center">
-            <div class="col-md-6 d-flex justify-content-center">
+            <div class="col-md-6 d-flex justify-content-center illustration-section">
                 <img src="{{ asset('images/graphic15.png') }}" alt="Illustration de bibliothèque" class="img-fluid" style="max-height: 400px;">
             </div>
             
-            <div class="col-md-6">
-                <div class="card shadow-lg p-4" style="width: 100%; max-width: 450px; border-radius: 10px;">
+            <div class="col-md-6 d-flex justify-content-center">
+                <div class="login-card p-5" style="width: 100%; max-width: 480px;">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo UIASS" style="height: 50px;">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo UIASS" style="height: 60px;">
                     </div>
-                    <h2 class="text-center mb-4" style="color: #2c3e50;">Connexion Lecteur</h2>
+                    <h2 class="text-center mb-4 login-header">Connexion Lecteur</h2>
                     
                     {% if error %}
                         <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
                             {{ error.messageKey|trans(error.messageData, 'security') }}
                         </div>
                     {% endif %}
                     
                     <form method="post" action="{{ path('app_login') }}" autocomplete="off">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Code d'admission :</label>
-                            <input type="text" id="username" name="codeAdmission" class="form-control" placeholder="Votre code d'admission" required autofocus autocomplete="off">
+                        
+                        <div class="mb-4">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-id-card"></i> Code d'admission
+                            </label>
+                            <input type="text" id="username" name="codeAdmission" class="form-control" placeholder="Entrez votre code d'admission" required autofocus autocomplete="off">
                         </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe :</label>
-                            <input type="password" id="password" name="password" class="form-control" placeholder="Mot de passe" required autocomplete="new-password">
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> Mot de passe
+                            </label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Entrez votre mot de passe" required autocomplete="new-password">
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                        <button type="submit" class="btn btn-login w-100">
+                            <i class="fas fa-sign-in-alt"></i> Se connecter
+                        </button>
                     </form>
                 </div>
             </div>
