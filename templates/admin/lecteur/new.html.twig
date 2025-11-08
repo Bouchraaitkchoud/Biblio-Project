@@ -205,6 +205,42 @@
             font-size: 0.875rem;
             line-height: 1.5;
         }
+        /* Custom File Upload Styling */
+        .custom-file-upload {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .btn-choose-file {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-choose-file:hover {
+            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+        .file-name {
+            color: #6c757d;
+            font-style: italic;
+            flex: 1;
+        }
+        .file-name.has-file {
+            color: #28a745;
+            font-weight: 600;
+            font-style: normal;
+        }
     </style>
 {% endblock %}
 
@@ -264,12 +300,12 @@
                                 {{ form_row(form.nom, {label: 'Nom *'}) }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                {{ form_row(form.prenom, {label: 'Prenom *'}) }}
+                                {{ form_row(form.prenom, {label: 'Prénom *'}) }}
                             </div>
                         </div>
                         <div class="mb-3">
                             {{ form_row(form.email, {label: 'Adresse email *', attr: {placeholder: 'exemple@email.com'}}) }}
-                            <small class="form-text">L email doit etre unique dans le systeme</small>
+                            <small class="form-text">L'email doit être unique dans le système</small>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -280,8 +316,8 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            {{ form_row(form.password, {label: 'Mot de passe *', attr: {placeholder: 'Minimum 6 caracteres'}}) }}
-                            <small class="form-text">Le mot de passe sera stocke en clair (minimum 6 caracteres)</small>
+                            {{ form_row(form.password, {label: 'Mot de passe *', attr: {placeholder: 'Minimum 6 caractères'}}) }}
+                            <small class="form-text">Le mot de passe sera stocké en clair (minimum 6 caractères)</small>
                         </div>
                 </div>
                 <div class="action-buttons">
@@ -304,16 +340,22 @@
                 <div class="lecteur-form-card-body">
                     <div class="csv-info-alert">
                         <h6><i class="fas fa-info-circle me-2"></i>Format du fichier CSV requis</h6>
-                        <p class="mb-2">Votre fichier CSV doit contenir les colonnes suivantes (dans cet ordre precis) :</p>
-                        <p class="mb-0"><code>Nom, Prenom, Code d admission, Etablissement, Formation, Promotion, Email, Mot de passe</code></p>
+                        <p class="mb-2">Votre fichier CSV doit contenir les colonnes suivantes (dans cet ordre précis) :</p>
+                        <p class="mb-0"><code>Nom, Prénom, Code d'admission, Établissement, Formation, Promotion, Email, Mot de passe</code></p>
                     </div>
                     <form action="{{ path('admin_lecteurs_import_csv') }}" method="post" enctype="multipart/form-data">
                         <div class="mb-4">
                             <label for="csvFile" class="form-label">
-                                <i class="fas fa-cloud-upload-alt me-2"></i>Selectionner un fichier CSV
+                                <i class="fas fa-cloud-upload-alt me-2"></i>Sélectionner un fichier CSV
                             </label>
-                            <input type="file" class="form-control form-control-lg" id="csvFile" name="csv_file" accept=".csv" required>
-                            <small class="form-text"><i class="fas fa-file-alt me-1"></i>Formats acceptes : .csv uniquement</small>
+                            <div class="custom-file-upload">
+                                <input type="file" class="form-control form-control-lg" id="csvFile" name="csv_file" accept=".csv" required style="display: none;">
+                                <button type="button" class="btn-choose-file" onclick="document.getElementById('csvFile').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Choisir un fichier
+                                </button>
+                                <span class="file-name" id="fileName">Aucun fichier sélectionné</span>
+                            </div>
+                            <small class="form-text"><i class="fas fa-file-alt me-1"></i>Formats acceptés : .csv uniquement</small>
                         </div>
                         <input type="hidden" name="_token" value="{{ csrf_token('csv_import') }}">
                 </div>
@@ -338,16 +380,16 @@
                     <h6><i class="fas fa-asterisk me-2" style="font-size: 0.7rem; color: #dc3545;"></i>Champs obligatoires</h6>
                     <ul>
                         <li>Nom du lecteur</li>
-                        <li>Prenom du lecteur</li>
-                        <li>Adresse email (doit etre unique)</li>
-                        <li>Mot de passe (minimum 6 caracteres)</li>
+                        <li>Prénom du lecteur</li>
+                        <li>Adresse email (doit être unique)</li>
+                        <li>Mot de passe (minimum 6 caractères)</li>
                     </ul>
-                    <h6><i class="fas fa-lock me-2"></i>Securite du mot de passe</h6>
-                    <p>Le mot de passe sera stocke en clair dans la base de donnees.</p>
+                    <h6><i class="fas fa-lock me-2"></i>Sécurité du mot de passe</h6>
+                    <p>Le mot de passe sera stocké en clair dans la base de données.</p>
                     <h6><i class="fas fa-file-csv me-2"></i>Import en masse</h6>
-                    <p>Utilisez le mode CSV pour creer plusieurs lecteurs simultanement.</p>
+                    <p>Utilisez le mode CSV pour créer plusieurs lecteurs simultanément.</p>
                     <h6><i class="fas fa-lightbulb me-2"></i>Conseil</h6>
-                    <p class="mb-0">Verifiez bien les informations avant de valider, notamment l email.</p>
+                    <p class="mb-0">Vérifiez bien les informations avant de valider, notamment l'email.</p>
                 </div>
             </div>
         </div>
@@ -368,5 +410,17 @@
                 toggleBtn.innerHTML = '<i class="fas fa-edit me-2"></i>Passer au mode manuel';
             }
         }
+        
+        // Update file name display when file is selected
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const fileName = document.getElementById('fileName');
+            if (e.target.files.length > 0) {
+                fileName.textContent = e.target.files[0].name;
+                fileName.classList.add('has-file');
+            } else {
+                fileName.textContent = 'Aucun fichier sélectionné';
+                fileName.classList.remove('has-file');
+            }
+        });
     </script>
 {% endblock %}
