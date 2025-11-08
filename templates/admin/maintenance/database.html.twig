@@ -1,0 +1,127 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Maintenance Base de Données{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/templates/admin-maintenance/maintenance.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="maintenance-container">
+    <h1 class="maintenance-header">
+        <i class="fas fa-database"></i> Maintenance Base de Données
+    </h1>
+
+    <!-- Flash Messages -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-circle' }}"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Warning Card -->
+    <div class="warning-card">
+        <h4>
+            <i class="fas fa-exclamation-triangle"></i> Attention : Opération Critique
+        </h4>
+        <p><strong>Cette action va :</strong></p>
+        <ul>
+            <li><strong>Créer une sauvegarde complète</strong> de toute la base de données</li>
+            <li><strong>Supprimer TOUS les lecteurs</strong> (étudiants) et leurs données</li>
+            <li><strong>Supprimer TOUTES les commandes</strong> et reçus associés</li>
+            <li><strong>Conserver</strong> : livres, disciplines, exemplaires, auteurs, éditeurs, administrateurs</li>
+        </ul>
+        <p class="mb-0"><strong><i class="fas fa-exclamation-circle"></i> Cette action est IRRÉVERSIBLE !</strong> Assurez-vous d'avoir téléchargé les sauvegardes nécessaires.</p>
+    </div>
+
+    <!-- Current Academic Year Info -->
+    <div class="info-card">
+        <h5><i class="fas fa-calendar-alt"></i> Année Académique Actuelle</h5>
+        <div class="academic-year">{{ currentAcademicYear }}</div>
+        <p class="mb-0 mt-2" style="font-size: 0.9rem; color: #7F8C8D;">
+            La sauvegarde sera automatiquement nommée avec cette année académique et l'horodatage.
+        </p>
+    </div>
+
+    <!-- Action Section -->
+    <div class="action-section">
+        <h3 class="mb-3"><i class="fas fa-rocket"></i> Créer Sauvegarde et Nettoyer</h3>
+        <p style="color: #7F8C8D; margin-bottom: 1.5rem;">
+            Cliquez sur le bouton ci-dessous pour créer une sauvegarde complète de la base de données 
+            et nettoyer les données des étudiants pour la nouvelle année académique.
+        </p>
+        
+        <form method="post" action="{{ path('admin_maintenance_backup_clean') }}" 
+              onsubmit="return confirm('⚠️ ATTENTION !\n\nÊtes-vous absolument sûr(e) de vouloir :\n\n✓ Créer une sauvegarde de la base de données\n✗ Supprimer TOUS les lecteurs et commandes\n\nCette action est IRRÉVERSIBLE !\n\nTapez OK pour continuer.');">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('backup_clean') }}">
+            
+            <button type="submit" class="btn-backup-clean">
+                <i class="fas fa-play-circle"></i>
+                Créer Sauvegarde et Nettoyer la Base
+            </button>
+
+            <div class="confirmation-text">
+                <i class="fas fa-info-circle"></i>
+                Une confirmation JavaScript vous sera demandée avant l'exécution.
+            </div>
+        </form>
+    </div>
+
+    <!-- Backups List Section -->
+    <div class="backups-section">
+        <h3><i class="fas fa-archive"></i> Sauvegardes Disponibles</h3>
+
+        {% if backups|length > 0 %}
+            <table class="backup-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-file-archive"></i> Nom du Fichier</th>
+                        <th><i class="fas fa-weight-hanging"></i> Taille</th>
+                        <th><i class="fas fa-clock"></i> Date de Création</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-database text-primary"></i>
+                                <strong>{{ backup.filename }}</strong>
+                            </td>
+                            <td>{{ backup.size }}</td>
+                            <td>{{ backup.created }}</td>
+                            <td>
+                                <a href="{{ path('admin_maintenance_download', {filename: backup.filename}) }}" 
+                                   class="btn-download">
+                                    <i class="fas fa-download"></i> Télécharger
+                                </a>
+                                
+                                <form method="post" 
+                                      action="{{ path('admin_maintenance_delete', {filename: backup.filename}) }}" 
+                                      style="display: inline;"
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette sauvegarde ?\n\n{{ backup.filename }}');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_backup') }}">
+                                    <button type="submit" class="btn-delete">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <p>Aucune sauvegarde disponible pour le moment.</p>
+                <p>Créez votre première sauvegarde en utilisant le bouton ci-dessus.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
