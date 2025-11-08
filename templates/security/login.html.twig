@@ -2,47 +2,160 @@
 
 {% block title %}Connexion Lecteur{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            background: url('{{ asset('images/library-background.png') }}') center center no-repeat !important;
+            background-size: cover !important;
+            background-attachment: fixed !important;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.70);
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .admin-login-link a {
+            color: #2C3E50 !important;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .admin-login-link a:hover {
+            background: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .login-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .login-header {
+            color: #2C3E50;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+        
+        .form-label {
+            color: #2C3E50;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            border: 2px solid #E0E6ED;
+            border-radius: 8px;
+            padding: 12px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #5A9BB5;
+            box-shadow: 0 0 0 0.2rem rgba(90, 155, 181, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #17A2B8, #16A085);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #16A085, #1ABC9C);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+        
+        .illustration-section {
+            padding: 2rem;
+        }
+        
+        .illustration-section img {
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-    <div class="admin-login-link" style="position: absolute; top: 10px; right: 10px;">
-        <a href="{{ path('app_admin_login') }}" style="font-size: 0.8em; color: #555;">Espace Administrateur</a>
+    <div class="admin-login-link" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
+        <a href="{{ path('app_admin_login') }}">
+            <i class="fas fa-user-shield"></i> Espace Administrateur
+        </a>
     </div>
+    
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="row w-100 align-items-center">
-            <div class="col-md-6 d-flex justify-content-center">
+            <div class="col-md-6 d-flex justify-content-center illustration-section">
                 <img src="{{ asset('images/graphic15.png') }}" alt="Illustration de bibliothèque" class="img-fluid" style="max-height: 400px;">
             </div>
             
-            <div class="col-md-6">
-                <div class="card shadow-lg p-4" style="width: 100%; max-width: 450px; border-radius: 10px;">
+            <div class="col-md-6 d-flex justify-content-center">
+                <div class="login-card p-5" style="width: 100%; max-width: 480px;">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo UIASS" style="height: 50px;">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo UIASS" style="height: 60px;">
                     </div>
-                    <h2 class="text-center mb-4" style="color: #2c3e50;">Connexion Lecteur</h2>
+                    <h2 class="text-center mb-4 login-header">Connexion Lecteur</h2>
                     
                     {% if error %}
                         <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
                             {{ error.messageKey|trans(error.messageData, 'security') }}
                         </div>
                     {% endif %}
                     
                     <form method="post" action="{{ path('app_login') }}">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Code d'admission :</label>
-                            <input type="text" id="username" name="codeAdmission" value="{{ app.request.get('_last_username') }}" class="form-control" placeholder="Votre code d'admission" required autofocus>
+                        
+                        <div class="mb-4">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-id-card"></i> Code d'admission
+                            </label>
+                            <input type="text" id="username" name="codeAdmission" value="{{ app.request.get('_last_username') }}" class="form-control" placeholder="Entrez votre code d'admission" required autofocus>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe :</label>
-                            <input type="password" id="password" name="password" class="form-control" placeholder="Mot de passe" required>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> Mot de passe
+                            </label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Entrez votre mot de passe" required>
                         </div>
 
-                        <div class="mb-3 form-check">
+                        <div class="mb-4 form-check">
                             <input type="checkbox" id="remember_me" name="_remember_me" class="form-check-input">
-                            <label for="remember_me" class="form-check-label">Se souvenir de moi</label>
+                            <label for="remember_me" class="form-check-label" style="color: #7F8C8D;">
+                                Se souvenir de moi
+                            </label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                        <button type="submit" class="btn btn-login w-100">
+                            <i class="fas fa-sign-in-alt"></i> Se connecter
+                        </button>
                     </form>
                 </div>
             </div>
