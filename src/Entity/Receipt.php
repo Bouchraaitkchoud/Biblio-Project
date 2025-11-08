@@ -2,8 +2,7 @@
 
 // src/Entity/Receipt.php
 namespace App\Entity;
-use Doctrine\DBAL\Types\Types; // Add this line at the top
-
+use Doctrine\DBAL\Types\Types;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,23 +14,21 @@ class Receipt
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Cart::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Cart $cart = null;
+    #[ORM\ManyToOne(targetEntity: Order::class)]
+    #[ORM\JoinColumn(name: 'order_id', nullable: false, onDelete: 'CASCADE')]
+    private ?Order $order = null;
 
     #[ORM\Column(length: 50)]
     private ?string $code = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $generatedAt = null; // Unique receipt code
+    private ?\DateTimeInterface $generatedAt = null;
 
     // Getters and setters
     public function getId(): ?int
     {
         return $this->id;
     }
-
-
 
     public function getCode(): ?string
     {
@@ -43,14 +40,15 @@ class Receipt
         $this->code = $code;
         return $this;
     }
-    public function getCart(): ?Cart
+
+    public function getOrder(): ?Order
     {
-        return $this->cart;
+        return $this->order;
     }
 
-    public function setCart(Cart $cart): self
+    public function setOrder(Order $order): self
     {
-        $this->cart = $cart;
+        $this->order = $order;
         return $this;
     }
 
@@ -65,7 +63,6 @@ class Receipt
         return $this;
     }
 
-    // Update constructor:
     public function __construct()
     {
         $this->generatedAt = new \DateTime();

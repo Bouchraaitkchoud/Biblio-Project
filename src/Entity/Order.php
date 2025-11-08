@@ -32,13 +32,6 @@ class Order
     #[ORM\Column(type:"string", length:20)]
     private ?string $status = null;
 
-    // This field can store details of the order (for example, an array of items or a JSON snapshot)
-    #[ORM\Column(type:"json", nullable:true)]
-    private ?array $orderDetails = [];
-
-    #[ORM\Column(type:"string", length:100, nullable:true)]
-    private ?string $adminEmail = null;
-
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $returnedAt = null;
 
@@ -123,28 +116,6 @@ class Order
     public function setReceiptCode(?string $receiptCode): self
     {
         $this->receiptCode = $receiptCode;
-        return $this;
-    }
-
-    public function getOrderDetails(): ?array
-    {
-        return $this->orderDetails;
-    }
-
-    public function setOrderDetails(?array $orderDetails): self
-    {
-        $this->orderDetails = $orderDetails;
-        return $this;
-    }
-
-    public function getAdminEmail(): ?string
-    {
-        return $this->adminEmail;
-    }
-
-    public function setAdminEmail(?string $adminEmail): self
-    {
-        $this->adminEmail = $adminEmail;
         return $this;
     }
 
