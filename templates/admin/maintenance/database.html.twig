@@ -57,7 +57,7 @@
         </p>
         
         <form method="post" action="{{ path('admin_maintenance_backup_clean') }}" 
-              onsubmit="return confirm('⚠️ ATTENTION !\n\nÊtes-vous absolument sûr(e) de vouloir :\n\n✓ Créer une sauvegarde de la base de données\n✗ Supprimer TOUS les lecteurs et commandes\n\nCette action est IRRÉVERSIBLE !\n\nTapez OK pour continuer.');">
+              onsubmit="return confirm('⚠️ ATTENTION !\n\nÊtes-vous absolument sûr(e) de vouloir :\n\n✓ Créer une sauvegarde de la base de données\n✗ Supprimer TOUS les lecteurs et commandes\n\nCette action est IRRÉVERSIBLE !');">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('backup_clean') }}">
             
             <button type="submit" class="btn-backup-clean">
@@ -67,7 +67,7 @@
 
             <div class="confirmation-text">
                 <i class="fas fa-info-circle"></i>
-                Une confirmation JavaScript vous sera demandée avant l'exécution.
+                Une confirmation vous sera demandée avant l'exécution.
             </div>
         </form>
     </div>
