@@ -30,21 +30,21 @@
                 </div>
             {% endif %}
             
-            <form action="{{ path('app_admin_check') }}" method="post" data-turbo="false" class="needs-validation" novalidate>
+            <form action="{{ path('app_admin_check') }}" method="post" data-turbo="false" class="needs-validation" novalidate autocomplete="off">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                 
                 <div class="mb-4">
                     <label for="admin_username" class="form-label">
                         <i class="fas fa-user-circle"></i> Login
                     </label>
-                    <input type="text" id="admin_username" name="login" class="form-control" placeholder="Entrez votre login" required value="{{ app.request.get('_last_username') }}" autofocus>
+                    <input type="text" id="admin_username" name="login" class="form-control" placeholder="Entrez votre login" required autofocus autocomplete="off">
                 </div>
                 
                 <div class="mb-4">
                     <label for="admin_password" class="form-label">
                         <i class="fas fa-lock"></i> Mot de passe
                     </label>
-                    <input type="password" id="admin_password" name="password" class="form-control" placeholder="Entrez votre mot de passe" required>
+                    <input type="password" id="admin_password" name="password" class="form-control" placeholder="Entrez votre mot de passe" required autocomplete="new-password">
                 </div>
                 
                 <button type="submit" class="btn btn-admin-login w-100">
