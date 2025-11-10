@@ -1,7 +1,7 @@
 /* Login Page Styles */
 
 body {
-    background: url('/images/library-background.png') center center no-repeat !important;
+    background: url('/images/WhatsApp Image 2025-11-08 at 19.29.19_16f718e2.jpg') center center no-repeat !important;
     background-size: cover !important;
     background-attachment: fixed !important;
     min-height: 100vh;
@@ -15,7 +15,7 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(200, 191, 191, 0.85);
     z-index: 0;
 }
 
@@ -26,7 +26,7 @@ body::before {
 
 .admin-login-link a {
     color: #2C3E50 !important;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(157, 150, 150, 0.95);
     padding: 8px 16px;
     border-radius: 6px;
     text-decoration: none;
@@ -71,7 +71,7 @@ body::before {
 }
 
 .btn-login {
-    background: linear-gradient(135deg, #17A2B8, #16A085);
+    background: linear-gradient(135deg, #144951, #207060);
     color: #FFFFFF;
     border: none;
     border-radius: 8px;

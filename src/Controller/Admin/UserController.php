@@ -63,7 +63,6 @@ class UserController extends AbstractController
 
         $privileges = [
             'Gérer les auteurs',
-            'Gérer les utilisateurs',
             'Gérer les lecteurs',
             'Gérer les livres',
             'Gérer les retours',

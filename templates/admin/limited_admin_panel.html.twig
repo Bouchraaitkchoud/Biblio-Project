@@ -138,13 +138,7 @@
                 </a>
             {% endif %}
 
-            {% if is_granted('ROLE_GERER_UTILISATEURS') %}
-                <a href="{{ path('admin_users_index') }}" class="management-item">
-                    <div class="icon"><i class="fas fa-user-shield"></i></div>
-                    <div class="title">Gérer les Utilisateurs</div>
-                    <div class="description">Gestion des comptes administrateurs</div>
-                </a>
-            {% endif %}
+
 
             {% if is_granted('ROLE_GERER_LIVRES') %}
                 <a href="{{ path('admin_books_index') }}" class="management-item">
