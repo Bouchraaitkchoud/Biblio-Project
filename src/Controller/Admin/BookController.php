@@ -103,8 +103,8 @@ class BookController extends AbstractController
             $coverImageFile = $form->get('coverImage')->getData();
             if ($coverImageFile) {
                 try {
-                    $imageFileName = $this->imageUploadService->uploadBookCover($coverImageFile, $book->getTitle());
-                    $book->setCoverImage($imageFileName);
+                    $coverImageFileName = $this->imageUploadService->uploadBook($coverImageFile, $book->getTitle());
+                    $book->setCoverImage($coverImageFileName);
                 } catch (\Exception $e) {
                     $this->addFlash('error', $e->getMessage());
                     return $this->render('admin/book/new.html.twig', [
@@ -114,11 +114,60 @@ class BookController extends AbstractController
                 }
             }
 
-            $this->entityManager->persist($book);
-            $this->entityManager->flush();
+            // Handle exemplaire creation (at least one is required)
+            $exemplaireBarcodes = $request->request->get('exemplaire_barcodes', []);
+            $exemplaireBarcodes = array_filter(array_map('trim', (array)$exemplaireBarcodes));
+    
+            if (empty($exemplaireBarcodes)) {
+                $this->addFlash('error', 'Vous devez ajouter au moins un exemplaire pour ce livre.');
+                return $this->render('admin/book/new.html.twig', [
+                    'book' => $book,
+                    'form' => $form->createView(),
+                ]);
+            }
 
-            $this->addFlash('success', 'Book created successfully.');
-            return $this->redirectToRoute('admin_books_index');
+            try {
+                $this->entityManager->beginTransaction();
+
+                $this->entityManager->persist($book);
+                $this->entityManager->flush();
+
+                // Create exemplaires for each barcode
+                foreach ($exemplaireBarcodes as $barcode) {
+                    $exemplaire = new Exemplaire();
+                    $exemplaire->setBook($book);
+                    $exemplaire->setBarcode($barcode);
+                    $exemplaire->setStatus('available');
+                    $exemplaire->setAcquisitionMode($request->request->get('exemplaire_acquisition_mode') ?: 'Achat');
+                    
+                    if ($acquisitionDate = $request->request->get('exemplaire_acquisition_date')) {
+                        $exemplaire->setAcquisitionDate(new \DateTime($acquisitionDate));
+                    }
+                    
+                    if ($price = $request->request->get('exemplaire_price')) {
+                        $exemplaire->setPrice($price);
+                    }
+                    
+                    if ($comment = $request->request->get('exemplaire_comment')) {
+                        $exemplaire->setComment($comment);
+                    }
+
+                    $this->entityManager->persist($exemplaire);
+                }
+
+                $this->entityManager->flush();
+                $this->entityManager->commit();
+
+                $this->addFlash('success', 'Livre créé avec succès avec ' . count($exemplaireBarcodes) . ' exemplaire(s).');
+                return $this->redirectToRoute('admin_books_index');
+            } catch (\Exception $e) {
+                $this->entityManager->rollback();
+                $this->addFlash('error', 'Erreur lors de la création du livre: ' . $e->getMessage());
+                return $this->render('admin/book/new.html.twig', [
+                    'book' => $book,
+                    'form' => $form->createView(),
+                ]);
+            }
         }
 
         return $this->render('admin/book/new.html.twig', [
