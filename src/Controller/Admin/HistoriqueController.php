@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Entity\Order; // Add this
+use App\Entity\Order;
+use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,27 +24,79 @@ class HistoriqueController extends AbstractController
     }
 
     #[Route('/admin/historique', name: 'admin_historique_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request, OrderRepository $orderRepository): Response
     {
-        $approvedOrders = $this->entityManager->getRepository(Order::class)
+        // Get search parameters
+        $searchQuery = $request->query->get('search', '');
+        $searchType = $request->query->get('searchType', 'all');
+        $filterStatus = $request->query->get('status', '');
+
+        // Build query
+        $qb = $this->entityManager->getRepository(Order::class)
             ->createQueryBuilder('o')
             ->leftJoin('o.lecteur', 'l')
             ->leftJoin('o.items', 'oi')
             ->leftJoin('oi.exemplaire', 'e')
+            ->leftJoin('e.book', 'b')
             ->leftJoin('e.location', 'loc')
             ->leftJoin('o.processedBy', 'u')
-            ->addSelect('l', 'oi', 'e', 'loc', 'u')
+            ->addSelect('l', 'oi', 'e', 'loc', 'u', 'b')
             ->where('o.status = :status')
             ->setParameter('status', 'approved')
-            ->getQuery()
-            ->getResult();
+            ->addOrderBy('o.placedAt', 'DESC');
 
-        if (!$approvedOrders) {
-            $this->addFlash('warning', 'Aucun emprunt approuvé trouvé.');
+        // Unified search based on search type
+        if (!empty($searchQuery)) {
+            $searchTerm = '%' . $searchQuery . '%';
+
+            switch ($searchType) {
+                case 'lecteur':
+                    // Search by lecteur: nom complet, email
+                    $qb->andWhere('(
+                        LOWER(CONCAT(l.nom, \' \', l.prenom)) LIKE LOWER(:search) OR
+                        LOWER(l.nom) LIKE LOWER(:search) OR
+                        LOWER(l.prenom) LIKE LOWER(:search) OR
+                        LOWER(l.email) LIKE LOWER(:search)
+                    )')
+                    ->setParameter('search', $searchTerm);
+                    break;
+
+                case 'exemplaire':
+                    // Search by exemplaire: titre, code-barres
+                    $qb->andWhere('(
+                        LOWER(b.title) LIKE LOWER(:search) OR
+                        LOWER(e.barcode) LIKE LOWER(:search)
+                    )')
+                    ->setParameter('search', $searchTerm);
+                    break;
+
+                case 'all':
+                default:
+                    // Global search: everything
+                    $qb->andWhere('(
+                        LOWER(CONCAT(l.nom, \' \', l.prenom)) LIKE LOWER(:search) OR
+                        LOWER(l.email) LIKE LOWER(:search) OR
+                        LOWER(b.title) LIKE LOWER(:search) OR
+                        LOWER(e.barcode) LIKE LOWER(:search)
+                    )')
+                    ->setParameter('search', $searchTerm);
+                    break;
+            }
         }
+
+        // Filter by exemplaire status
+        if (!empty($filterStatus)) {
+            $qb->andWhere('e.status = :exemplaireStatus')
+               ->setParameter('exemplaireStatus', $filterStatus);
+        }
+
+        $approvedOrders = $qb->getQuery()->getResult();
 
         return $this->render('admin/historique/index.html.twig', [
             'approvedOrders' => $approvedOrders,
+            'searchQuery' => $searchQuery,
+            'searchType' => $searchType,
+            'filterStatus' => $filterStatus,
         ]);
     }
 

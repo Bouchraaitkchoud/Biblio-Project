@@ -9,6 +9,12 @@
             background: linear-gradient(135deg, #fdfaf5 0%, #f8f5f0 100%) !important;
         }
         
+        main.library-main {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+        
         .page-header {
             text-align: center;
             font-size: 2.5rem;
@@ -25,6 +31,9 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
             border-left: 5px solid #b2903e;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .search-input {
@@ -41,35 +50,40 @@
             box-shadow: 0 0 0 0.2rem rgba(178, 144, 62, 0.25);
             outline: none;
         }
-        
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+
+        /* LIST LAYOUT - Horizontal - FULL WIDTH */
+        .books-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
             margin-top: 2rem;
+            width: 100%;
+            max-width: 100%;
         }
         
-        .book-card {
+        .book-row {
             background: white;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
             cursor: pointer;
-            height: 100%;
-            min-height: 450px;
             border-left: 5px solid #b2903e;
             display: flex;
-            flex-direction: column;
+            align-items: stretch;
+            min-height: 180px;
+            width: 100%;
         }
         
-        .book-card:hover {
-            transform: translateY(-5px);
+        .book-row:hover {
+            transform: translateX(5px);
             box-shadow: 0 12px 35px rgba(0,0,0,0.15);
         }
         
-        .book-image {
-            height: 250px;
+        .book-image-container {
+            width: 140px;
+            min-width: 140px;
+            height: 180px;
             background: linear-gradient(45deg, #f8f9fa, #e9ecef);
             display: flex;
             align-items: center;
@@ -78,58 +92,50 @@
             overflow: hidden;
         }
         
-        .book-image img {
+        .book-image-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
         
-        .book-image .fallback-icon {
-            font-size: 3rem;
+        .book-image-container .fallback-icon {
+            font-size: 2.5rem;
             color: #b2903e;
             opacity: 0.7;
         }
         
-        .book-content {
+        .book-info {
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             flex: 1;
         }
         
-        .book-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1a2e4f;
+        .book-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
             margin-bottom: 0.8rem;
+        }
+        
+        .book-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a2e4f;
             line-height: 1.4;
-            min-height: 4.2em;
             font-family: 'Merriweather', serif;
-        }
-        
-        .book-authors {
-            color: #b2903e;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            min-height: 2.5em;
-        }
-        
-        .book-year {
-            color: #666;
-            font-size: 0.85rem;
-            margin-bottom: auto;
-            min-height: 1.5em;
+            max-width: 70%;
         }
         
         .availability-badge {
             display: inline-block;
-            padding: 0.2rem 0.6rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-top: 0.5rem;
-            align-self: flex-start;
+            white-space: nowrap;
         }
         
         .available {
@@ -144,6 +150,75 @@
             border: 1px solid #f5c6cb;
         }
         
+        .book-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 0.8rem 0;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: #b2903e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        
+        .meta-value {
+            color: #333;
+        }
+        
+        .book-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.8rem;
+        }
+        
+        .book-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        
+        .book-isbn {
+            font-size: 0.85rem;
+            color: #999;
+        }
+        
+        .btn-view {
+            background: linear-gradient(135deg, #b2903e, #9b7e46);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .btn-view:hover {
+            background: linear-gradient(135deg, #9b7e46, #7d6435);
+            color: white;
+            text-decoration: none;
+        }
+        
         .no-books {
             text-align: center;
             padding: 4rem 2rem;
@@ -152,6 +227,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             border-left: 5px solid #b2903e;
+            width: 100%;
         }
         
         .no-books i {
@@ -175,11 +251,30 @@
             background: linear-gradient(135deg, #9b7e46, #7d6435);
             color: white;
         }
-        
+
         @media (max-width: 768px) {
-            .books-grid {
+            .book-image-container {
+                width: 100px;
+                min-width: 100px;
+                height: 140px;
+            }
+            
+            .book-info {
+                padding: 1rem;
+            }
+            
+            .book-title {
+                font-size: 1.1rem;
+                max-width: 60%;
+            }
+            
+            .book-meta {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
+                gap: 1rem;
+            }
+            
+            .book-row {
+                min-height: 140px;
             }
             
             .page-header {
@@ -189,9 +284,29 @@
         }
         
         @media (max-width: 576px) {
-            .books-grid {
+            .book-row {
+                min-height: auto;
+                flex-direction: column;
+            }
+            
+            .book-image-container {
+                width: 100%;
+                min-width: 100%;
+                height: 150px;
+            }
+            
+            .book-header {
+                flex-direction: column;
+            }
+            
+            .book-title {
+                max-width: 100%;
+                font-size: 1rem;
+            }
+            
+            .book-meta {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
+                gap: 0.8rem;
             }
         }
     </style>
@@ -228,14 +343,15 @@
     </div>
     
     {% if books|length > 0 %}
-        <div class="books-grid" id="booksContainer">
+        <div class="books-list" id="booksContainer">
             {% for book in books %}
-                <div class="book-card" 
+                <div class="book-row" 
                      data-title="{{ book.title|lower }}" 
                      data-authors="{% for author in book.authors %}{{ author.name|lower }} {% endfor %}"
-                     data-isbn="{{ book.isbn|lower|default('') }}"
-                     onclick="window.location.href='{{ path('book_show', {id: book.id}) }}'">
-                    <div class="book-image">
+                     data-isbn="{{ book.isbn|lower|default('') }}">
+                    
+                    <!-- IMAGE LEFT -->
+                    <div class="book-image-container">
                         {% if book.coverImage %}
                             <img src="{{ book.coverImage }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="fallback-icon" style="display: none;">
@@ -247,30 +363,64 @@
                             </div>
                         {% endif %}
                     </div>
-                    <div class="book-content">
-                        <h5 class="book-title">{{ book.title }}</h5>
-                        <div class="book-authors">
-                            {% if book.authors|length > 0 %}
-                                {% for author in book.authors %}
-                                    {{ author.name }}{% if not loop.last %}, {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                Auteur inconnu
-                            {% endif %}
+                    
+                    <!-- INFO RIGHT -->
+                    <div class="book-info">
+                        <!-- Title & Availability -->
+                        <div class="book-header">
+                            <h5 class="book-title">{{ book.title }}</h5>
+                            <span class="availability-badge {% if book.isAvailable %}available{% else %}unavailable{% endif %}">
+                                {% if book.isAvailable %}
+                                    <i class="fas fa-check"></i> {{ book.availableCount }} disponible(s)
+                                {% else %}
+                                    <i class="fas fa-times"></i> Non disponible
+                                {% endif %}
+                            </span>
                         </div>
-                        <div class="book-year">
-                            {% if book.publicationYear %}
-                                {{ book.publicationYear }}
-                            {% else %}
-                                &nbsp;
-                            {% endif %}
+                        
+                        <!-- Description -->
+                        {% if book.description %}
+                            <div class="book-description">
+                                {{ book.description|slice(0, 150) }}...
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Meta Information -->
+                        <div class="book-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Auteur(s)</span>
+                                <span class="meta-value">
+                                    {% if book.authors|length > 0 %}
+                                        {% for author in book.authors %}
+                                            {{ author.name }}{% if not loop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        Auteur inconnu
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Année</span>
+                                <span class="meta-value">
+                                    {% if book.publicationYear %}
+                                        {{ book.publicationYear }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">ISBN</span>
+                                <span class="meta-value">{{ book.isbn|default('N/A') }}</span>
+                            </div>
                         </div>
-                        <div class="availability-badge {% if book.isAvailable %}available{% else %}unavailable{% endif %}">
-                            {% if book.isAvailable %}
-                                <i class="fas fa-check"></i> {{ book.availableCount }} disponible(s)
-                            {% else %}
-                                <i class="fas fa-times"></i> Non disponible
-                            {% endif %}
+                        
+                        <!-- Footer -->
+                        <div class="book-footer">
+                            <span class="book-isbn">ISBN: {{ book.isbn|default('Non disponible') }}</span>
+                            <a href="{{ path('book_show', {id: book.id}) }}" class="btn btn-view">
+                                <i class="fas fa-arrow-right"></i> Voir plus
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -289,9 +439,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('bookSearch');
     const booksContainer = document.getElementById('booksContainer');
-    const bookCards = document.querySelectorAll('.book-card');
+    const bookRows = document.querySelectorAll('.book-row');
     
-    if (searchInput && bookCards.length > 0) {
+    if (searchInput && bookRows.length > 0) {
         // Real-time search as user types (client-side filtering)
         let debounceTimer;
         searchInput.addEventListener('input', function() {
@@ -299,22 +449,22 @@ document.addEventListener('DOMContentLoaded', function() {
             debounceTimer = setTimeout(() => {
                 const searchTerm = this.value.toLowerCase().trim();
                 
-                bookCards.forEach(card => {
-                    const title = card.getAttribute('data-title');
-                    const authors = card.getAttribute('data-authors');
-                    const isbn = card.getAttribute('data-isbn');
+                bookRows.forEach(row => {
+                    const title = row.getAttribute('data-title');
+                    const authors = row.getAttribute('data-authors');
+                    const isbn = row.getAttribute('data-isbn');
                     const searchText = title + ' ' + authors + ' ' + isbn;
                     
                     if (searchTerm === '' || searchText.includes(searchTerm)) {
-                        card.style.display = 'block';
+                        row.style.display = 'flex';
                     } else {
-                        card.style.display = 'none';
+                        row.style.display = 'none';
                     }
                 });
                 
                 // Update visible count
-                const visibleCards = Array.from(bookCards).filter(card => card.style.display !== 'none');
-                console.log(`Affichage ${visibleCards.length} livre(s) sur ${bookCards.length}`);
+                const visibleRows = Array.from(bookRows).filter(row => row.style.display !== 'none');
+                console.log(`Affichage ${visibleRows.length} livre(s) sur ${bookRows.length}`);
             }, 300);
         });
 
