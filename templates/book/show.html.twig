@@ -261,6 +261,54 @@
             transform: translateY(-2px);
         }
 
+        #limitModal .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        #limitModal .modal-header {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #limitModal .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        #limitModal .modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        #limitModal .modal-btn-confirm {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #limitModal .modal-btn-confirm:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 900px) {
             .book-detail-main {
                 flex-direction: column;
@@ -345,9 +393,7 @@
             {% if book.isAvailable %}
                 <i class="fas fa-check-circle" style="color: #28a745;"></i> 
                 <strong style="color: #28a745;">Disponible</strong>
-                <small style="display: block; color: #666; margin-top: 0.3rem;">
-                    {{ book.availableCount }} exemplaire(s) disponible(s)
-                </small>
+      
             {% else %}
                 <i class="fas fa-times-circle" style="color: #dc3545;"></i> 
                 <strong style="color: #dc3545;">Non disponible</strong>
@@ -360,7 +406,7 @@
         <div class="buttons-container">
             {% if book.isAvailable %}
                 <button id="add-to-cart-btn" class="add-to-cart-btn" onclick="window.addToCartGlobal({{ book.id }}, this); return false;">
-                    <i class="fas fa-cart-plus"></i> Ajouter au panier
+                    <i class="fas fa-cart-plus"></i> Ajouter   au panier
                 </button>
             {% else %}
                 <button class="add-to-cart-btn" disabled style="background: #6c757d; cursor: not-allowed; opacity: 0.6;">
@@ -377,7 +423,7 @@
             </a>
             
             <a href="{{ path('home') }}" class="back-button">
-                <i class="fas fa-arrow-left"></i> Retour au catalogue
+                <i class="fas fa-arrow-left"></i> Retour  au catalogue
             </a>
         </div>
     </div>
@@ -461,19 +507,81 @@
             } else {
                 button.innerHTML = originalContent;
                 button.disabled = false;
-                showErrorModal(data.message || 'Erreur lors de l\'ajout au panier');
+                
+                // Affiche le message personnalisé
+                if (data.limit_reached) {
+                    showLimitMessage(data.message, data.current_count, data.max_count);
+                } else {
+                    showErrorMessage(data.message);
+                }
             }
         })
         .catch(error => {
             console.error('Erreur:', error);
             button.innerHTML = originalContent;
             button.disabled = false;
-            showErrorModal('Erreur lors de l\'ajout : ' + error.message);
+            showErrorMessage('Erreur lors de l\'ajout au panier');
         });
     }
 
-    function showErrorModal(message) {
-        alert(message); // Ou tu peux créer une autre modal pour les erreurs
+    // Affiche un message d'erreur de limite
+    function showLimitMessage(message, currentCount, maxCount) {
+        const modal = document.getElementById('limitModal');
+        
+        // Crée la modal si elle n'existe pas
+        if (!modal) {
+            const limitModalHTML = `
+                <div class="modal-overlay" id="limitModal">
+                    <div class="modal-content" style="border-left: 5px solid #dc3545;">
+                        <div class="modal-header" style="color: #dc3545;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            
+                        </div>
+                        <div class="modal-body" id="limitMessage"></div>
+                        <div class="modal-footer">
+                            <button class="modal-btn-confirm" onclick="closeLimitModal()">
+                                <i class="fas fa-times"></i> Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', limitModalHTML);
+        }
+        
+        document.getElementById('limitMessage').innerHTML = `
+            <div style="text-align: center; padding: 1rem 0;">
+                <div style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <p style="font-size: 1.1rem; color: #1a2e4f; margin-bottom: 1rem;">
+                    <strong>${message}</strong>
+                </p>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <p style="margin: 0.5rem 0; color: #7a6b52;">
+                        <strong>Votre panier :</strong> ${currentCount}/${maxCount} livre(s)
+                    </p>
+                    <p style="margin: 0.5rem 0; font-size: 0.9rem; color: #999;">
+                        Vous devez réduire votre commande pour ajouter d'autres livres
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('limitModal').classList.add('active');
+    }
+
+    // Affiche un message d'erreur simple
+    function showErrorMessage(message) {
+        alert(message);
+    }
+
+    // Ferme la modal de limite
+    function closeLimitModal() {
+        const limitModal = document.getElementById('limitModal');
+        if (limitModal) {
+            limitModal.classList.remove('active');
+        }
     }
 
     function updateLocalCartButton(count) {

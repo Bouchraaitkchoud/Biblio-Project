@@ -1,0 +1,634 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\admin\order\treat.html.twig #}
+
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Traiter la Commande #{{ order.id }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            background: #fdfaf5 !important;
+        }
+
+        .treat-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .treat-header {
+            background: linear-gradient(135deg, #1a2e4f, #2a3f5f);
+            color: white;
+            padding: 2rem;
+            border-bottom: 5px solid #b2903e;
+        }
+
+        .treat-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .treat-content {
+            padding: 2rem;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-left: 5px solid #b2903e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: #b2903e;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 3px solid #b2903e;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #b2903e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #1a2e4f;
+            font-size: 1.1rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .books-section {
+            background: #f8f9fa;
+            border-left: 5px solid #b2903e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .book-item-detailed {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 3px solid #b2903e;
+            margin-bottom: 1rem;
+        }
+
+        .book-item-detailed:last-child {
+            margin-bottom: 0;
+        }
+
+        .book-title-detail {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 0.8rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .book-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: #fdfaf5;
+            padding: 0.8rem;
+            border-radius: 6px;
+            border-left: 2px solid #b2903e;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #b2903e;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .detail-value {
+            color: #1a2e4f;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        .action-section {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .btn-approve:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .btn-reject:hover {
+            background: linear-gradient(135deg, #fd7e14, #ff6b6b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-family: 'Georgia', serif;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirmation-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            color: #4e4a45;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn-confirm {
+            flex: 1;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-confirm.approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal-btn-confirm.approve:hover {
+            background: #20c997;
+        }
+
+        .modal-btn-confirm.reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-confirm.reject:hover {
+            background: #fd7e14;
+        }
+
+        .modal-btn-cancel {
+            flex: 1;
+            padding: 0.7rem 1.5rem;
+            background: #e9ecef;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #dee2e6;
+        }
+
+        .badge-status {
+            display: inline-block;
+            background: #b2903e;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        h2, h3 {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+        }
+    </style>
+{% endblock %}
+
+{% block admin_content %}
+    <div class="treat-container">
+        <!-- Header -->
+        <div class="treat-header">
+            <h1>
+                <i class="fas fa-clipboard-list"></i>
+                Traitement de la Commande #{{ order.id }}
+            </h1>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">
+                Commande passée le {{ order.placedAt|date('d/m/Y à H:i') }}
+            </p>
+        </div>
+
+        <!-- Content -->
+        <div class="treat-content">
+            <!-- Lecteur Information -->
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Informations du Lecteur
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Nom Complet</div>
+                        <div class="info-value">{{ order.lecteur.nom|upper }} {{ order.lecteur.prenom }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Code d'Admission</div>
+                        <div class="info-value"><code>{{ order.lecteur.codeAdmission }}</code></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value"><a href="mailto:{{ order.lecteur.email }}">{{ order.lecteur.email }}</a></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Établissement</div>
+                        <div class="info-value">{{ order.lecteur.etablissement }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Formation</div>
+                        <div class="info-value">{{ order.lecteur.formation }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Promotion</div>
+                        <div class="info-value">{{ order.lecteur.promotion }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Books Information -->
+            <div class="books-section">
+                <div class="section-title">
+                    <i class="fas fa-book"></i>
+                    Livres Commandés ({{ order.items|length }})
+                </div>
+                
+                {% for item in order.items %}
+                    <div class="book-item-detailed">
+                        <div class="book-title-detail">{{ item.exemplaire.book.title }}</div>
+                        
+                        <div class="book-detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">ISBN</div>
+                                <div class="detail-value">
+                                    {% if item.exemplaire.book.isbn %}
+                                        {{ item.exemplaire.book.isbn }}
+                                    {% else %}
+                                        <span style="color: #999;">N/A</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-label">Code-barres</div>
+                                <div class="detail-value">{{ item.exemplaire.barcode }}</div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-label">Statut Exemplaire</div>
+                                <div class="detail-value">
+                                    {% if item.exemplaire.status == 'available' %}
+                                        <span style="color: #28a745; font-weight: bold;">Disponible</span>
+                                    {% elseif item.exemplaire.status == 'borrowed' %}
+                                        <span style="color: #ffc107; font-weight: bold;">Emprunté</span>
+                                    {% else %}
+                                        <span style="color: #dc3545; font-weight: bold;">{{ item.exemplaire.status|upper }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-label">Auteur(s)</div>
+                                <div class="detail-value">
+                                    {% if item.exemplaire.book.authors|length > 0 %}
+                                        {% for author in item.exemplaire.book.authors %}
+                                            {{ author.name }}{% if not loop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color: #999;">N/A</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-label">Année de Publication</div>
+                                <div class="detail-value">
+                                    {% if item.exemplaire.book.publicationYear %}
+                                        {{ item.exemplaire.book.publicationYear }}
+                                    {% else %}
+                                        <span style="color: #999;">N/A</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-label">Emplacement</div>
+                                <div class="detail-value">
+                                    {% if item.exemplaire.location %}
+                                        {{ item.exemplaire.location.name }}
+                                    {% else %}
+                                        <span style="color: #999;">N/A</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Order Information -->
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Informations de la Commande
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Date de Commande</div>
+                        <div class="info-value">{{ order.placedAt|date('d/m/Y H:i:s') }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Nombre d'Articles</div>
+                        <div class="info-value">{{ order.items|length }} livre(s)</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Statut</div>
+                        <div class="info-value">
+                            <span class="badge-status">
+                                <i class="fas fa-hourglass-half"></i>
+                                En Attente de Traitement
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-section">
+                <p style="margin: 0 0 1.5rem 0; color: #7a6b52; font-size: 1rem;">
+                    <i class="fas fa-info-circle"></i>
+                    Choisissez l'action à effectuer :
+                </p>
+                
+                <div class="action-buttons">
+                    <button class="btn-approve" onclick="submitViaForm('approve')">
+                        <i class="fas fa-check-circle"></i>
+                        Approuver la Commande
+                    </button>
+                    <button class="btn-reject" onclick="submitViaForm('reject')">
+                        <i class="fas fa-times-circle"></i>
+                        Rejeter la Commande
+                    </button>
+                    <a href="{{ path('admin_orders_index') }}" class="btn-back">
+                        <i class="fas fa-arrow-left"></i>
+                        Retour à la Liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Forms for Approve/Reject -->
+    <form id="approveForm" method="POST" action="{{ path('admin_order_approve', {'id': order.id}) }}" style="display: none;">
+        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ order.id) }}">
+    </form>
+    
+    <form id="rejectForm" method="POST" action="{{ path('admin_order_reject', {'id': order.id}) }}" style="display: none;">
+        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ order.id) }}">
+    </form>
+
+    <!-- Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">
+                <i class="fas fa-question-circle"></i>
+                <span id="modalTitleText"></span>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn-cancel" onclick="closeConfirmation()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn-confirm" id="confirmBtn" onclick="submitAction()">
+                    <i class="fas fa-check"></i> Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let actionType = null;
+
+        function showConfirmation(type) {
+            actionType = type;
+            const modal = document.getElementById('confirmationModal');
+            const titleText = document.getElementById('modalTitleText');
+            const bodyText = document.getElementById('modalBody');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            if (type === 'approve') {
+                titleText.textContent = 'Approuver la Commande';
+                bodyText.innerHTML = `
+                    <strong>Êtes-vous sûr de vouloir approuver cette commande ?</strong><br>
+                    <br>
+                    Une fois approuvée :<br>
+                    • Les exemplaires seront marqués comme empruntés<br>
+                    • Le lecteur doit recevoir son livre <br>
+                `;
+                confirmBtn.className = 'modal-btn-confirm approve';
+                confirmBtn.innerHTML = '<i class="fas fa-check"></i> Approuver';
+            } else {
+                titleText.textContent = 'Rejeter la Commande';
+                bodyText.innerHTML = `
+                    <strong>Êtes-vous sûr de vouloir rejeter cette commande ?</strong><br>
+                    <br>
+                    Une fois rejetée :<br>
+                    • Les exemplaires redeviendront disponibles<br>
+                    • Le lecteur recevra une notification<br>
+                    • La commande ne pourra pas être modifiée
+                `;
+                confirmBtn.className = 'modal-btn-confirm reject';
+                confirmBtn.innerHTML = '<i class="fas fa-times"></i> Rejeter';
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeConfirmation() {
+            document.getElementById('confirmationModal').classList.remove('show');
+            actionType = null;
+        }
+
+        function submitViaForm(type) {
+            showConfirmation(type);
+        }
+
+        function submitAction() {
+            if (!actionType) return;
+
+            const formId = actionType === 'approve' ? 'approveForm' : 'rejectForm';
+            const form = document.getElementById(formId);
+            
+            console.log('Submitting form:', formId);
+            form.submit();
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeConfirmation();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('confirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConfirmation();
+            }
+        });
+    </script>
+{% endblock %}

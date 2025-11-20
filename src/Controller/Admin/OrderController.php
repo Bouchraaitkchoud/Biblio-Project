@@ -185,4 +185,18 @@ class OrderController extends AbstractController
 
         return $this->json(['token' => $token]);
     }
+
+    #[Route('/{id}/treat', name: 'admin_order_treat', methods: ['GET'])]
+    public function treatOrder(Order $order): Response
+    {
+        // Vérifier que la commande est en attente
+        if ($order->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Cette commande ne peut pas être traitée.');
+            return $this->redirectToRoute('admin_orders_index');
+        }
+
+        return $this->render('admin/order/treat.html.twig', [
+            'order' => $order,
+        ]);
+    }
 }
