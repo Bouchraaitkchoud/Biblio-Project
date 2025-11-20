@@ -10,46 +10,35 @@ class ReceiptGeneratorService
 {
     public function generateRequestReceipt(Order $order): string
     {
-        $pdf = new TCPDF('P', 'mm', [58, 200], true, 'UTF-8', false); // 58mm width, increased height
+        $pdf = new TCPDF('P', 'mm', [58, 200], true, 'UTF-8', false); // 58mm width for thermal printer
         $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Système Bibliothèque');
-        $pdf->SetTitle('Reçu d\'Emprunt Bibliothèque');
-        $pdf->SetMargins(4, 4, 4);
+        $pdf->SetAuthor('Bibliothèque UIASS');
+        $pdf->SetTitle('Bon de Retrait Bibliothèque');
+        $pdf->SetMargins(6, 3, 6); // Increased margins to prevent text cutoff
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
-        $pdf->SetAutoPageBreak(true, 4);
+        $pdf->SetAutoPageBreak(true, 3);
         $pdf->AddPage();
 
-        // Title
-        $pdf->SetFont('helvetica', 'B', 12);
-        $pdf->Cell(0, 6, 'REÇU BIBLIOTHÈQUE', 0, 1, 'C');
-        $pdf->SetFont('helvetica', '', 8);
-        $pdf->Cell(0, 4, str_repeat('*', 32), 0, 1, 'C');
-        $pdf->Ln(2);
-
-        // Receipt code displayed
-        $pdf->SetFont('helvetica', 'B', 9);
-        $pdf->Cell(0, 4, $order->getReceiptCode(), 0, 1, 'C');
+        // Header - Library Name
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 5, 'BIBLIOTHÈQUE UIASS', 0, 1, 'C');
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, 'Bon de Retrait', 0, 1, 'C');
+        $pdf->Cell(0, 3, str_repeat('=', 28), 0, 1, 'C');
         $pdf->Ln(1);
 
-        // Barcode for receipt code
+        // Receipt code displayed prominently
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->Cell(0, 6, $order->getReceiptCode(), 0, 1, 'C');
+        $pdf->Ln(1);
+
+        // Barcode for receipt code - adjusted width
         $barcodeData = $order->getReceiptCode();
         $pdf->write1DBarcode($barcodeData, 'C128', null, null, 50, 12, 0.4, ['position' => 'C', 'align' => 'C'], 'N');
         $pdf->Ln(2);
 
-        // Order info
-        $pdf->SetFont('helvetica', '', 8);
-        $pdf->Cell(0, 4, 'Commande N°: ' . $order->getId(), 0, 1, 'C');
-        $pdf->Cell(0, 4, 'Date: ' . $order->getPlacedAt()->format('d/m/Y H:i'), 0, 1, 'C');
-        $pdf->Cell(0, 4, 'Étudiant: ' . $order->getLecteur()->getEmail(), 0, 1, 'C');
-        $pdf->Ln(2);
-
-        // Table header
-        $pdf->SetFont('helvetica', 'B', 8);
-        $pdf->Cell(32, 5, 'Livre', 1, 0, 'L');
-        $pdf->Cell(18, 5, 'Code-barres', 1, 1, 'L');
-
-        // Table rows - each book gets its own properly sized row with text wrapping
+        // Order info section
         $pdf->SetFont('helvetica', '', 7);
 
         foreach ($order->getItems() as $item) {
@@ -73,12 +62,17 @@ class ReceiptGeneratorService
             $pdf->MultiCell(18, $rowHeight, $barcode, 1, 'C', false, 1, $currentX + 32, $currentY, true, 0, false, true, $rowHeight, 'M', false);
         }
 
+        $pdf->Ln(1);
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, str_repeat('=', 28), 0, 1, 'C');
         $pdf->Ln(2);
-        $pdf->Cell(0, 4, str_repeat('*', 32), 0, 1, 'C');
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 6, 'MERCI!', 0, 1, 'C');
+        $pdf->Ln(1);
+        $pdf->SetFont('helvetica', '', 6);
+        $pdf->Cell(0, 2, 'Bibliothèque UIASS', 0, 1, 'C');
 
-        return $pdf->Output('recu_demande.pdf', 'S');
+        return $pdf->Output('recu_' . $order->getReceiptCode() . '.pdf', 'S');
     }
 
     public function generateApprovalReceipt(Order $order): string

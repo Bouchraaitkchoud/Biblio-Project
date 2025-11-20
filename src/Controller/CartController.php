@@ -265,14 +265,17 @@ class CartController extends AbstractController
                 $em->persist($exemplaire);
             }
 
-            // Generate receipt code
-            $receiptCode = 'RCPT-' . date('Ymd') . '-' . strtoupper(uniqid());
-
+            // Ensure receipt code uses new format C000001 (regenerate if needed)
+            if (!$order->getReceiptCode() || !preg_match('/^C\d{6}$/', $order->getReceiptCode())) {
+                $receiptCode = 'C' . str_pad($order->getId(), 6, '0', STR_PAD_LEFT);
+                $order->setReceiptCode($receiptCode);
+            }
+            
             // Update order with approval info
             $order->setStatus('approved');
             $order->setProcessedAt(new \DateTime());
             $order->setReceiptCode($receiptCode);
-
+            
             $em->persist($order);
             $em->flush();
 

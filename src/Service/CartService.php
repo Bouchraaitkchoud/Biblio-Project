@@ -207,10 +207,6 @@ class CartService
         $order->setPlacedAt(new \DateTime());
         $order->setStatus('pending');
         
-        // Generate receipt code
-        $receiptCode = 'RCPT-' . date('Ymd') . '-' . strtoupper(uniqid());
-        $order->setReceiptCode($receiptCode);
-
         // Add order items (exemplaires stay available until admin approves)
         foreach ($exemplaires as $exemplaire) {
             $item = new OrderItem();
@@ -220,6 +216,11 @@ class CartService
         }
 
         $this->entityManager->persist($order);
+        $this->entityManager->flush();
+        
+        // Generate receipt code with format C + 6-digit padded ID (after flush so we have the ID)
+        $receiptCode = 'C' . str_pad($order->getId(), 6, '0', STR_PAD_LEFT);
+        $order->setReceiptCode($receiptCode);
         $this->entityManager->flush();
         
         return $order;
