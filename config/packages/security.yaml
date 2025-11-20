@@ -70,7 +70,20 @@ security:
         providers: ["admin_provider", "lecteur_provider"]
 
   role_hierarchy:
-    ROLE_ADMIN: [ROLE_USER]
+    ROLE_ADMIN:
+      [
+        ROLE_USER,
+        ROLE_GERER_LIVRES,
+        ROLE_GERER_AUTEURS,
+        ROLE_GERER_UTILISATEURS,
+        ROLE_GERER_LECTEURS,
+        ROLE_GERER_DISCIPLINES,
+        ROLE_GERER_EDITEURS,
+        ROLE_GERER_EMPLACEMENTS,
+        ROLE_GERER_RETOURS,
+        ROLE_GERER_COMMANDES,
+        ROLE_GERER_HISTORIQUE,
+      ]
     # ROLE_LIMITED_ADMIN does NOT inherit ROLE_USER - they are restricted to admin panel only
 
   firewalls:

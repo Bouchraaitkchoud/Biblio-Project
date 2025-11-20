@@ -20,7 +20,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Psr\Log\LoggerInterface;
 
 #[Route('/admin/orders')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_COMMANDES')]
 class OrderController extends AbstractController
 {
     public function __construct(

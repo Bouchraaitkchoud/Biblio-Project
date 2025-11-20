@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/disciplines', name: 'admin_disciplines_')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_DISCIPLINES')]
 class DisciplineController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]

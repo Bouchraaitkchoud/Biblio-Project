@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/publishers')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_EDITEURS')]
 class PublisherController extends AbstractController
 {
     public function __construct(

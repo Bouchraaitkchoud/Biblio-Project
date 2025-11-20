@@ -151,6 +151,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'ROLE_GERER_LECTEURS' => 'Lecteurs',
             'ROLE_GERER_DISCIPLINES' => 'Disciplines',
             'ROLE_GERER_EDITEURS' => 'Éditeurs',
+            'ROLE_GERER_EMPLACEMENTS' => 'Emplacements',
             'ROLE_GERER_RETOURS' => 'Retours',
             'ROLE_GERER_COMMANDES' => 'Commandes',
             'ROLE_GERER_HISTORIQUE' => 'Historique',
