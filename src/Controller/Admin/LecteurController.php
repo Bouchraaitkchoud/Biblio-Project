@@ -16,7 +16,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/admin/lecteurs')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_LECTEURS')]
 class LecteurController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}

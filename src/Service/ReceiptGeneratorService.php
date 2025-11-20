@@ -28,6 +28,11 @@ class ReceiptGeneratorService
         $pdf->Cell(0, 3, str_repeat('=', 28), 0, 1, 'C');
         $pdf->Ln(1);
 
+        // Order ID
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, 'ID Commande: #' . $order->getId(), 0, 1, 'C');
+        $pdf->Ln(1);
+
         // Receipt code displayed prominently
         $pdf->SetFont('helvetica', 'B', 14);
         $pdf->Cell(0, 6, $order->getReceiptCode(), 0, 1, 'C');
@@ -63,9 +68,6 @@ class ReceiptGeneratorService
         $pdf->Ln(2);
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 6, 'MERCI!', 0, 1, 'C');
-        $pdf->Ln(1);
-        $pdf->SetFont('helvetica', '', 6);
-        $pdf->Cell(0, 2, 'Bibliothèque UIASS', 0, 1, 'C');
 
         return $pdf->Output('recu_' . $order->getReceiptCode() . '.pdf', 'S');
     }
@@ -99,6 +101,7 @@ class ReceiptGeneratorService
         $pdf->Ln(5);
 
         // Add approval details
+        $pdf->Cell(0, 10, 'ID Commande: #' . $order->getId(), 0, 1);
         $pdf->Cell(0, 10, 'Date d\'approbation: ' . $order->getProcessedAt()->format('d/m/Y H:i:s'), 0, 1);
         $pdf->Cell(0, 10, 'Étudiant: ' . $order->getLecteur()->getEmail(), 0, 1);
         $pdf->Ln(5);

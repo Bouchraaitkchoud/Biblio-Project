@@ -163,13 +163,14 @@
     <div class="page-header">Traiter les retours</div>
     <div class="return-container">
         <div class="scanner-section">
-            <h3>Scanner le code-barres</h3>
+            <h3>Scanner le code-barres ou entrer l'ID de commande</h3>
             <div class="input-group mb-3">
-                <input type="text" id="barcodeInput" class="form-control" placeholder="Scannez ou entrez le code-barres" autofocus>
+                <input type="text" id="barcodeInput" class="form-control" placeholder="Code-barres ou ID de commande (ex: 123)" autofocus>
                 <button type="button" id="scanButton" class="btn btn-primary">
-                    <i class="fas fa-search"></i> Scanner
+                    <i class="fas fa-search"></i> Rechercher
                 </button>
             </div>
+            <small class="text-muted">Vous pouvez scanner un code-barres ou saisir l'ID de commande</small>
             <div id="scanMessage" class="alert" style="display: none;"></div>
         </div>
 
@@ -179,6 +180,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>ID Commande</th>
                         <th>Lecteur</th>
                         <th>Date</th>
                         <th>Livre</th>
@@ -191,6 +193,7 @@
                     {% for order in pendingOrders %}
                         {% for item in order.items %}
                         <tr>
+                            <td style="font-weight: bold; color: #1a2e4f;">#{{ order.id }}</td>
                             <td>
                                 <strong>{{ order.lecteur.nom }} {{ order.lecteur.prenom }}</strong><br>
                                 <small class="text-muted">{{ order.lecteur.email }}</small>
@@ -215,7 +218,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="6">Aucune commande en attente de retour</td>
+                            <td colspan="7">Aucune commande en attente de retour</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -313,11 +316,17 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        showBookDetails(data.exemplaire);
-                        currentExemplaireId = data.exemplaire.id;
-                        showMessage('Livre trouvé !', 'success');
+                        if (data.order_mode) {
+                            // Multiple books from order
+                            showOrderBooks(data);
+                        } else {
+                            // Single book from barcode
+                            showBookDetails(data.exemplaire);
+                            currentExemplaireId = data.exemplaire.id;
+                        }
+                        showMessage(data.order_mode ? `Commande #${data.order_id} trouvée - ${data.exemplaires.length} livre(s) à retourner` : 'Livre trouvé !', 'success');
                     } else {
-                        showMessage(data.message || 'Erreur lors du scan', 'error');
+                        showMessage(data.message || 'Erreur lors de la recherche', 'error');
                         hideBookDetails();
                     }
                 })
@@ -409,6 +418,72 @@
                 document.getElementById('borrowedDate').textContent = exemplaire.borrowed_date;
                 bookDetails.classList.add('show');
             }
+
+            function showOrderBooks(data) {
+                // Show multiple books from an order
+                const orderInfo = `
+                    <div class="alert alert-info">
+                        <h5><strong>Commande #${data.order_id}</strong></h5>
+                        <p><strong>Emprunté par:</strong> ${data.borrowed_by}</p>
+                        <p><strong>Date d'emprunt:</strong> ${data.borrowed_date}</p>
+                        <hr>
+                        <h6>Livres à retourner:</h6>
+                        <ul>
+                            ${data.exemplaires.map(ex => `
+                                <li>
+                                    <strong>${ex.book_title}</strong><br>
+                                    <small>Code: ${ex.barcode} | Emplacement: ${ex.location}</small><br>
+                                    <button class="btn btn-sm btn-success mt-1" onclick="quickReturnFromScan(${ex.id}, '${ex.barcode}', '${ex.book_title.replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-undo"></i> Retourner ce livre
+                                    </button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                // Insert after scan message
+                const existingOrderInfo = document.getElementById('orderBooksInfo');
+                if (existingOrderInfo) {
+                    existingOrderInfo.remove();
+                }
+                
+                const orderDiv = document.createElement('div');
+                orderDiv.id = 'orderBooksInfo';
+                orderDiv.innerHTML = orderInfo;
+                scanMessage.parentNode.insertBefore(orderDiv, scanMessage.nextSibling);
+            }
+
+            window.quickReturnFromScan = function(exemplaireId, barcode, title) {
+                if (confirm(`Traiter le retour de:\\n${title}\\n(Code: ${barcode})`)) {
+                    const formData = new FormData();
+                    formData.append('exemplaire_id', exemplaireId);
+
+                    fetch('{{ path('admin_returns_process') }}', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showMessage('Retour traité avec succès !', 'success');
+                            addToReturnHistory({
+                                book_title: title,
+                                barcode: barcode,
+                                id: exemplaireId
+                            });
+                            // Reload to update the table
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showMessage(data.message || 'Erreur lors du traitement', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showMessage('Erreur: ' + error.message, 'error');
+                    });
+                }
+            };
 
             function hideBookDetails() {
                 bookDetails.classList.remove('show');

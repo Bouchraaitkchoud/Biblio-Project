@@ -348,7 +348,8 @@
                 <div class="book-row" 
                      data-title="{{ book.title|lower }}" 
                      data-authors="{% for author in book.authors %}{{ author.name|lower }} {% endfor %}"
-                     data-isbn="{{ book.isbn|lower|default('') }}">
+                     data-isbn="{{ book.isbn|lower|default('') }}"
+                     onclick="window.location.href='{{ path('book_show', {id: book.id}) }}'">
                     
                     <!-- IMAGE LEFT -->
                     <div class="book-image-container">
@@ -418,9 +419,9 @@
                         <!-- Footer -->
                         <div class="book-footer">
                             <span class="book-isbn">ISBN: {{ book.isbn|default('Non disponible') }}</span>
-                            <a href="{{ path('book_show', {id: book.id}) }}" class="btn btn-view">
+                            <span class="btn btn-view">
                                 <i class="fas fa-arrow-right"></i> Voir plus
-                            </a>
+                            </span>
                         </div>
                     </div>
                 </div>

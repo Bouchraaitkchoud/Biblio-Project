@@ -20,7 +20,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Psr\Log\LoggerInterface;
 
 #[Route('/admin/orders')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_COMMANDES')]
 class OrderController extends AbstractController
 {
     public function __construct(
@@ -184,5 +184,19 @@ class OrderController extends AbstractController
         $token = $this->csrfTokenManager->getToken($tokenId)->getValue();
 
         return $this->json(['token' => $token]);
+    }
+
+    #[Route('/{id}/treat', name: 'admin_order_treat', methods: ['GET'])]
+    public function treatOrder(Order $order): Response
+    {
+        // Vérifier que la commande est en attente
+        if ($order->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Cette commande ne peut pas être traitée.');
+            return $this->redirectToRoute('admin_orders_index');
+        }
+
+        return $this->render('admin/order/treat.html.twig', [
+            'order' => $order,
+        ]);
     }
 }

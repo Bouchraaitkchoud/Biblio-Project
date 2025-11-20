@@ -15,7 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 #[Route('/admin/users')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_UTILISATEURS')]
 class UserController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}

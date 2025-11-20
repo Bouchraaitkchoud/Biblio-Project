@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_HISTORIQUE')]
 class HistoriqueController extends AbstractController
 {
     private EntityManagerInterface $entityManager;

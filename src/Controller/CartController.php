@@ -82,18 +82,23 @@ class CartController extends AbstractController
             }
 
             try {
-                $items = $this->cartService->getCartItems();
+                // Récupère la limite maximale
                 $maxBooks = $this->configService->getMaxBooksPerOrder();
-
-                // Vérifier la limite
+                
+                // Vérifie le nombre de livres actuels
+                $items = $this->cartService->getCartItems();
+                
                 if (count($items) >= $maxBooks) {
                     return new JsonResponse([
+                        'success' => false,
                         'message' => sprintf(
-                            'Vous avez atteint la limite de %d livre(s) par commande.',
+                            '❌ Limite atteinte ! Vous avez déjà %d livre(s) dans votre panier. Vous ne pouvez pas ajouter plus de %d livre(s) par commande.',
+                            count($items),
                             $maxBooks
                         ),
-                        'success' => false,
-                        'limit_reached' => true
+                        'limit_reached' => true,
+                        'current_count' => count($items),
+                        'max_count' => $maxBooks
                     ], 400);
                 }
 

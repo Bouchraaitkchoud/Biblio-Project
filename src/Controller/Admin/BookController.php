@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/books')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_GERER_LIVRES')]
 class BookController extends AbstractController
 {
     public function __construct(

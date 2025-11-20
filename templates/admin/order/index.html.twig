@@ -92,194 +92,121 @@
             color: #7a6b52;
             font-size: 0.9em;
         }
-        .book-quantity {
-            background: #1a2e4f;
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-        }
         .action-buttons {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 15px;
         }
-        .btn-approve {
-            background-color: #1a2e4f;
-            border-color: #1a2e4f;
-            color: #fff;
-            padding: 8px 20px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
+        .btn-treat {
+            background: linear-gradient(135deg, #1a2e4f, #2a3f5f);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
             font-family: 'Georgia', serif;
-        }
-        .btn-approve:hover {
-            background-color: #b2903e;
-            border-color: #b2903e;
-            transform: translateY(-2px);
-        }
-        .btn-reject {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: #fff;
-            padding: 8px 20px;
-            border-radius: 6px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .btn-reject:hover {
-            background-color: #c82333;
-            border-color: #c82333;
+        .btn-treat:hover {
+            background: linear-gradient(135deg, #2a3f5f, #3a4f7f);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
         }
         .no-orders {
             text-align: center;
             padding: 40px 20px;
-            background: #fff;
-            border-radius: 8px;
             color: #7a6b52;
             font-family: 'Georgia', serif;
         }
         .no-orders i {
-            font-size: 3em;
-            margin-bottom: 15px;
-            color: #b2903e;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
         .filters-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            background: white;
             padding: 15px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .filter-buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .filter-btn {
-            padding: 8px 15px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            padding: 8px 16px;
             border-radius: 6px;
-            color: #fff;
-            font-weight: bold;
             cursor: pointer;
-            border: none;
             transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
+            font-weight: 500;
+        }
+        .filter-btn:hover {
+            border-color: #b2903e;
         }
         .filter-btn.active {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .filter-btn-all {
-            background-color: #1a2e4f;
-        }
-        .filter-btn-pending {
-            background-color: #b2903e;
-        }
-        .filter-btn-approved {
-            background-color: #28a745;
-        }
-        .filter-btn-rejected {
-            background-color: #dc3545;
+            background: #b2903e;
+            color: white;
+            border-color: #b2903e;
         }
         .order-stats {
-            display: flex;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid #b2903e;
         }
         .stat-value {
-            font-size: 1.5em;
+            font-size: 2em;
             font-weight: bold;
-            font-family: 'Georgia', serif;
-        }
-        .stat-pending {
-            color: #b2903e;
-        }
-        .stat-approved {
-            color: #28a745;
-        }
-        .stat-rejected {
-            color: #dc3545;
+            color: #1a2e4f;
         }
         .stat-label {
-            font-size: 0.8em;
-            color: #7a6b52;
-            font-family: 'Georgia', serif;
-        }
-        .sort-options {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .sort-label {
             color: #7a6b52;
             font-size: 0.9em;
-            font-family: 'Georgia', serif;
-        }
-        .sort-select {
-            padding: 5px 10px;
-            border-radius: 6px;
-            border: 1px solid #b2903e;
-            color: #1a2e4f;
-            font-family: 'Georgia', serif;
+            margin-top: 5px;
         }
         .status-badge {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
             font-weight: bold;
-            color: #fff;
-            font-family: 'Georgia', serif;
         }
         .badge-pending {
-            background-color: #b2903e;
-        }
-        .badge-approved {
-            background-color: #28a745;
-        }
-        .badge-rejected {
-            background-color: #dc3545;
-        }
-        .availability-warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 10px;
+            background: #fff3cd;
             color: #856404;
         }
-        .availability-warning i {
-            color: #f39c12;
+        .badge-approved {
+            background: #d4edda;
+            color: #155724;
         }
-        .book-item.unavailable {
+        .badge-rejected {
             background: #f8d7da;
-            border-left-color: #dc3545;
-        }
-        .book-item.unavailable .book-title {
             color: #721c24;
-            text-decoration: line-through;
-        }
-        .btn-approve.disabled {
-            background-color: #6c757d !important;
-            cursor: not-allowed !important;
-            opacity: 0.6;
-        }
-        .btn-approve.disabled:hover {
-            background-color: #6c757d !important;
         }
 
         h1, h2, h3 {
             color: #1a2e4f;
             font-family: 'Georgia', serif;
-            font-weight: bold;
         }
     </style>
 {% endblock %}
@@ -290,44 +217,43 @@
             <div class="alert alert-success mt-3">{{ message|raw }}</div>
         {% endfor %}
 
-        <h1 class="mb-4">Gestion des Commandes</h1>
+        <h1 class="mb-4"><i class="fas fa-tasks"></i> Gestion des Commandes</h1>
 
-        <div class="mb-3" style="text-align:right;">
-            <a href="{{ path('admin_scan_index') }}" class="btn btn-warning" style="font-weight:bold; color:#fff;">
-                <i class="fas fa-barcode"></i> Scanner la commande
-            </a>
+        <!-- Statistics -->
+        <div class="order-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ pendingCount }}</div>
+                <div class="stat-label">En Attente</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ approvedCount }}</div>
+                <div class="stat-label">Approuvées</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ rejectedCount }}</div>
+                <div class="stat-label">Rejetées</div>
+            </div>
         </div>
 
+        <!-- Filters -->
         <div class="filters-container">
             <div class="filter-buttons">
-                <button class="filter-btn filter-btn-all active" data-status="all">Toutes les commandes</button>
-                <button class="filter-btn filter-btn-pending" data-status="pending">En attente</button>
-                <button class="filter-btn filter-btn-approved" data-status="approved">Approuvées</button>
-                <button class="filter-btn filter-btn-rejected" data-status="rejected">Rejetées</button>
-            </div>
-            <div class="order-stats">
-                <div class="stat-item">
-                    <div class="stat-value stat-pending">{{ pendingCount }}</div>
-                    <div class="stat-label">En attente</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value stat-approved">{{ approvedCount }}</div>
-                    <div class="stat-label">Approuvées</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value stat-rejected">{{ rejectedCount }}</div>
-                    <div class="stat-label">Rejetées</div>
-                </div>
-            </div>
-            <div class="sort-options">
-                <span class="sort-label">Trier par :</span>
-                <select class="sort-select" data-order-filter-target="sortSelect" data-action="change->order-filter#sortOrders">
-                    <option value="newest">Les plus récentes</option>
-                    <option value="oldest">Les plus anciennes</option>
-                </select>
+                <a href="{{ path('admin_orders_index') }}" class="filter-btn {% if currentStatus == '' %}active{% endif %}">
+                    <i class="fas fa-list"></i> Tous
+                </a>
+                <a href="{{ path('admin_orders_index', {'status': 'pending'}) }}" class="filter-btn {% if currentStatus == 'pending' %}active{% endif %}">
+                    <i class="fas fa-hourglass-half"></i> En Attente
+                </a>
+                <a href="{{ path('admin_orders_index', {'status': 'approved'}) }}" class="filter-btn {% if currentStatus == 'approved' %}active{% endif %}">
+                    <i class="fas fa-check-circle"></i> Approuvées
+                </a>
+                <a href="{{ path('admin_orders_index', {'status': 'rejected'}) }}" class="filter-btn {% if currentStatus == 'rejected' %}active{% endif %}">
+                    <i class="fas fa-times-circle"></i> Rejetées
+                </a>
             </div>
         </div>
 
+        <!-- Orders List -->
         <div class="orders-container">
             {% if orders is empty %}
                 <div class="no-orders">
@@ -336,189 +262,52 @@
                 </div>
             {% else %}
                 {% for order in orders %}
-                    {% set availability = check_cart_availability(order) %}
-                    <div class="order-item status-{{ order.status|lower }}" data-status="{{ order.status|lower }}" data-order-filter-target="orderItem">
+                    <div class="order-item status-{{ order.status }}">
                         <div class="order-header">
-                            <div class="order-id">Commande #{{ order.id }}</div>
-                            <div class="order-date">{{ order.placedAt|date('M d, Y H:i') }}</div>
-                        </div>
-                        <div class="user-info">
-                            <i class="fas fa-user"></i>
-                            {{ order.lecteur.email }}
-                        </div>
-                        
-                        {% if order.status != 'pending' and order.processedBy %}
-                            <div class="user-info" style="font-size: 0.9em; color: #7a6b52;">
-                                <i class="fas fa-user-check"></i>
-                                Traité par: {{ order.processedBy.email }}
-                                {% if order.processedAt %}
-                                    le {{ order.processedAt|date('d/m/Y à H:i') }}
+                            <div>
+                                <div class="order-id">#{{ order.id }} - Commande du {{ order.placedAt|date('d/m/Y à H:i') }}</div>
+                            </div>
+                            <span class="status-badge badge-{{ order.status }}">
+                                {% if order.status == 'pending' %}
+                                    <i class="fas fa-hourglass-half"></i> En Attente
+                                {% elseif order.status == 'approved' %}
+                                    <i class="fas fa-check-circle"></i> Approuvée
+                                {% else %}
+                                    <i class="fas fa-times-circle"></i> Rejetée
                                 {% endif %}
-                            </div>
-                        {% endif %}
-                        
-                        {% if order.status == 'pending' and not availability.all_available %}
-                            <div class="availability-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <strong>Attention :</strong> {{ availability.unavailable_books|length }} livre(s) ne sont plus disponibles pour cette commande.
-                                L'approbation est désactivée jusqu'à rétablissement ou rejet de la commande.
-                            </div>
-                        {% endif %}
-                        
+                            </span>
+                        </div>
+
+                        <div class="user-info">
+                            <i class="fas fa-user-circle"></i>
+                            <strong>{{ order.lecteur.nom|upper }} {{ order.lecteur.prenom }}</strong>
+                            <span style="margin-left: 1rem; color: #7a6b52;">({{ order.lecteur.email }})</span>
+                        </div>
+
                         <div class="books-list">
+                            <strong style="color: #1a2e4f;">Livres commandés :</strong>
                             {% for item in order.items %}
-                                {% set isAvailable = item.exemplaire.status == 'available' or item.exemplaire.status == 'reserved' %}
-                                <div class="book-item {{ not isAvailable ? 'unavailable' : '' }}">
+                                <div class="book-item">
                                     <div class="book-info">
-                                        <div class="book-title">
-                                            {{ item.exemplaire.book.title }}
-                                            {% if not isAvailable %}
-                                                <span style="color: #dc3545; font-size: 0.8em;">({{ item.exemplaire.status|title }})</span>
-                                            {% endif %}
+                                        <div class="book-title">{{ item.exemplaire.book.title }}</div>
+                                        <div class="book-author">
+                                            Code-barres: <code style="background: #f0f0f0; padding: 2px 5px; border-radius: 3px;">{{ item.exemplaire.barcode }}</code>
                                         </div>
-                                        <div class="book-author">par {{ item.exemplaire.book.authorName }}</div>
                                     </div>
-                                    <div class="book-quantity">Quantité : 1</div>
                                 </div>
                             {% endfor %}
                         </div>
-                        <div class="action-buttons">
-                            {% if order.status == 'pending' %}
-                                {% if availability.all_available %}
-                                    <button type="button" class="btn-approve" onclick="showApprovalModal({{ order.id }}, '{{ order.lecteur.email }}')">
-                                        <i class="fas fa-check"></i> Approuver
-                                    </button>
-                                {% else %}
-                                    <button type="button" class="btn-approve disabled" disabled title="Impossible d'approuver : {{ availability.unavailable_books|length }} livre(s) indisponible(s)">
-                                        <i class="fas fa-ban"></i> Impossibilité d'approuver
-                                    </button>
-                                {% endif %}
-                                <form action="{{ path('admin_order_reject', {'id': order.id}) }}" method="POST" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ order.id) }}">
-                                    <button type="submit" class="btn-reject">
-                                        <i class="fas fa-times"></i> Rejeter
-                                    </button>
-                                </form>
-                            {% else %}
-                                <span class="status-badge badge-{{ order.status|lower }}">
-                                    {{ order.status|upper }}
-                                </span>
-                            {% endif %}
-                        </div>
+
+                        {% if order.status == 'pending' %}
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_order_treat', {'id': order.id}) }}" class="btn-treat">
+                                    <i class="fas fa-edit"></i> Traiter la commande
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% endif %}
         </div>
     </div>
-</div>
-
-<!-- Modal d'approbation -->
-<div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="approvalModalLabel">Approuver la commande</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <form id="approvalForm" method="POST">
-                <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir approuver la commande pour : <strong id="userEmail"></strong> ?</p>
-                    <input type="hidden" name="_token" id="approvalToken">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-success">Approuver la commande</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-// Filter and sort functionality (vanilla JS replacement for Stimulus)
-document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const orderItems = document.querySelectorAll('.order-item');
-    const sortSelect = document.querySelector('.sort-select');
-    
-    // Filter orders
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const status = this.dataset.status;
-            
-            // Update active button
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Filter orders
-            orderItems.forEach(item => {
-                if (status === 'all' || item.dataset.status === status) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    });
-    
-    // Sort orders
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function() {
-            const ordersContainer = document.querySelector('.orders-container');
-            const orders = Array.from(orderItems);
-            
-            orders.sort((a, b) => {
-                const dateA = new Date(a.querySelector('.order-date').textContent.trim());
-                const dateB = new Date(b.querySelector('.order-date').textContent.trim());
-                
-                return this.value === 'newest' ? dateB - dateA : dateA - dateB;
-            });
-            
-            // Re-append in sorted order
-            orders.forEach(order => ordersContainer.appendChild(order));
-            
-            // Re-apply current filter
-            const activeButton = document.querySelector('.filter-btn.active');
-            if (activeButton) {
-                const currentStatus = activeButton.dataset.status;
-                orderItems.forEach(item => {
-                    if (currentStatus === 'all' || item.dataset.status === currentStatus) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-        });
-    }
-});
-
-function showApprovalModal(cartId, userEmail) {
-    // Définir l'action du formulaire
-    document.getElementById('approvalForm').action = '{{ path('admin_order_approve', {'id': '__CART_ID__'}) }}'.replace('__CART_ID__', cartId);
-    
-    // Définir l'email de l'utilisateur
-    document.getElementById('userEmail').textContent = userEmail;
-    
-    // Récupérer le token CSRF via AJAX
-    fetch('{{ path('csrf_token_ajax') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({tokenId: 'approve' + cartId})
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('approvalToken').value = data.token;
-        // Afficher le modal une fois le token chargé
-        const modal = new bootstrap.Modal(document.getElementById('approvalModal'));
-        modal.show();
-    })
-    .catch(error => {
-        console.error('Erreur lors du chargement du token CSRF:', error);
-    });
-}
-</script>
-
 {% endblock %}
