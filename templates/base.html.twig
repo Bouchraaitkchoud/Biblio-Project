@@ -283,13 +283,13 @@
             <div class="admin-layout">
                 <nav class="admin-sidebar">
                     <div class="sidebar-brand">
-                        <h3><i class="fas fa-book-reader"></i> Admin Panel</h3>
+                        <h3><i class="fas fa-book-reader"></i> Panneau administrateur</h3>
                     </div>
                     <div class="sidebar-links">
                         {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('admin_dashboard') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_dashboard' %} active{% endif %}">
                                 <i class="fas fa-tachometer-alt"></i>
-                                <span>Dashboard</span>
+                                <span>Tableau de bord</span>
                             </a>
                         {% else %}
                             <a href="{{ path('admin_limited_panel') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_limited_panel' %} active{% endif %}">
