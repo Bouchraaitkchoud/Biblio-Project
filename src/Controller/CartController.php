@@ -5,7 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\Book;
 use App\Entity\Cart;
 use App\Entity\Order;
@@ -27,7 +27,7 @@ class CartController extends AbstractController
     private ReceiptGeneratorService $receiptGenerator;
 
     public function __construct(
-        LoggerInterface $logger, 
+        LoggerInterface $logger,
         CartService $cartService,
         ReceiptGeneratorService $receiptGenerator,
         private ConfigService $configService // Ajoute ici
@@ -45,18 +45,18 @@ class CartController extends AbstractController
         $user = $security->getUser();
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             return new JsonResponse([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
             ], 403);
         }
-        
+
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
             return new JsonResponse([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
             ], 403);
         }
-        
+
         try {
             // 1. Fetch the book
             $book = $entityManager->getRepository(Book::class)->find($id);
@@ -69,7 +69,7 @@ class CartController extends AbstractController
             if (!$book->isAvailable()) {
                 $this->logger->warning('Attempt to add unavailable book to cart: {bookId}', ['bookId' => $id]);
                 return new JsonResponse([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Ce livre n\'est pas disponible actuellement'
                 ], 400);
             }
@@ -99,18 +99,18 @@ class CartController extends AbstractController
 
                 // Add book to cookie cart
                 $cookie = $this->cartService->addBookToDraftCart($book);
-                
+
                 $response = new JsonResponse([
                     'success' => true,
                     'message' => 'Book added to cart'
                 ]);
-                
+
                 $response->headers->setCookie($cookie);
-                
+
                 $this->logger->info('Book {bookId} added to draft cart', [
                     'bookId' => $book->getId()
                 ]);
-                    
+
                 return $response;
             } catch (\Exception $e) {
                 return new JsonResponse([
@@ -118,13 +118,12 @@ class CartController extends AbstractController
                     'message' => $e->getMessage()
                 ], 400);
             }
-
         } catch (\Exception $e) {
             $this->logger->error('Cart addition failed: {error}', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return new JsonResponse([
                 'success' => false,
                 'message' => 'An error occurred'
@@ -140,18 +139,18 @@ class CartController extends AbstractController
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au panier.');
         }
-        
+
         /** @var \App\Entity\Lecteur $lecteur */
         $lecteur = $security->getUser();
-        
+
         if (!$lecteur) {
             return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
         }
-        
+
         try {
             // Convert cookie cart to database order entity
             $order = $this->cartService->convertCookieCartToEntity($lecteur);
-            
+
             if (!$order) {
                 return new JsonResponse(['success' => false, 'message' => 'No cart items found']);
             }
@@ -161,19 +160,19 @@ class CartController extends AbstractController
             $receipt->setOrder($order);
             $receipt->setCode($order->getReceiptCode());
             $receipt->setGeneratedAt(new \DateTime());
-            
+
             $em->persist($receipt);
             $em->flush();
 
             // Generate the PDF receipt
             try {
                 $pdfContent = $this->receiptGenerator->generateRequestReceipt($order);
-                
+
                 // If it's an AJAX request, return success with PDF URL or data
                 if ($request->isXmlHttpRequest()) {
                     // Store PDF temporarily or return base64
                     $pdfBase64 = base64_encode($pdfContent);
-                    
+
                     $response = new JsonResponse([
                         'success' => true,
                         'message' => 'Demande envoyée avec succès !',
@@ -181,9 +180,9 @@ class CartController extends AbstractController
                         'orderId' => $order->getId(),
                         'pdfData' => $pdfBase64
                     ]);
-                    
+
                     $response->headers->setCookie($this->cartService->clearDraftCart());
-                    
+
                     return $response;
                 }
 
@@ -192,9 +191,9 @@ class CartController extends AbstractController
                     'Content-Type' => 'application/pdf',
                     'Content-Disposition' => 'attachment; filename="receipt_' . $order->getReceiptCode() . '.pdf"'
                 ]);
-                
+
                 $response->headers->setCookie($this->cartService->clearDraftCart());
-                
+
                 return $response;
             } catch (\Exception $e) {
                 $this->logger->error('Error generating PDF receipt: ' . $e->getMessage(), [
@@ -202,7 +201,7 @@ class CartController extends AbstractController
                     'order_id' => $order->getId(),
                     'lecteur_id' => $lecteur->getId()
                 ]);
-                
+
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Failed to generate receipt. Please try again.'
@@ -213,7 +212,7 @@ class CartController extends AbstractController
                 'exception' => $e,
                 'lecteur_id' => $lecteur->getId()
             ]);
-            
+
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -226,13 +225,13 @@ class CartController extends AbstractController
     public function approveCart(int $id, EntityManagerInterface $em, Request $request)
     {
         $order = $em->getRepository(Order::class)->find($id);
-        
+
         if (!$order || $order->getStatus() !== 'pending') {
             return new JsonResponse(['success' => false, 'message' => 'Invalid order for approval']);
         }
 
         // Verify CSRF token if coming from web form
-        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('approve'.$order->getId(), $request->request->get('_token'))) {
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('approve' . $order->getId(), $request->request->get('_token'))) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
         }
 
@@ -248,9 +247,9 @@ class CartController extends AbstractController
         if (!empty($unavailableBooks)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Impossible d\'approuver cette demande. Les livres suivants ne sont plus disponibles: ' . 
-                            implode(', ', $unavailableBooks) . 
-                            '. Veuillez soit rejeter la demande, soit attendre que les livres redeviennent disponibles.',
+                'message' => 'Impossible d\'approuver cette demande. Les livres suivants ne sont plus disponibles: ' .
+                    implode(', ', $unavailableBooks) .
+                    '. Veuillez soit rejeter la demande, soit attendre que les livres redeviennent disponibles.',
                 'unavailable_books' => $unavailableBooks
             ], 400);
         }
@@ -268,12 +267,12 @@ class CartController extends AbstractController
 
             // Generate receipt code
             $receiptCode = 'RCPT-' . date('Ymd') . '-' . strtoupper(uniqid());
-            
+
             // Update order with approval info
             $order->setStatus('approved');
             $order->setProcessedAt(new \DateTime());
             $order->setReceiptCode($receiptCode);
-            
+
             $em->persist($order);
             $em->flush();
 
@@ -284,7 +283,7 @@ class CartController extends AbstractController
         } catch (\Exception $e) {
             // Rollback transaction on error
             $em->rollback();
-            
+
             return new JsonResponse([
                 'success' => false,
                 'message' => 'An error occurred while approving the order'
@@ -297,13 +296,13 @@ class CartController extends AbstractController
     public function rejectCart(int $id, EntityManagerInterface $em, Request $request): JsonResponse
     {
         $order = $em->getRepository(Order::class)->find($id);
-        
+
         if (!$order || $order->getStatus() !== 'pending') {
             return new JsonResponse(['success' => false, 'message' => 'Invalid order for rejection']);
         }
 
         // Verify CSRF token if coming from web form
-        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('reject'.$order->getId(), $request->request->get('_token'))) {
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('reject' . $order->getId(), $request->request->get('_token'))) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid CSRF token']);
         }
 
@@ -319,7 +318,7 @@ class CartController extends AbstractController
         // Update order with rejection info
         $order->setStatus('rejected');
         $order->setProcessedAt(new \DateTime());
-        
+
         $em->flush();
 
         return new JsonResponse([
@@ -339,18 +338,18 @@ class CartController extends AbstractController
             $this->addFlash('error', 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres. Connectez-vous avec un compte étudiant pour accéder au panier.');
             return $this->redirectToRoute('admin_dashboard');
         }
-        
+
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres. Connectez-vous avec un compte étudiant pour accéder au panier.');
             return $this->redirectToRoute('admin_limited_panel');
         }
-        
+
         // Validate cart and remove unavailable items
         $validation = $this->cartService->validateAndCleanCart();
-        
+
         // Load exemplaires from cookie cart (now cleaned)
         $items = $this->cartService->getCartItems();
-        
+
         // Get a valid discipline (first book in cart)
         $discipline = null;
         if (!empty($items)) {
@@ -378,7 +377,7 @@ class CartController extends AbstractController
 
         return $response;
     }
-    
+
     #[Route('/remove-from-cart/{id}', name: 'remove_from_cart', methods: ['POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function removeFromCart(int $id, EntityManagerInterface $em): Response
@@ -387,29 +386,29 @@ class CartController extends AbstractController
         $user = $this->getUser();
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             return new JsonResponse([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
             ], 403);
         }
-        
+
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
             return new JsonResponse([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Vous êtes connecté avec un compte administrateur. Les administrateurs ne peuvent pas commander des livres.'
             ], 403);
         }
-        
+
         $book = $em->getRepository(Book::class)->find($id);
-        
+
         if (!$book) {
             return new JsonResponse(['success' => false, 'message' => 'Book not found'], 404);
         }
-        
+
         $cookie = $this->cartService->removeBookFromDraftCart($book);
-        
+
         $response = new JsonResponse(['success' => true]);
         $response->headers->setCookie($cookie);
-        
+
         return $response;
     }
 }

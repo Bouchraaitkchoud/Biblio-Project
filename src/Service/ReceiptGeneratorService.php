@@ -34,7 +34,7 @@ class ReceiptGeneratorService
 
         // Barcode for receipt code
         $barcodeData = $order->getReceiptCode();
-        $pdf->write1DBarcode($barcodeData, 'C128', null, null, 50, 12, 0.4, ['position'=>'C', 'align'=>'C'], 'N');
+        $pdf->write1DBarcode($barcodeData, 'C128', null, null, 50, 12, 0.4, ['position' => 'C', 'align' => 'C'], 'N');
         $pdf->Ln(2);
 
         // Order info
@@ -51,24 +51,24 @@ class ReceiptGeneratorService
 
         // Table rows - each book gets its own properly sized row with text wrapping
         $pdf->SetFont('helvetica', '', 7);
-        
+
         foreach ($order->getItems() as $item) {
             $ex = $item->getExemplaire();
             $bookTitle = $ex->getBook()->getTitle();
             $barcode = $ex->getBarcode();
-            
+
             // Save current position
             $currentX = $pdf->GetX();
             $currentY = $pdf->GetY();
-            
+
             // Calculate how many lines the book title will need (considering padding)
             $numLines = $pdf->getNumLines($bookTitle, 30); // Slightly less than 32 for padding
             $rowHeight = ($numLines * 3.5) + 2; // 3.5mm per line + 2mm padding
             $rowHeight = max($rowHeight, 8); // Minimum height of 8mm
-            
+
             // Draw book title with MultiCell (enables text wrapping)
             $pdf->MultiCell(32, $rowHeight, $bookTitle, 1, 'L', false, 0, $currentX, $currentY, true, 0, false, true, $rowHeight, 'T', false);
-            
+
             // Draw barcode cell with same height, centered
             $pdf->MultiCell(18, $rowHeight, $barcode, 1, 'C', false, 1, $currentX + 32, $currentY, true, 0, false, true, $rowHeight, 'M', false);
         }
@@ -115,23 +115,21 @@ class ReceiptGeneratorService
         $pdf->Ln(5);
 
         // Add table header
-        $pdf->Cell(60, 10, 'Titre du Livre', 1);
-        $pdf->Cell(60, 10, 'Code-barres', 1);
-        $pdf->Cell(60, 10, 'Date de Retour', 1);
+        $pdf->Cell(90, 10, 'Titre du Livre', 1);
+        $pdf->Cell(90, 10, 'Code-barres', 1);
         $pdf->Ln();
 
         // Add items
         foreach ($order->getItems() as $item) {
             $exemplaire = $item->getExemplaire();
             $book = $exemplaire->getBook();
-            
-            $pdf->Cell(60, 10, $book->getTitle(), 1);
-            $pdf->Cell(60, 10, $exemplaire->getBarcode(), 1);
-            $pdf->Cell(60, 10, $exemplaire->getReturnDate()->format('d/m/Y'), 1);
+
+            $pdf->Cell(90, 10, $book->getTitle(), 1);
+            $pdf->Cell(90, 10, $exemplaire->getBarcode(), 1);
             $pdf->Ln();
         }
 
         // Output PDF
         return $pdf->Output('recu_approbation.pdf', 'S');
     }
-} 
+}

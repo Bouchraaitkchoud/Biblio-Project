@@ -16,8 +16,7 @@ class EmailVerifier
         private VerifyEmailHelperInterface $verifyEmailHelper,
         private MailerInterface $mailer,
         private EntityManagerInterface $entityManager
-    ) {
-    }
+    ) {}
 
     public function sendEmailConfirmation(string $verifyEmailRouteName, User $user, TemplatedEmail $email): void
     {
@@ -44,7 +43,8 @@ class EmailVerifier
     {
         $this->verifyEmailHelper->validateEmailConfirmationFromRequest($request, (string) $user->getId(), (string) $user->getEmail());
 
-        $user->setIsVerified(true);
+        // User entity doesn't have isVerified field - verification is handled elsewhere
+        // $user->setIsVerified(true);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
