@@ -51,27 +51,27 @@ class ScanController extends AbstractController
                 'receipt_code' => $receiptCode,
                 'received_params' => $request->request->all()
             ]);
-            
+
             // Find order by receipt_code and status pending
             $order = $this->entityManager->getRepository(Order::class)->findOneBy([
                 'receiptCode' => $receiptCode,
                 'status' => 'pending'
             ]);
-            
+
             if (!$order) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'No pending order found with this receipt code'
                 ], 404);
             }
-            
+
             // Return order details for approval, including CSRF token
             return new JsonResponse([
                 'success' => true,
                 'cart_id' => $order->getId(),
                 'student' => $order->getLecteur()->getEmail(),
                 'request_date' => $order->getPlacedAt()->format('Y-m-d H:i:s'),
-                'items' => array_map(function($item) {
+                'items' => array_map(function ($item) {
                     return [
                         'book_title' => $item->getExemplaire()->getBook()->getTitle(),
                         'barcode' => $item->getExemplaire()->getBarcode()
@@ -159,7 +159,7 @@ class ScanController extends AbstractController
                 'order_found' => $order ? 'yes' : 'no',
                 'order_status' => $order ? $order->getStatus() : 'n/a'
             ]);
-            
+
             if (!$order || $order->getStatus() !== 'pending') {
                 return new JsonResponse([
                     'success' => false,
@@ -173,7 +173,7 @@ class ScanController extends AbstractController
             // Update exemplaire statuses
             foreach ($order->getItems() as $item) {
                 $exemplaire = $item->getExemplaire();
-                
+
                 // Update exemplaire status from reserved to borrowed
                 $exemplaire->setStatus('borrowed');
                 $this->entityManager->persist($exemplaire);
@@ -183,34 +183,46 @@ class ScanController extends AbstractController
             $order->setStatus('approved');
             $order->setProcessedBy($this->getUser());
             $order->setProcessedAt(new \DateTime());
-            
+
             $this->entityManager->persist($order);
             $this->entityManager->flush();
 
             // Commit transaction
             $this->entityManager->commit();
 
+            // Generate approval receipt PDF and save temporarily
+            $pdfContent = $this->receiptGenerator->generateApprovalReceipt($order);
+
+            $publicDir = $this->getParameter('kernel.project_dir') . '/public/temp';
+            if (!is_dir($publicDir)) {
+                mkdir($publicDir, 0777, true);
+            }
+
+            $filename = 'approval_' . $order->getId() . '_' . time() . '.pdf';
+            $filepath = $publicDir . '/' . $filename;
+            file_put_contents($filepath, $pdfContent);
+
             return $this->json([
                 'success' => true,
                 'message' => 'Order approved successfully.',
-                'order_id' => $order->getId()
+                'order_id' => $order->getId(),
+                'receipt_url' => '/temp/' . $filename
             ]);
-
         } catch (\Exception $e) {
             // Rollback transaction on error
             $this->entityManager->rollback();
-            
+
             // Log the error
             $this->logger->error('Error in approveScannedCart', [
                 'error_message' => $e->getMessage(),
                 'error_trace' => $e->getTraceAsString(),
                 'order_id' => $id
             ]);
-            
+
             return new JsonResponse([
                 'success' => false,
                 'message' => 'An error occurred while approving the order: ' . $e->getMessage()
             ], 500);
         }
     }
-} 
+}

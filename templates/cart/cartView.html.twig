@@ -278,22 +278,45 @@
         .then(data => {
             console.log('Response data:', data);
             if (data.success) {
-                showNotification('Demande envoyée avec succès ! Téléchargement du reçu...', 'success');
+                showNotification('Demande envoyée avec succès ! Impression du reçu...', 'success');
                 
-                // Download the PDF receipt
-                if (data.pdfData) {
-                    const linkSource = `data:application/pdf;base64,${data.pdfData}`;
-                    const downloadLink = document.createElement('a');
-                    const fileName = `receipt_${data.receiptCode}.pdf`;
+                // Open PDF file directly for printing
+                if (data.printUrl) {
+                    console.log('Opening PDF file:', data.printUrl);
                     
-                    downloadLink.href = linkSource;
-                    downloadLink.download = fileName;
-                    downloadLink.click();
+                    // Create hidden iframe for printing (better for kiosk mode)
+                    const printFrame = document.createElement('iframe');
+                    printFrame.style.position = 'fixed';
+                    printFrame.style.top = '-9999px';
+                    printFrame.style.left = '-9999px';
+                    printFrame.style.width = '1px';
+                    printFrame.style.height = '1px';
+                    printFrame.src = data.printUrl;
+                    
+                    document.body.appendChild(printFrame);
+                    
+                    // Wait for PDF to load, then print
+                    printFrame.onload = function() {
+                        setTimeout(() => {
+                            try {
+                                printFrame.contentWindow.focus();
+                                printFrame.contentWindow.print();
+                                console.log('Print triggered on iframe');
+                            } catch (e) {
+                                console.error('Print error:', e);
+                            }
+                        }, 5000);
+                    };
+                    
+                    // Redirect after 15 seconds to give time for printing
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 15000);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
                 }
-                
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
             } else {
                 button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
                 button.disabled = false;

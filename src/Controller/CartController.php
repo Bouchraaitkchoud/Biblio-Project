@@ -17,6 +17,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Service\ReceiptGeneratorService;
 use App\Service\ConfigService;
 
@@ -84,10 +85,10 @@ class CartController extends AbstractController
             try {
                 // Récupère la limite maximale
                 $maxBooks = $this->configService->getMaxBooksPerOrder();
-                
+
                 // Vérifie le nombre de livres actuels
                 $items = $this->cartService->getCartItems();
-                
+
                 if (count($items) >= $maxBooks) {
                     return new JsonResponse([
                         'success' => false,
@@ -173,17 +174,25 @@ class CartController extends AbstractController
             try {
                 $pdfContent = $this->receiptGenerator->generateRequestReceipt($order);
 
-                // If it's an AJAX request, return success with PDF URL or data
+                // If it's an AJAX request, save PDF temporarily and return URL
                 if ($request->isXmlHttpRequest()) {
-                    // Store PDF temporarily or return base64
-                    $pdfBase64 = base64_encode($pdfContent);
+                    // Save PDF temporarily to public directory
+                    $publicDir = $this->getParameter('kernel.project_dir') . '/public/temp';
+                    if (!is_dir($publicDir)) {
+                        mkdir($publicDir, 0777, true);
+                    }
+
+                    $filename = 'receipt_' . $order->getId() . '_' . time() . '.pdf';
+                    $filepath = $publicDir . '/' . $filename;
+                    file_put_contents($filepath, $pdfContent);
 
                     $response = new JsonResponse([
                         'success' => true,
                         'message' => 'Demande envoyée avec succès !',
                         'receiptCode' => $order->getReceiptCode(),
                         'orderId' => $order->getId(),
-                        'pdfData' => $pdfBase64
+                        'receiptId' => $receipt->getId(),
+                        'printUrl' => '/temp/' . $filename
                     ]);
 
                     $response->headers->setCookie($this->cartService->clearDraftCart());
@@ -275,12 +284,12 @@ class CartController extends AbstractController
                 $receiptCode = 'C' . str_pad($order->getId(), 6, '0', STR_PAD_LEFT);
                 $order->setReceiptCode($receiptCode);
             }
-            
+
             // Update order with approval info
             $order->setStatus('approved');
             $order->setProcessedAt(new \DateTime());
             $order->setReceiptCode($receiptCode);
-            
+
             $em->persist($order);
             $em->flush();
 
@@ -368,7 +377,7 @@ class CartController extends AbstractController
         }
 
         $maxBooks = $this->configService->getMaxBooksPerOrder();
-        
+
         $response = $this->render('cart/cartView.html.twig', [
             'cart' => null, // No database cart for draft
             'items' => $items,

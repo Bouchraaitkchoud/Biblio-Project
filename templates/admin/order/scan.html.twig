@@ -352,8 +352,32 @@
                             msg = `Commande #${orderId} rejetée`;
                         }
                         if (data.receipt_url) {
-                            msg += ` - <a href='${data.receipt_url}' target='_blank'>Télécharger le reçu</a>`;
-                            window.open(data.receipt_url, '_blank');
+                            msg += ` - Impression du reçu...`;
+                            console.log('Opening PDF file:', data.receipt_url);
+                            
+                            // Create hidden iframe for printing (better for kiosk mode)
+                            const printFrame = document.createElement('iframe');
+                            printFrame.style.position = 'fixed';
+                            printFrame.style.top = '-9999px';
+                            printFrame.style.left = '-9999px';
+                            printFrame.style.width = '1px';
+                            printFrame.style.height = '1px';
+                            printFrame.src = data.receipt_url;
+                            
+                            document.body.appendChild(printFrame);
+                            
+                            // Wait for PDF to load, then print
+                            printFrame.onload = function() {
+                                setTimeout(() => {
+                                    try {
+                                        printFrame.contentWindow.focus();
+                                        printFrame.contentWindow.print();
+                                        console.log('Print triggered on iframe');
+                                    } catch (e) {
+                                        console.error('Print error:', e);
+                                    }
+                                }, 5000);
+                            };
                         }
                         addScanHistory('success', msg);
                         resetOrderDetails();
