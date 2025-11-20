@@ -1,0 +1,232 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Configuration Système{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+
+        /* --- GLOBAL PAGE BACKGROUND --- */
+        body {
+            background: #f4f5f7 !important;
+        }
+
+        /* --- MAIN CARD CONTAINER --- */
+        .config-wrapper {
+            max-width: 900px;
+            margin: 2.5rem auto;
+        }
+
+        .config-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 2.5rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+            border-top: 5px solid #b89245;
+        }
+
+        /* --- HEADER --- */
+        .config-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a2e4f;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .config-title i {
+            color: #b89245;
+            font-size: 1.8rem;
+        }
+
+        /* --- SECTION BLOCK --- */
+        .section-block {
+            padding: 1.8rem;
+            border-radius: 10px;
+            background: #fafafa;
+            border: 1px solid #ececec;
+            margin-bottom: 2rem;
+        }
+
+        .section-heading {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1a2e4f;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        .section-heading i {
+            color: #b89245;
+        }
+
+        .section-description {
+            color: #6d6d6d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* --- CURRENT VALUE BOX --- */
+        .current-limit-box {
+            background: #eef5ff;
+            padding: 1.2rem;
+            border-radius: 8px;
+            border-left: 4px solid #1f6fe0;
+            margin-bottom: 1.5rem;
+        }
+
+        .current-limit-box strong {
+            color: #1f6fe0;
+            font-size: 1.2rem;
+        }
+
+        /* --- INPUT FIELD --- */
+        .form-control {
+            border-radius: 10px !important;
+            border: 2px solid #ddd !important;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: .25s;
+            max-width: 240px;
+        }
+
+        .form-control:focus {
+            border-color: #b89245;
+            box-shadow: 0 0 0 0.2rem rgba(184,146,69,0.25);
+        }
+
+        .input-hint {
+            font-size: .9rem;
+            margin-top: .4rem;
+            color: #7c6f57;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-save {
+            background: #b89245;
+            border: none;
+            padding: .75rem 2rem;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            transition: .25s;
+        }
+
+        .btn-save:hover {
+            background: #98793c;
+        }
+
+        .btn-cancel {
+            padding: .75rem 2rem;
+            border-radius: 10px;
+            border: 1px solid #b89245;
+            color: #b89245;
+            font-weight: 600;
+            background: transparent;
+            transition: .25s;
+            margin-left: .7rem;
+        }
+
+        .btn-cancel:hover {
+            background: #b89245;
+            color: white;
+        }
+
+        /* --- ALERTS REDESIGN --- */
+        .alert {
+            border-radius: 10px;
+            padding: 1rem 1.3rem;
+            font-size: .95rem;
+        }
+
+        /* --- INFO / WARNING BOXES --- */
+        .warning-box, .info-box {
+            padding: 1rem 1.2rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .warning-box {
+            background: #fff4d6;
+            border-left: 4px solid #ffb400;
+        }
+
+        .info-box {
+            background: #e7f8ff;
+            border-left: 4px solid #0db4d6;
+        }
+
+    </style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="config-wrapper">
+    <div class="config-card">
+
+        <div class="config-title">
+            <i class="fas fa-sliders-h"></i>
+            Configuration Système
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="section-block">
+            <div class="section-heading">
+                <i class="fas fa-book"></i>
+                Limite de Livres par Commande
+            </div>
+
+            <p class="section-description">
+                Définissez le nombre maximal de livres qu’un lecteur peut emprunter dans une même commande.
+            </p>
+
+            <div class="current-limit-box">
+                <strong>Limite actuelle :</strong>
+                <span style="font-size: 1.7rem;">{{ maxBooks }}</span> livre(s)
+            </div>
+
+            <form method="POST" action="{{ path('admin_config_system') }}">
+                <label class="form-label fw-bold"><i class="fas fa-edit"></i> Nouvelle limite</label>
+                <input type="number" name="max_books" value="{{ maxBooks }}" min="1" max="100" required class="form-control">
+
+                <div class="input-hint">
+                    <i class="fas fa-info-circle"></i> Valeur entre 1 et 100.
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+
+                    <a href="{{ path('admin_dashboard') }}" class="btn-cancel">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                </div>
+            </form>
+
+            <div class="warning-box mt-4">
+                <i class="fas fa-exclamation-circle"></i>
+                Cette limite s'appliquera immédiatement après modification.
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                Les lecteurs verront cette limite directement dans leur panier.
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

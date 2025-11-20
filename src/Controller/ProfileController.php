@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Lecteur;
+use App\Entity\Order;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -94,6 +95,40 @@ class ProfileController extends AbstractController
         return $this->render('profile/change_password.html.twig', [
             'lecteur' => $lecteur,
             'mustChangePassword' => $lecteur->getForcePasswordChange(),
+        ]);
+    }
+
+    #[Route('/commandes', name: 'profile_commandes', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function commandes(): Response
+    {
+        /** @var Lecteur $lecteur */
+        $lecteur = $this->getUser();
+        
+        // If user is an admin (not a Lecteur), redirect to admin dashboard
+        if (!$lecteur instanceof Lecteur) {
+            return $this->redirectToRoute('admin_dashboard');
+        }
+        
+        // Fetch all approved orders for this lecteur
+        $orders = $this->entityManager->getRepository(Order::class)
+            ->createQueryBuilder('o')
+            ->leftJoin('o.items', 'oi')
+            ->leftJoin('oi.exemplaire', 'e')
+            ->leftJoin('e.book', 'b')
+            ->leftJoin('b.authors', 'a')
+            ->addSelect('oi', 'e', 'b', 'a')
+            ->where('o.lecteur = :lecteur')
+            ->andWhere('o.status = :status')
+            ->setParameter('lecteur', $lecteur)
+            ->setParameter('status', 'approved')
+            ->orderBy('o.placedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+        
+        return $this->render('profile/commandes.html.twig', [
+            'orders' => $orders,
+            'lecteur' => $lecteur
         ]);
     }
 }

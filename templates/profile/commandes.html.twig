@@ -1,0 +1,498 @@
+{# filepath: c:\Users\Hp\Biblio-Project\biblio-project-backend\templates\profile\commandes.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique de mes Commandes{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            background: linear-gradient(135deg, #fdfaf5 0%, #f8f5f0 100%) !important;
+        }
+
+        .profile-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .profile-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a2e4f;
+        }
+
+        .profile-nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .profile-nav a {
+            color: #1a2e4f;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .profile-nav a:hover {
+            background: #f0f0f0;
+        }
+
+        .profile-nav .btn-logout {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .profile-nav .btn-logout:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #1a2e4f;
+            font-family: 'Georgia', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: #7a6b52;
+            font-size: 1rem;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border-left: 4px solid #b2903e;
+            text-align: center;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 1.8rem;
+            color: #b2903e;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1a2e4f;
+        }
+
+        .stat-card .stat-label {
+            color: #7a6b52;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Commands Table */
+        .commands-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .commands-header {
+            background: linear-gradient(135deg, #1a2e4f, #2a3f5f);
+            color: white;
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Table Styles */
+        .commands-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .commands-table thead {
+            background: linear-gradient(135deg, #1a2e4f, #2a3f5f);
+            color: white;
+        }
+
+        .commands-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-bottom: 2px solid #b2903e;
+            white-space: nowrap;
+        }
+
+        .commands-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9rem;
+            color: #7a6b52;
+        }
+
+        .commands-table tbody tr:hover {
+            background: #fdfaf5;
+            transition: all 0.3s ease;
+        }
+
+        .commands-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .command-id {
+            font-family: 'Courier New', monospace;
+            color: #b2903e;
+            font-weight: 600;
+        }
+
+        .command-date-cell {
+            font-family: 'Courier New', monospace;
+            color: #1a2e4f;
+            font-weight: 500;
+        }
+
+        .book-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-title-cell {
+            font-weight: 600;
+            color: #1a2e4f;
+            margin-bottom: 0.2rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .book-author-cell {
+            font-size: 0.85rem;
+            color: #b2903e;
+        }
+
+        .barcode-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #b2903e;
+        }
+
+        .isbn-cell {
+            font-family: 'Courier New', monospace;
+            color: #b2903e;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-returned {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-borrowed {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffecb5;
+        }
+
+        .date-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #1a2e4f;
+        }
+
+        .date-cell .returned-date {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #7a6b52;
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            color: #b2903e;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-data p {
+            font-size: 1.1rem;
+            margin: 0;
+            font-family: 'Georgia', serif;
+        }
+
+        .back-button-section {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #1a2e4f 0%, #2a3f5f 100%);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #2a3f5f 0%, #3a4f7f 100%);
+            transform: translateX(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+
+        .back-button i {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .commands-table {
+                font-size: 0.85rem;
+            }
+
+            .commands-table th,
+            .commands-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .book-title-cell {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .profile-nav {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .commands-table {
+                font-size: 0.8rem;
+            }
+
+            .commands-table th,
+            .commands-table td {
+                padding: 0.6rem 0.4rem;
+            }
+
+            .book-info {
+                flex-direction: column;
+            }
+
+            .book-author-cell {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- Back Button -->
+        <div class="back-button-section">
+            <a href="{{ path('profile_index') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Retour à Mon Compte
+            </a>
+        </div>
+
+        <div class="page-header">
+            <h1><i class="fas fa-history"></i> Historique de mes Commandes</h1>
+            <p>Consultez toutes vos demandes d'emprunt et l'état de vos livres</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                <div class="stat-value">{{ orders|length }}</div>
+                <div class="stat-label">Commandes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value">
+                    {% set totalItems = 0 %}
+                    {% for order in orders %}
+                        {% set totalItems = totalItems + order.items|length %}
+                    {% endfor %}
+                    {{ totalItems }}
+                </div>
+                <div class="stat-label">Livres</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-undo"></i></div>
+                <div class="stat-value">
+                    {% set returnedCount = 0 %}
+                    {% for order in orders %}
+                        {% if order.returnedAt %}
+                            {% set returnedCount = returnedCount + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ returnedCount }}
+                </div>
+                <div class="stat-label">Retours</div>
+            </div>
+        </div>
+
+        <!-- Commands Table -->
+        {% if orders is not empty %}
+            <div class="commands-section">
+                <div class="commands-header">
+                    <i class="fas fa-list"></i> Détail de mes Commandes
+                </div>
+
+                <table class="commands-table">
+                    <thead>
+                        <tr>
+                            <th>Commande</th>
+                            <th>Titre du Livre</th>
+                            <th>Auteur(s)</th>
+                            <th>Code-barres</th>
+                            <th>ISBN</th>
+                            <th>Date de Commande</th>
+                            <th>Date de Retour</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            {% for item in order.items %}
+                                <tr>
+                                    <td>
+                                        <span class="command-id">#{{ order.id }}</span><br>
+                                        <small class="command-date-cell">{{ order.placedAt|date('d/m/Y') }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="book-info">
+                                            <span class="book-title-cell">{{ item.exemplaire.book.title }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="book-author-cell">
+                                            {% if item.exemplaire.book.authors|length > 0 %}
+                                                {% for author in item.exemplaire.book.authors %}
+                                                    {{ author.name }}{% if not loop.last %}<br>{% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                <span style="color: #999;">N/A</span>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="barcode-cell">{{ item.exemplaire.barcode }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="isbn-cell">
+                                            {% if item.exemplaire.book.isbn %}
+                                                {{ item.exemplaire.book.isbn }}
+                                            {% else %}
+                                                <span style="color: #999;">N/A</span>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="date-cell">{{ order.placedAt|date('d/m/Y H:i') }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="date-cell">
+                                            {% if order.returnedAt %}
+                                                <span class="returned-date">{{ order.returnedAt|date('d/m/Y H:i') }}</span>
+                                            {% else %}
+                                                <span style="color: #ffc107; font-weight: bold;">-</span>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if order.returnedAt %}
+                                            <span class="status-badge status-returned">
+                                                <i class="fas fa-check-circle"></i> Retourné
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-borrowed">
+                                                <i class="fas fa-hourglass-half"></i> En Prêt
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="commands-section">
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i>
+                    <p>Vous n'avez encore aucune commande approuvée.</p>
+                    <p style="font-size: 0.9rem; margin-top: 1rem;">
+                        <a href="{{ path('home') }}" style="color: #b2903e; text-decoration: none; font-weight: 600;">
+                            ← Retour à l'accueil pour parcourir les livres
+                        </a>
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

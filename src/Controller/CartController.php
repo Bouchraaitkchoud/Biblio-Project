@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\ReceiptGeneratorService;
+use App\Service\ConfigService;
 
 class CartController extends AbstractController
 {
@@ -28,7 +29,8 @@ class CartController extends AbstractController
     public function __construct(
         LoggerInterface $logger, 
         CartService $cartService,
-        ReceiptGeneratorService $receiptGenerator
+        ReceiptGeneratorService $receiptGenerator,
+        private ConfigService $configService // Ajoute ici
     ) {
         $this->logger = $logger;
         $this->cartService = $cartService;
@@ -80,6 +82,21 @@ class CartController extends AbstractController
             }
 
             try {
+                $items = $this->cartService->getCartItems();
+                $maxBooks = $this->configService->getMaxBooksPerOrder();
+
+                // Vérifier la limite
+                if (count($items) >= $maxBooks) {
+                    return new JsonResponse([
+                        'message' => sprintf(
+                            'Vous avez atteint la limite de %d livre(s) par commande.',
+                            $maxBooks
+                        ),
+                        'success' => false,
+                        'limit_reached' => true
+                    ], 400);
+                }
+
                 // Add book to cookie cart
                 $cookie = $this->cartService->addBookToDraftCart($book);
                 
@@ -343,12 +360,15 @@ class CartController extends AbstractController
             }
         }
 
+        $maxBooks = $this->configService->getMaxBooksPerOrder();
+        
         $response = $this->render('cart/cartView.html.twig', [
             'cart' => null, // No database cart for draft
             'items' => $items,
             'total' => count($items),
             'discipline' => $discipline,
-            'removedItems' => $validation['removed'] // Pass removed items to template
+            'removedItems' => $validation['removed'], // Pass removed items to template
+            'maxBooks' => $maxBooks  // Ajoute ici
         ]);
 
         // Set updated cookie if items were removed

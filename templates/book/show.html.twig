@@ -158,6 +158,109 @@
             gap: 1rem;
             margin-top: 1.5rem;
         }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            border-left: 5px solid #b2903e;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            margin-bottom: 1rem;
+            font-family: 'Georgia', serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            font-size: 1.1rem;
+            color: #4e4a45;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .book-title-modal {
+            color: #b2903e;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-confirm {
+            background: #b2903e;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #a07d33;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(178, 144, 62, 0.3);
+        }
+
+        .modal-btn-cancel {
+            background: #e9ecef;
+            color: #1a2e4f;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #d6d8db;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 900px) {
             .book-detail-main {
                 flex-direction: column;
@@ -180,6 +283,28 @@
 {% endblock %}
 
 {% block body %}
+<!-- Modal de confirmation -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-question-circle" style="color: #b2903e;"></i>
+        </div>
+        <div class="modal-body">
+            Souhaitez-vous procéder à l’ajout du livre
+            <span class="book-title-modal" id="modalBookTitle">Loading...</span> 
+            à votre panier ?
+        </div>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">
+                <i class="fas fa-check"></i> Ajouter
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="book-detail-main">
     <div class="book-detail-cover">
         {% if book.coverImage %}
@@ -261,80 +386,113 @@
 
 {% block javascripts %}
 <script>
+    let currentBookId = null;
+    let currentButton = null;
+
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page chargée, vérification des fonctions globales...');
-        console.log('window.addToCartGlobal:', typeof window.addToCartGlobal);
-        console.log('window.updateCartBadge:', typeof window.updateCartBadge);
-        
+        const modal = document.getElementById('confirmModal');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const modalBookTitle = document.getElementById('modalBookTitle');
+
         if (typeof window.addToCartGlobal !== 'function') {
-            console.log('Fonction globale introuvée, création d\'une solution de repli...');
             window.addToCartGlobal = function(bookId, button) {
-                alert('La fonction fonctionne ! BookID : ' + bookId);
-                const originalContent = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
-                button.disabled = true;
+                const bookTitle = document.querySelector('.book-title').textContent;
                 
-                fetch(`/add-to-cart/${bookId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response ok:', response.ok);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Response data:', data);
-                    if (data.success) {
-                        button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
-                        button.style.backgroundColor = '#28a745';
-                        const headerBadge = document.querySelector('.cart-badge');
-                        const currentCount = headerBadge ? parseInt(headerBadge.textContent) : 0;
-                        if (window.updateCartBadge) {
-                            window.updateCartBadge(currentCount + 1);
-                        }
-                        updateLocalCartButton(currentCount + 1);
-                        setTimeout(() => {
-                            button.innerHTML = originalContent;
-                            button.disabled = false;
-                            button.style.backgroundColor = '';
-                        }, 2000);
-                    } else {
-                        button.innerHTML = originalContent;
-                        button.disabled = false;
-                        alert(data.message || 'Erreur lors de l\'ajout');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    button.innerHTML = originalContent;
-                    button.disabled = false;
-                    alert('Erreur: ' + error.message);
-                });
+                // Affiche la modal
+                currentBookId = bookId;
+                currentButton = button;
+                modalBookTitle.textContent = bookTitle;
+                modal.classList.add('active');
             };
         }
+
+        // Bouton Confirmer
+        modalConfirmBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            addToCartProcess(currentBookId, currentButton);
+        });
+
+        // Bouton Annuler
+        modalCancelBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            currentBookId = null;
+            currentButton = null;
+        });
+
+        // Fermer la modal en cliquant en dehors
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                currentBookId = null;
+                currentButton = null;
+            }
+        });
+    });
+
+    function addToCartProcess(bookId, button) {
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
+        button.disabled = true;
         
-        function updateLocalCartButton(count) {
-            const cartBtn = document.querySelector('.view-cart-btn');
-            const existingBadge = cartBtn ? cartBtn.querySelector('.cart-count-badge') : null;
-            if (count > 0) {
-                if (existingBadge) {
-                    existingBadge.textContent = count;
-                } else if (cartBtn) {
-                    const badge = document.createElement('span');
-                    badge.className = 'cart-count-badge';
-                    badge.textContent = count;
-                    cartBtn.appendChild(badge);
+        fetch(`/add-to-cart/${bookId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
+                button.style.backgroundColor = '#28a745';
+                const headerBadge = document.querySelector('.cart-badge');
+                const currentCount = headerBadge ? parseInt(headerBadge.textContent) : 0;
+                if (window.updateCartBadge) {
+                    window.updateCartBadge(currentCount + 1);
                 }
+                updateLocalCartButton(currentCount + 1);
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                    button.style.backgroundColor = '';
+                }, 2000);
             } else {
-                if (existingBadge) {
-                    existingBadge.remove();
-                }
+                button.innerHTML = originalContent;
+                button.disabled = false;
+                showErrorModal(data.message || 'Erreur lors de l\'ajout au panier');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            showErrorModal('Erreur lors de l\'ajout : ' + error.message);
+        });
+    }
+
+    function showErrorModal(message) {
+        alert(message); // Ou tu peux créer une autre modal pour les erreurs
+    }
+
+    function updateLocalCartButton(count) {
+        const cartBtn = document.querySelector('.view-cart-btn');
+        const existingBadge = cartBtn ? cartBtn.querySelector('.cart-count-badge') : null;
+        if (count > 0) {
+            if (existingBadge) {
+                existingBadge.textContent = count;
+            } else if (cartBtn) {
+                const badge = document.createElement('span');
+                badge.className = 'cart-count-badge';
+                badge.textContent = count;
+                cartBtn.appendChild(badge);
+            }
+        } else {
+            if (existingBadge) {
+                existingBadge.remove();
             }
         }
-    });
+    }
 </script>
 {% endblock %}

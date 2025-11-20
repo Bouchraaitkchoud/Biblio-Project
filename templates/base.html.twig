@@ -358,6 +358,12 @@
                             </a>
                         {% endif %}
                         {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('admin_config_system') }}" class="admin-nav-link{% if app.request.get('_route') == 'admin_config_system' %} active{% endif %}">
+                                <i class="fas fa-cogs"></i>
+                                <span>Configuration</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('main_site') }}" class="admin-nav-link">
                                 <i class="fas fa-home"></i>
                                 <span>Accueil</span>
