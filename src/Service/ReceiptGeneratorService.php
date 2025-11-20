@@ -38,28 +38,23 @@ class ReceiptGeneratorService
         $pdf->write1DBarcode($barcodeData, 'C128', null, null, 50, 12, 0.4, ['position' => 'C', 'align' => 'C'], 'N');
         $pdf->Ln(2);
 
-        // Order info section
+        // Order info section - Simple list of books
         $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, 'Livres:', 0, 1, 'L');
+        $pdf->Ln(1);
 
+        $bookNumber = 1;
         foreach ($order->getItems() as $item) {
             $ex = $item->getExemplaire();
             $bookTitle = $ex->getBook()->getTitle();
-            $barcode = $ex->getBarcode();
 
-            // Save current position
-            $currentX = $pdf->GetX();
-            $currentY = $pdf->GetY();
-
-            // Calculate how many lines the book title will need (considering padding)
-            $numLines = $pdf->getNumLines($bookTitle, 30); // Slightly less than 32 for padding
-            $rowHeight = ($numLines * 3.5) + 2; // 3.5mm per line + 2mm padding
-            $rowHeight = max($rowHeight, 8); // Minimum height of 8mm
-
-            // Draw book title with MultiCell (enables text wrapping)
-            $pdf->MultiCell(32, $rowHeight, $bookTitle, 1, 'L', false, 0, $currentX, $currentY, true, 0, false, true, $rowHeight, 'T', false);
-
-            // Draw barcode cell with same height, centered
-            $pdf->MultiCell(18, $rowHeight, $barcode, 1, 'C', false, 1, $currentX + 32, $currentY, true, 0, false, true, $rowHeight, 'M', false);
+            // Simple numbered list
+            $pdf->SetFont('helvetica', 'B', 7);
+            $pdf->Cell(5, 4, $bookNumber . '.', 0, 0, 'L');
+            $pdf->SetFont('helvetica', '', 7);
+            $pdf->MultiCell(0, 4, $bookTitle, 0, 'L', false, 1);
+            $pdf->Ln(0.5);
+            $bookNumber++;
         }
 
         $pdf->Ln(1);
