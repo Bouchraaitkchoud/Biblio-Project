@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller\Admin;
 
 use App\Entity\Publisher;
@@ -10,10 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/publishers')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_EDITEURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class PublisherController extends AbstractController
 {
     public function __construct(
@@ -27,9 +28,9 @@ class PublisherController extends AbstractController
         $searchTerm = $request->query->get('search');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 20;
-        
+
         $paginationData = $this->publisherRepository->getPaginatedPublishers($page, $limit, $searchTerm);
-        
+
         return $this->render('admin/publisher/index.html.twig', [
             'publishers' => $paginationData['publishers'],
             'pagination' => [
@@ -40,7 +41,7 @@ class PublisherController extends AbstractController
             'searchTerm' => $searchTerm,
         ]);
     }
-    
+
     #[Route('/export-csv', name: 'admin_publisher_export_csv', methods: ['GET'])]
     public function exportCsv(): Response
     {
@@ -51,8 +52,9 @@ class PublisherController extends AbstractController
         foreach ($publishers as $publisher) {
             // Replace commas and newlines to avoid breaking CSV format
             $name = str_replace([",", "\n"], [" ", " "], $publisher->getName());
-            
-            $csvData .= sprintf("%d,%s\n",
+
+            $csvData .= sprintf(
+                "%d,%s\n",
                 $publisher->getId(),
                 $name
             );
@@ -68,26 +70,26 @@ class PublisherController extends AbstractController
 
         return $response;
     }
-    
+
     #[Route('/new', name: 'admin_publisher_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
         if ($request->isMethod('POST')) {
             $name = $request->request->get('name');
-            
+
             if (empty($name)) {
                 $this->addFlash('error', 'Publisher name cannot be empty.');
                 return $this->render('admin/publisher/new.html.twig');
             }
-            
+
             $publisher = new Publisher();
             $publisher->setName($name);
-            
+
             $this->entityManager->persist($publisher);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Publisher created successfully.');
-            
+
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse([
                     'success' => true,
@@ -95,13 +97,13 @@ class PublisherController extends AbstractController
                     'name' => $publisher->getName()
                 ]);
             }
-            
+
             return $this->redirectToRoute('admin_publishers_index');
         }
-        
+
         return $this->render('admin/publisher/new.html.twig');
     }
-    
+
     #[Route('/{id}', name: 'admin_publisher_show', methods: ['GET'])]
     public function show(Publisher $publisher): Response
     {
@@ -109,7 +111,7 @@ class PublisherController extends AbstractController
             'publisher' => $publisher,
         ]);
     }
-    
+
     #[Route('/{id}/edit', name: 'admin_publisher_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Publisher $publisher): Response
     {
@@ -121,13 +123,13 @@ class PublisherController extends AbstractController
             $this->addFlash('success', 'Publisher updated successfully.');
             return $this->redirectToRoute('admin_publishers_index');
         }
-        
+
         return $this->render('admin/publisher/edit.html.twig', [
             'publisher' => $publisher,
             'form' => $form->createView(),
         ]);
     }
-    
+
     #[Route('/{id}/delete', name: 'admin_publisher_delete', methods: ['POST'])]
     public function delete(Request $request, Publisher $publisher): Response
     {
@@ -136,41 +138,41 @@ class PublisherController extends AbstractController
             $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des éditeurs.');
             return $this->redirectToRoute('admin_publishers_index');
         }
-        
-        if ($this->isCsrfTokenValid('delete'.$publisher->getId(), $request->request->get('_token'))) {
+
+        if ($this->isCsrfTokenValid('delete' . $publisher->getId(), $request->request->get('_token'))) {
             // Check if it has books
             if (!$publisher->getBooks()->isEmpty()) {
                 $this->addFlash('error', 'Cannot delete publisher that has books.');
                 return $this->redirectToRoute('admin_publishers_index');
             }
-            
+
             $this->entityManager->remove($publisher);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Publisher deleted successfully.');
         }
-        
+
         return $this->redirectToRoute('admin_publishers_index');
     }
-    
+
     #[Route('/quick-create', name: 'admin_publisher_quick_create', methods: ['POST'])]
     public function quickCreate(Request $request): JsonResponse
     {
         $name = $request->request->get('name');
-        
+
         if (empty($name)) {
             return new JsonResponse([
                 'success' => false,
                 'error' => 'Publisher name is required.'
             ], 400);
         }
-        
+
         $publisher = new Publisher();
         $publisher->setName($name);
-        
+
         $this->entityManager->persist($publisher);
         $this->entityManager->flush();
-        
+
         return new JsonResponse([
             'success' => true,
             'id' => $publisher->getId(),

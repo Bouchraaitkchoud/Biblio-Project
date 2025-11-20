@@ -11,10 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/locations')]
-#[Security("is_granted('ROLE_ADMIN')")]
+#[IsGranted('ROLE_ADMIN')]
 class LocationController extends AbstractController
 {
     public function __construct(
@@ -27,7 +27,7 @@ class LocationController extends AbstractController
     public function index(Request $request): Response
     {
         $search = trim($request->query->get('search', ''));
-        
+
         if ($search) {
             $locations = $this->locationRepository->createQueryBuilder('l')
                 ->where('l.name LIKE :search')
@@ -126,10 +126,10 @@ class LocationController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_location_delete', methods: ['POST'])]
     public function delete(Request $request, Location $location): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$location->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $location->getId(), $request->request->get('_token'))) {
             // Check if location has exemplaires
             $exemplairesCount = $this->exemplaireRepository->count(['location' => $location]);
-            
+
             if ($exemplairesCount > 0) {
                 $this->addFlash('error', "Impossible de supprimer cet emplacement car $exemplairesCount exemplaire(s) y sont associés.");
                 return $this->redirectToRoute('admin_locations_index');

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller\Admin;
 
 use App\Entity\Book;
@@ -15,10 +16,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/books')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_LIVRES')")]
+#[IsGranted('ROLE_ADMIN')]
 class BookController extends AbstractController
 {
     public function __construct(
@@ -35,9 +36,9 @@ class BookController extends AbstractController
         $searchTerm = $request->query->get('search');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 20;
-        
+
         $paginationData = $this->bookRepository->getPaginatedBooks($page, $limit, $searchTerm);
-        
+
         return $this->render('admin/book/index.html.twig', [
             'books' => $paginationData['books'],
             'pagination' => [
@@ -48,7 +49,7 @@ class BookController extends AbstractController
             'searchTerm' => $searchTerm,
         ]);
     }
-    
+
     #[Route('/export-csv', name: 'admin_book_export_csv', methods: ['GET'])]
     public function exportCsv(): Response
     {
@@ -59,18 +60,19 @@ class BookController extends AbstractController
         foreach ($books as $book) {
             $title = str_replace([",", "\n"], [" ", " "], $book->getTitle());
             // Use getAuthorName() instead of getAuthor()
-            $authorName = $book->getAuthorName() 
-                ? str_replace([",", "\n"], [" ", " "], $book->getAuthorName()) 
+            $authorName = $book->getAuthorName()
+                ? str_replace([",", "\n"], [" ", " "], $book->getAuthorName())
                 : '';
-            $disciplineName = $book->getDiscipline() 
-                ? str_replace([",", "\n"], [" ", " "], $book->getDiscipline()->getName()) 
+            $disciplineName = $book->getDisciplines()->first()
+                ? str_replace([",", "\n"], [" ", " "], $book->getDisciplines()->first()->getName())
                 : '';
             $publicationYear = $book->getPublicationYear() ?: '';
-            $isbn = $book->getIsbn() 
-                ? str_replace([",", "\n"], [" ", " "], $book->getIsbn()) 
+            $isbn = $book->getIsbn()
+                ? str_replace([",", "\n"], [" ", " "], $book->getIsbn())
                 : '';
-            
-            $csvData .= sprintf("%d,%s,%s,%s,%s,%s\n",
+
+            $csvData .= sprintf(
+                "%d,%s,%s,%s,%s,%s\n",
                 $book->getId(),
                 $title,
                 $authorName,
@@ -90,7 +92,7 @@ class BookController extends AbstractController
 
         return $response;
     }
-    
+
     #[Route('/new', name: 'admin_book_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
@@ -103,7 +105,7 @@ class BookController extends AbstractController
             $coverImageFile = $form->get('coverImage')->getData();
             if ($coverImageFile) {
                 try {
-                    $coverImageFileName = $this->imageUploadService->uploadBook($coverImageFile, $book->getTitle());
+                    $coverImageFileName = $this->imageUploadService->uploadBookCover($coverImageFile, $book->getTitle());
                     $book->setCoverImage($coverImageFileName);
                 } catch (\Exception $e) {
                     $this->addFlash('error', $e->getMessage());
@@ -117,7 +119,7 @@ class BookController extends AbstractController
             // Handle exemplaire creation (at least one is required)
             $exemplaireBarcodes = $request->request->get('exemplaire_barcodes', []);
             $exemplaireBarcodes = array_filter(array_map('trim', (array)$exemplaireBarcodes));
-    
+
             if (empty($exemplaireBarcodes)) {
                 $this->addFlash('error', 'Vous devez ajouter au moins un exemplaire pour ce livre.');
                 return $this->render('admin/book/new.html.twig', [
@@ -139,15 +141,15 @@ class BookController extends AbstractController
                     $exemplaire->setBarcode($barcode);
                     $exemplaire->setStatus('available');
                     $exemplaire->setAcquisitionMode($request->request->get('exemplaire_acquisition_mode') ?: 'Achat');
-                    
+
                     if ($acquisitionDate = $request->request->get('exemplaire_acquisition_date')) {
                         $exemplaire->setAcquisitionDate(new \DateTime($acquisitionDate));
                     }
-                    
+
                     if ($price = $request->request->get('exemplaire_price')) {
                         $exemplaire->setPrice($price);
                     }
-                    
+
                     if ($comment = $request->request->get('exemplaire_comment')) {
                         $exemplaire->setComment($comment);
                     }
@@ -175,7 +177,7 @@ class BookController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-    
+
     #[Route('/{id}', name: 'admin_books_show', methods: ['GET'])]
     public function show(Book $book): Response
     {
@@ -184,7 +186,7 @@ class BookController extends AbstractController
             'exemplaires' => $book->getExemplaires()
         ]);
     }
-    
+
     #[Route('/{id}/edit', name: 'admin_book_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Book $book): Response
     {
@@ -201,7 +203,7 @@ class BookController extends AbstractController
                     if ($oldCoverImage) {
                         $this->imageUploadService->deleteBookCover($oldCoverImage);
                     }
-                    
+
                     $imageFileName = $this->imageUploadService->uploadBookCover($coverImageFile, $book->getTitle());
                     $book->setCoverImage($imageFileName);
                 } catch (\Exception $e) {
@@ -223,7 +225,7 @@ class BookController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-    
+
     #[Route('/{id}/delete', name: 'admin_book_delete', methods: ['POST'])]
     public function delete(Request $request, Book $book): Response
     {
@@ -232,8 +234,8 @@ class BookController extends AbstractController
             $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des livres. Seuls les administrateurs complets peuvent supprimer.');
             return $this->redirectToRoute('admin_books_show', ['id' => $book->getId()]);
         }
-        
-        if ($this->isCsrfTokenValid('delete'.$book->getId(), $request->request->get('_token'))) {
+
+        if ($this->isCsrfTokenValid('delete' . $book->getId(), $request->request->get('_token'))) {
             // Check if any exemplaires are in active carts
             $hasActiveCartItems = $this->entityManager->getRepository('App\Entity\CartItem')
                 ->createQueryBuilder('ci')
@@ -250,13 +252,13 @@ class BookController extends AbstractController
                 $this->addFlash('error', 'Cannot delete book that has items in active carts.');
                 return $this->redirectToRoute('admin_books_index');
             }
-            
+
             $this->entityManager->remove($book);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Book deleted successfully.');
         }
-        
+
         return $this->redirectToRoute('admin_books_index');
     }
 
@@ -265,43 +267,38 @@ class BookController extends AbstractController
     {
         $exemplaire = new Exemplaire();
         $exemplaire->setBook($book);
-        
+
         $form = $this->createForm(ExemplaireType::class, $exemplaire);
         $form->handleRequest($request);
-        
+
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 // Start transaction
                 $this->entityManager->beginTransaction();
-                
+
                 // Set default status if not provided
                 if (!$exemplaire->getStatus()) {
                     $exemplaire->setStatus('available');
                 }
-                
-                // Set default section if not provided
-                if (!$exemplaire->getDiscipline()) {
-                    $exemplaire->setDiscipline($book->getDiscipline());
-                }
-                
+
                 $this->entityManager->persist($exemplaire);
                 $this->entityManager->flush();
-                
+
                 // Commit transaction
                 $this->entityManager->commit();
-                
+
                 $this->addFlash('success', 'Exemplaire added successfully.');
                 return $this->redirectToRoute('admin_books_show', ['id' => $book->getId()]);
             } catch (\Exception $e) {
                 // Rollback transaction on error
                 $this->entityManager->rollback();
-                
+
                 $this->addFlash('error', 'An error occurred while adding the exemplaire. Please try again.');
                 // Log the error for debugging
                 error_log('Error adding exemplaire: ' . $e->getMessage());
             }
         }
-        
+
         return $this->render('admin/book/add_exemplaire.html.twig', [
             'book' => $book,
             'form' => $form->createView()

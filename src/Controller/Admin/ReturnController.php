@@ -13,10 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/returns')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_RETOURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class ReturnController extends AbstractController
 {
     public function __construct(
@@ -53,7 +52,7 @@ class ReturnController extends AbstractController
     {
         try {
             $barcode = $request->request->get('barcode');
-            
+
             if (!$barcode) {
                 return new JsonResponse([
                     'success' => false,
@@ -62,7 +61,7 @@ class ReturnController extends AbstractController
             }
 
             $barcode = trim($barcode);
-            
+
             // Log the incoming request
             $this->logger->info('Processing barcode scan request', [
                 'barcode' => $barcode
@@ -82,8 +81,11 @@ class ReturnController extends AbstractController
             if ($exemplaire->getStatus() !== 'borrowed') {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => sprintf('Exemplaire with barcode %s is not currently borrowed (Status: %s)', 
-                        $barcode, $exemplaire->getStatus())
+                    'message' => sprintf(
+                        'Exemplaire with barcode %s is not currently borrowed (Status: %s)',
+                        $barcode,
+                        $exemplaire->getStatus()
+                    )
                 ], 400);
             }
 
@@ -124,7 +126,6 @@ class ReturnController extends AbstractController
                     'location' => $exemplaire->getLocation() ? $exemplaire->getLocation()->getName() : 'N/A'
                 ]
             ]);
-
         } catch (\Exception $e) {
             // Log the detailed error
             $this->logger->error('Error in scanBarcode', [
@@ -144,7 +145,7 @@ class ReturnController extends AbstractController
     public function processReturn(Request $request): JsonResponse
     {
         $exemplaireId = $request->request->get('exemplaire_id');
-        
+
         if (!$exemplaireId) {
             return new JsonResponse([
                 'success' => false,
@@ -157,7 +158,7 @@ class ReturnController extends AbstractController
             $this->entityManager->beginTransaction();
 
             $exemplaire = $this->exemplaireRepository->find($exemplaireId);
-            
+
             if (!$exemplaire) {
                 throw new \Exception('Exemplaire not found');
             }
@@ -223,14 +224,14 @@ class ReturnController extends AbstractController
         } catch (\Exception $e) {
             // Rollback transaction on error
             $this->entityManager->rollback();
-            
+
             // Log the error
             $this->logger->error('Error processing return', [
                 'error_message' => $e->getMessage(),
                 'error_trace' => $e->getTraceAsString(),
                 'exemplaire_id' => $exemplaireId
             ]);
-            
+
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Error processing return: ' . $e->getMessage()

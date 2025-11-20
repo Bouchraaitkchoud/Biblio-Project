@@ -14,13 +14,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Psr\Log\LoggerInterface;
 
 #[Route('/admin/orders')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_COMMANDES')")]
+#[IsGranted('ROLE_ADMIN')]
 class OrderController extends AbstractController
 {
     public function __construct(
@@ -38,26 +38,26 @@ class OrderController extends AbstractController
         $status = $request->query->get('status', '');
         $orderBy = $request->query->get('orderBy', 'placedAt');
         $order = $request->query->get('order', 'DESC');
-        
+
         $qb = $this->orderRepository->createQueryBuilder('o')
             ->leftJoin('o.lecteur', 'l')
             ->leftJoin('o.processedBy', 'u')
             ->addSelect('l', 'u');
-        
+
         if (!empty($status)) {
             $qb->where('o.status = :status')
-               ->setParameter('status', $status);
+                ->setParameter('status', $status);
         }
-        
+
         $qb->orderBy('o.' . $orderBy, $order);
-        
+
         $orders = $qb->getQuery()->getResult();
-        
+
         // Get count by status for the statistics
         $pendingCount = $this->orderRepository->count(['status' => 'pending']);
         $approvedCount = $this->orderRepository->count(['status' => 'approved']);
         $rejectedCount = $this->orderRepository->count(['status' => 'rejected']);
-        
+
         return $this->render('admin/order/index.html.twig', [
             'orders' => $orders,
             'currentStatus' => $status,
@@ -70,9 +70,9 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}/approve', name: 'admin_order_approve', methods: ['POST'])]
-    public function approve(Request $request, Order $order, EntityManagerInterface $em): Response 
+    public function approve(Request $request, Order $order, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('approve'.$order->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('approve' . $order->getId(), $request->request->get('_token'))) {
             try {
                 // Start transaction
                 $em->beginTransaction();
@@ -80,7 +80,7 @@ class OrderController extends AbstractController
                 // Update exemplaire statuses from available to borrowed
                 foreach ($order->getItems() as $item) {
                     $exemplaire = $item->getExemplaire();
-                    
+
                     // Update exemplaire status to borrowed
                     $exemplaire->setStatus('borrowed');
                     $em->persist($exemplaire);
@@ -90,7 +90,7 @@ class OrderController extends AbstractController
                 $order->setStatus('approved');
                 $order->setProcessedAt(new \DateTime());
                 $order->setProcessedBy($this->getUser());
-                
+
                 $em->persist($order);
                 $em->flush();
 
@@ -102,12 +102,12 @@ class OrderController extends AbstractController
             } catch (\Exception $e) {
                 // Rollback transaction on error
                 $em->rollback();
-                
+
                 $this->logger->error('Error approving order: ' . $e->getMessage(), [
                     'exception' => $e,
                     'order_id' => $order->getId()
                 ]);
-                
+
                 $this->addFlash('error', 'Failed to approve order. Please try again.');
                 return $this->redirectToRoute('admin_orders_index');
             }
@@ -119,7 +119,7 @@ class OrderController extends AbstractController
     #[Route('/{id}/reject', name: 'admin_order_reject', methods: ['POST'])]
     public function reject(Request $request, Order $order): Response
     {
-        if ($this->isCsrfTokenValid('reject'.$order->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('reject' . $order->getId(), $request->request->get('_token'))) {
             // Release all exemplaires back to available status
             foreach ($order->getItems() as $item) {
                 $exemplaire = $item->getExemplaire();
@@ -128,11 +128,11 @@ class OrderController extends AbstractController
                     $this->em->persist($exemplaire);
                 }
             }
-            
+
             $order->setStatus('rejected');
             $order->setProcessedAt(new \DateTime());
             $order->setProcessedBy($this->getUser());
-            
+
             $this->em->flush();
 
             $this->addFlash('warning', 'Order has been rejected.');
@@ -147,17 +147,17 @@ class OrderController extends AbstractController
         try {
             // Find the receipt for this cart
             $receipt = $this->em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
-            
+
             if (!$receipt) {
                 $this->logger->error('No receipt found for cart', [
                     'cart_id' => $cart->getId(),
                     'cart_status' => $cart->getStatus()
                 ]);
-                
+
                 $this->addFlash('error', 'No receipt found for this order. Please try approving the order again.');
                 return $this->redirectToRoute('admin_orders_index');
             }
-            
+
             // Generate the receipt PDF using the ReceiptController
             return $this->redirectToRoute('receipt_show', ['id' => $receipt->getId()]);
         } catch (\Exception $e) {
@@ -165,7 +165,7 @@ class OrderController extends AbstractController
                 'exception' => $e,
                 'cart_id' => $cart->getId()
             ]);
-            
+
             $this->addFlash('error', 'Failed to view receipt. Please try again.');
             return $this->redirectToRoute('admin_orders_index');
         }
@@ -176,13 +176,13 @@ class OrderController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $tokenId = $data['tokenId'] ?? null;
-        
+
         if (!$tokenId) {
             return $this->json(['error' => 'Token ID required'], 400);
         }
-        
+
         $token = $this->csrfTokenManager->getToken($tokenId)->getValue();
-        
+
         return $this->json(['token' => $token]);
     }
 }

@@ -12,10 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/disciplines', name: 'admin_disciplines_')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_DISCIPLINES')")]
+#[IsGranted('ROLE_ADMIN')]
 class DisciplineController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
@@ -109,7 +109,7 @@ class DisciplineController extends AbstractController
                     if ($oldImage) {
                         $imageUploadService->deleteDiscipline($oldImage);
                     }
-                    
+
                     $imageFileName = $imageUploadService->uploadDiscipline($imageFile, $discipline->getName());
                     $discipline->setImage($imageFileName);
                 } catch (\Exception $e) {
@@ -141,8 +141,8 @@ class DisciplineController extends AbstractController
             $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des disciplines.');
             return $this->redirectToRoute('admin_disciplines_index');
         }
-        
-        if ($this->isCsrfTokenValid('delete'.$discipline->getId(), $request->request->get('_token'))) {
+
+        if ($this->isCsrfTokenValid('delete' . $discipline->getId(), $request->request->get('_token'))) {
             if ($discipline->getBooks()->count() > 0) {
                 $this->addFlash('error', 'Impossible de supprimer cette discipline car elle contient des livres. Veuillez d\'abord déplacer ou supprimer les livres associés.');
                 return $this->redirectToRoute('admin_disciplines_index');

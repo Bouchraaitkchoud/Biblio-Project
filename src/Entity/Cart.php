@@ -18,7 +18,7 @@ class Cart
     #[ORM\ManyToOne(targetEntity: Lecteur::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Lecteur $lecteur = null;
-    
+
 
     #[ORM\Column(type: 'string', length: 20)]
     private string $status = 'draft'; // Can be: draft, pending, approved
@@ -28,7 +28,7 @@ class Cart
 
     #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class, cascade: ['persist', 'remove'])]
     private Collection $items;
-    
+
     public function __construct()
     {
         $this->items = new ArrayCollection();
@@ -68,7 +68,7 @@ class Cart
         }
         return $this;
     }
-    
+
     public function removeItem(CartItem $item): self
     {
         if ($this->items->removeElement($item)) {
@@ -99,5 +99,23 @@ class Cart
     {
         $this->createdAt = $createdAt;
         return $this;
+    }
+
+    /**
+     * Alias for getLecteur() - returns the user (Lecteur) associated with this cart
+     * Used for compatibility where code expects getUser()
+     */
+    public function getUser(): ?Lecteur
+    {
+        return $this->lecteur;
+    }
+
+    /**
+     * Alias for setLecteur() - sets the user (Lecteur) for this cart
+     * Used for compatibility where code expects setUser()
+     */
+    public function setUser(?Lecteur $lecteur): self
+    {
+        return $this->setLecteur($lecteur);
     }
 }

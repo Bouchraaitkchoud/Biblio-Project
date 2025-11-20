@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\Admin;
@@ -11,9 +12,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_HISTORIQUE')")]
+#[IsGranted('ROLE_ADMIN')]
 class HistoriqueController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -58,7 +59,7 @@ class HistoriqueController extends AbstractController
                         LOWER(l.prenom) LIKE LOWER(:search) OR
                         LOWER(l.email) LIKE LOWER(:search)
                     )')
-                    ->setParameter('search', $searchTerm);
+                        ->setParameter('search', $searchTerm);
                     break;
 
                 case 'exemplaire':
@@ -67,7 +68,7 @@ class HistoriqueController extends AbstractController
                         LOWER(b.title) LIKE LOWER(:search) OR
                         LOWER(e.barcode) LIKE LOWER(:search)
                     )')
-                    ->setParameter('search', $searchTerm);
+                        ->setParameter('search', $searchTerm);
                     break;
 
                 case 'all':
@@ -79,7 +80,7 @@ class HistoriqueController extends AbstractController
                         LOWER(b.title) LIKE LOWER(:search) OR
                         LOWER(e.barcode) LIKE LOWER(:search)
                     )')
-                    ->setParameter('search', $searchTerm);
+                        ->setParameter('search', $searchTerm);
                     break;
             }
         }
@@ -87,7 +88,7 @@ class HistoriqueController extends AbstractController
         // Filter by exemplaire status
         if (!empty($filterStatus)) {
             $qb->andWhere('e.status = :exemplaireStatus')
-               ->setParameter('exemplaireStatus', $filterStatus);
+                ->setParameter('exemplaireStatus', $filterStatus);
         }
 
         $approvedOrders = $qb->getQuery()->getResult();
@@ -123,7 +124,7 @@ class HistoriqueController extends AbstractController
         );
         $query->setParameter('status', 'approved');
         $orders = $query->getResult();
-        
+
         // Build CSV content from $orders data...
         $csvData = "Lecteur,Date de commande,Date de retour,Exemplaire,Emplacement,Admin traitant\n";
         foreach ($orders as $order) {
@@ -132,12 +133,12 @@ class HistoriqueController extends AbstractController
                 $order['lecteurEmail'],
                 isset($order['placedAt']) ? $order['placedAt']->format('d/m/Y H:i') : '',
                 isset($order['returnedAt']) ? $order['returnedAt']->format('d/m/Y H:i') : 'Non retourné',
-                $order['bookTitle'].' ('.$order['bookBarcode'].')',
+                $order['bookTitle'] . ' (' . $order['bookBarcode'] . ')',
                 $order['locationName'] ?? 'N/A',
                 $order['adminEmail'] ?? 'N/A'
             );
         }
-        
+
         $response = new Response($csvData);
         $disposition = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
@@ -145,7 +146,7 @@ class HistoriqueController extends AbstractController
         );
         $response->headers->set('Content-Disposition', $disposition);
         $response->headers->set('Content-Type', 'text/csv');
-        
+
         return $response;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller\Admin;
 
 use App\Entity\Author;
@@ -10,10 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/authors')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_AUTEURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class AuthorController extends AbstractController
 {
     public function __construct(
@@ -27,9 +28,9 @@ class AuthorController extends AbstractController
         $searchTerm = $request->query->get('search');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 20;
-        
+
         $paginationData = $this->authorRepository->getPaginatedAuthors($page, $limit, $searchTerm);
-        
+
         return $this->render('admin/author/index.html.twig', [
             'authors'    => $paginationData['authors'],
             'pagination' => [
@@ -40,26 +41,26 @@ class AuthorController extends AbstractController
             'searchTerm' => $searchTerm,
         ]);
     }
-    
+
     #[Route('/new', name: 'admin_author_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
         if ($request->isMethod('POST')) {
             $name = $request->request->get('name');
-            
+
             if (empty($name)) {
                 $this->addFlash('error', 'Author name cannot be empty.');
                 return $this->render('admin/author/new.html.twig');
             }
-            
+
             $author = new Author();
             $author->setName($name);
-            
+
             $this->entityManager->persist($author);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Author created successfully.');
-            
+
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse([
                     'success' => true,
@@ -67,25 +68,24 @@ class AuthorController extends AbstractController
                     'name'    => $author->getName()
                 ]);
             }
-            
+
             return $this->redirectToRoute('admin_authors_index');
         }
-        
+
         return $this->render('admin/author/new.html.twig');
     }
-    
+
     #[Route('/export-csv', name: 'admin_author_export_csv', methods: ['GET'])]
     public function exportCsv(): Response
     {
         $authors = $this->authorRepository->findAll();
 
         // Build CSV string (modify columns as needed)
-        $csvData = "ID,Name,Bio\n";
+        $csvData = "ID,Name\n";
         foreach ($authors as $author) {
             // Replace commas and newlines to avoid breaking CSV format
             $name = str_replace([",", "\n"], [" ", " "], $author->getName());
-            $bio  = str_replace([",", "\n"], [" ", " "], $author->getBio() ?: '');
-            $csvData .= sprintf("%d,%s,%s\n", $author->getId(), $name, $bio);
+            $csvData .= sprintf("%d,%s\n", $author->getId(), $name);
         }
 
         $response = new Response($csvData);
@@ -98,7 +98,7 @@ class AuthorController extends AbstractController
 
         return $response;
     }
-    
+
     #[Route('/{id}', name: 'admin_author_show', methods: ['GET'])]
     public function show(Author $author): Response
     {
@@ -106,19 +106,19 @@ class AuthorController extends AbstractController
             'author' => $author,
         ]);
     }
-    
+
     #[Route('/{id}/edit', name: 'admin_author_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Author $author): Response
     {
         $form = $this->createForm(\App\Form\AuthorType::class, $author);
         $form->handleRequest($request);
-            
+
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
             $this->addFlash('success', 'Author updated successfully.');
             return $this->redirectToRoute('admin_authors_index');
         }
-        
+
         return $this->render('admin/author/edit.html.twig', [
             'author' => $author,
             'form'   => $form->createView(),
@@ -155,21 +155,21 @@ class AuthorController extends AbstractController
             $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des auteurs.');
             return $this->redirectToRoute('admin_authors_index');
         }
-        
-        if ($this->isCsrfTokenValid('delete'.$author->getId(), $request->request->get('_token'))) {
-            
+
+        if ($this->isCsrfTokenValid('delete' . $author->getId(), $request->request->get('_token'))) {
+
             // Check if it has books
             if (!$author->getBooks()->isEmpty()) {
                 $this->addFlash('error', 'Cannot delete author that has books.');
                 return $this->redirectToRoute('admin_authors_index');
             }
-            
+
             $this->entityManager->remove($author);
             $this->entityManager->flush();
-            
+
             $this->addFlash('success', 'Author deleted successfully.');
         }
-        
+
         return $this->redirectToRoute('admin_authors_index');
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller\Admin;
 
 use App\Entity\User;
@@ -12,10 +13,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/users')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_UTILISATEURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class UserController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
@@ -25,24 +25,24 @@ class UserController extends AbstractController
     {
         $search = trim($request->query->get('search', ''));
         $userRepo = $this->entityManager->getRepository(User::class);
-        
+
         // Only get admin users (exclude regular ROLE_USER only)
         $qb = $userRepo->createQueryBuilder('u');
-        
+
         if ($search !== '') {
             $searchLower = strtolower($search);
             $qb->where('LOWER(u.email) LIKE :search OR LOWER(u.login) LIKE :search OR LOWER(u.nom) LIKE :search OR LOWER(u.prenom) LIKE :search')
-               ->setParameter('search', '%' . $searchLower . '%');
+                ->setParameter('search', '%' . $searchLower . '%');
         }
-        
+
         $users = $qb->getQuery()->getResult();
-        
+
         // Filter to only show admin users
-        $adminUsers = array_filter($users, function($user) {
+        $adminUsers = array_filter($users, function ($user) {
             $roles = $user->getRoles();
             return in_array('ROLE_ADMIN', $roles) || in_array('ROLE_LIMITED_ADMIN', $roles);
         });
-        
+
         return $this->render('admin/users/index.html.twig', [
             'users' => $adminUsers,
         ]);
@@ -188,7 +188,7 @@ class UserController extends AbstractController
             $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des utilisateurs.');
             return $this->redirectToRoute('admin_users_index');
         }
-        
+
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             $this->entityManager->remove($user);
             $this->entityManager->flush();

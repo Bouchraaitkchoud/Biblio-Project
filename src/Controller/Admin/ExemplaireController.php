@@ -9,10 +9,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/exemplaires')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_EXEMPLAIRES')")]
+#[IsGranted('ROLE_ADMIN')]
 class ExemplaireController extends AbstractController
 {
     public function __construct(
@@ -45,16 +45,11 @@ class ExemplaireController extends AbstractController
     #[Route('/{id}/return', name: 'admin_exemplaire_return', methods: ['POST'])]
     public function returnBook(Request $request, Exemplaire $exemplaire): Response
     {
-        if ($this->isCsrfTokenValid('return'.$exemplaire->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('return' . $exemplaire->getId(), $request->request->get('_token'))) {
             try {
                 $this->entityManager->beginTransaction();
                 $exemplaire->setStatus('available');
-                $exemplaire->setReturnDate(new \DateTime());
-                $book = $exemplaire->getBook();
-                $currentQuantity = $book->getQuantity();
-                $book->setQuantity($currentQuantity + 1);
                 $this->entityManager->persist($exemplaire);
-                $this->entityManager->persist($book);
                 $this->entityManager->flush();
                 $this->entityManager->commit();
                 $this->addFlash('success', 'Book returned successfully.');
@@ -85,11 +80,13 @@ class ExemplaireController extends AbstractController
         $emailReceipt = $request->request->get('email_receipt') === '1';
         $photoFile = $request->files->get('photo');
         $exemplaire->setStatus('available');
-        $exemplaire->setReturnDate($dateReturned ? new \DateTime($dateReturned) : new \DateTime());
         $this->entityManager->persist($exemplaire);
         $this->entityManager->flush();
 
         if ($printReceipt) {
+            $user = $this->getUser();
+            $processedBy = ($user instanceof \App\Entity\User) ? $user->getEmail() : '';
+
             $request->getSession()->set('return_receipt_data', [
                 'barcode' => $exemplaire->getBarcode(),
                 'book_title' => $exemplaire->getBook()->getTitle(),
@@ -99,7 +96,7 @@ class ExemplaireController extends AbstractController
                 'flag_late' => $flagLate,
                 'flag_damaged' => $flagDamaged,
                 'fine' => $fine,
-                'processed_by' => $this->getUser() instanceof \App\Entity\User ? $this->getUser()->getEmail() : '',
+                'processed_by' => $processedBy,
             ]);
             return $this->redirectToRoute('admin_exemplaire_return_receipt', ['id' => $exemplaire->getId()]);
         }

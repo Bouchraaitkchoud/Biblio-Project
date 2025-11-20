@@ -14,10 +14,9 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 #[Route('/admin/lecteurs')]
-#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_LECTEURS')")]
+#[IsGranted('ROLE_ADMIN')]
 class LecteurController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
@@ -26,7 +25,7 @@ class LecteurController extends AbstractController
     public function index(Request $request, LecteurRepository $lecteurRepository): Response
     {
         $search = trim($request->query->get('search', ''));
-        
+
         if ($search !== '') {
             $searchLower = strtolower($search);
             $lecteurs = $lecteurRepository->createQueryBuilder('l')
@@ -43,13 +42,13 @@ class LecteurController extends AbstractController
         } else {
             $lecteurs = $lecteurRepository->findBy([], ['nom' => 'ASC']);
         }
-        
+
         return $this->render('admin/lecteur/index.html.twig', [
             'lecteurs' => $lecteurs,
             'search' => $search,
         ]);
     }
-    
+
     #[Route('/export-csv', name: 'admin_lecteurs_export_csv', methods: ['GET'])]
     public function exportCsv(LecteurRepository $lecteurRepository): Response
     {
@@ -66,9 +65,10 @@ class LecteurController extends AbstractController
             $promotion = str_replace([",", "\n"], [" ", " "], $lecteur->getPromotion());
             $email = str_replace([",", "\n"], [" ", " "], $lecteur->getEmail());
             $password = str_replace([",", "\n"], [" ", " "], $lecteur->getPassword());
-            
+
             // Surround fields with quotes to properly handle commas in data
-            $csvData .= sprintf('"%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
+            $csvData .= sprintf(
+                '"%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
                 $nom,
                 $prenom,
                 $codeAdmission,
@@ -104,7 +104,7 @@ class LecteurController extends AbstractController
             if (!empty($password)) {
                 $lecteur->setPassword($password);
             }
-            
+
             $this->entityManager->persist($lecteur);
             $this->entityManager->flush();
 
@@ -128,7 +128,7 @@ class LecteurController extends AbstractController
         }
 
         $csvFile = $request->files->get('csv_file');
-        
+
         if (!$csvFile) {
             $this->addFlash('error', 'Aucun fichier n\'a été uploadé.');
             return $this->redirectToRoute('admin_lecteurs_new');
@@ -156,7 +156,7 @@ class LecteurController extends AbstractController
 
             while (($data = fgetcsv($handle)) !== false) {
                 $lineNumber++;
-                
+
                 // Validate row has all required fields
                 if (count($data) < 8) {
                     $errorCount++;
@@ -194,7 +194,7 @@ class LecteurController extends AbstractController
             if ($importedCount > 0) {
                 $this->addFlash('success', "$importedCount lecteur(s) importé(s) avec succès.");
             }
-            
+
             if ($errorCount > 0) {
                 $errorMessage = "$errorCount erreur(s) détectée(s).";
                 if (count($errors) > 0) {
@@ -205,7 +205,6 @@ class LecteurController extends AbstractController
                 }
                 $this->addFlash('error', $errorMessage);
             }
-
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors de l\'import: ' . $e->getMessage());
         }
@@ -233,7 +232,7 @@ class LecteurController extends AbstractController
             if (!empty($newPassword)) {
                 $lecteur->setPassword($newPassword);
             }
-            
+
             $this->entityManager->flush();
             $this->addFlash('success', 'Le lecteur a été mis à jour avec succès.');
             return $this->redirectToRoute('admin_lecteurs_index');
@@ -253,7 +252,7 @@ class LecteurController extends AbstractController
             $this->addFlash('error', 'Vous n\'avez pas la permission de supprimer des lecteurs.');
             return $this->redirectToRoute('admin_lecteurs_index');
         }
-        
+
         if ($this->isCsrfTokenValid('delete' . $lecteur->getId(), $request->request->get('_token'))) {
             $this->entityManager->remove($lecteur);
             $this->entityManager->flush();
@@ -268,16 +267,16 @@ class LecteurController extends AbstractController
         try {
             // Generate a random temporary password
             $temporaryPassword = $this->generateRandomPassword();
-            
+
             // For Lecteur, we use plaintext password (as configured in security.yaml)
             // So we don't hash it
             $lecteur->setPassword($temporaryPassword);
-            
+
             // Mark that the user must change password on next login
             $lecteur->setForcePasswordChange(true);
-            
+
             $this->entityManager->flush();
-            
+
             return new JsonResponse([
                 'success' => true,
                 'newPassword' => $temporaryPassword
@@ -296,21 +295,21 @@ class LecteurController extends AbstractController
         $lowercase = 'abcdefghijklmnopqrstuvwxyz';
         $numbers = '0123456789';
         $special = '!@#$%';
-        
+
         $allChars = $uppercase . $lowercase . $numbers . $special;
-        
+
         // Ensure at least one of each type
         $password = '';
         $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
         $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
         $password .= $numbers[random_int(0, strlen($numbers) - 1)];
         $password .= $special[random_int(0, strlen($special) - 1)];
-        
+
         // Fill the rest randomly
         for ($i = 4; $i < $length; $i++) {
             $password .= $allChars[random_int(0, strlen($allChars) - 1)];
         }
-        
+
         // Shuffle the password
         return str_shuffle($password);
     }
