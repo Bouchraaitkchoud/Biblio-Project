@@ -69,6 +69,78 @@ class OrderController extends AbstractController
         ]);
     }
 
+    #[Route('/search', name: 'admin_orders_search', methods: ['POST'])]
+    public function search(Request $request): Response
+    {
+        $searchTerm = trim($request->request->get('search', ''));
+
+        if (empty($searchTerm)) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Veuillez entrer un ID de commande ou un code de reçu'
+            ], 400);
+        }
+
+        // Check if it's numeric (order ID)
+        if (is_numeric($searchTerm)) {
+            $order = $this->orderRepository->find((int)$searchTerm);
+
+            if ($order) {
+                return $this->json([
+                    'success' => true,
+                    'order' => [
+                        'id' => $order->getId(),
+                        'status' => $order->getStatus(),
+                        'placedAt' => $order->getPlacedAt()->format('d/m/Y à H:i'),
+                        'lecteur' => [
+                            'nom' => $order->getLecteur()->getNom(),
+                            'prenom' => $order->getLecteur()->getPrenom(),
+                            'email' => $order->getLecteur()->getEmail(),
+                        ],
+                        'items' => array_map(function ($item) {
+                            return [
+                                'book_title' => $item->getExemplaire()->getBook()->getTitle(),
+                                'barcode' => $item->getExemplaire()->getBarcode(),
+                            ];
+                        }, $order->getItems()->toArray()),
+                        'treatUrl' => $order->getStatus() === 'pending' ? $this->generateUrl('admin_order_treat', ['id' => $order->getId()]) : null
+                    ]
+                ]);
+            }
+        }
+
+        // Otherwise, search by receipt code (barcode on the receipt)
+        $order = $this->orderRepository->findOneBy(['receiptCode' => $searchTerm]);
+
+        if ($order) {
+            return $this->json([
+                'success' => true,
+                'order' => [
+                    'id' => $order->getId(),
+                    'status' => $order->getStatus(),
+                    'placedAt' => $order->getPlacedAt()->format('d/m/Y à H:i'),
+                    'lecteur' => [
+                        'nom' => $order->getLecteur()->getNom(),
+                        'prenom' => $order->getLecteur()->getPrenom(),
+                        'email' => $order->getLecteur()->getEmail(),
+                    ],
+                    'items' => array_map(function ($item) {
+                        return [
+                            'book_title' => $item->getExemplaire()->getBook()->getTitle(),
+                            'barcode' => $item->getExemplaire()->getBarcode(),
+                        ];
+                    }, $order->getItems()->toArray()),
+                    'treatUrl' => $order->getStatus() === 'pending' ? $this->generateUrl('admin_order_treat', ['id' => $order->getId()]) : null
+                ]
+            ]);
+        }
+
+        return $this->json([
+            'success' => false,
+            'message' => 'Aucune commande trouvée pour "' . htmlspecialchars($searchTerm) . '"'
+        ], 404);
+    }
+
     #[Route('/{id}/approve', name: 'admin_order_approve', methods: ['POST'])]
     public function approve(Request $request, Order $order, EntityManagerInterface $em): Response
     {

@@ -208,6 +208,17 @@
             color: #1a2e4f;
             font-family: 'Georgia', serif;
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 {% endblock %}
 
@@ -218,6 +229,20 @@
         {% endfor %}
 
         <h1 class="mb-4"><i class="fas fa-tasks"></i> Gestion des Commandes</h1>
+
+        <!-- Search Section -->
+        <div class="filters-container">
+            <h5 style="margin-bottom: 15px; color: #1a2e4f;"><i class="fas fa-search"></i> Rechercher une commande</h5>
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="ID de commande (ex: 123) ou code-barres de la commande" autofocus>
+                <button type="button" id="searchButton" class="btn btn-primary" style="background: #1a2e4f; border-color: #1a2e4f;">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
+            </div>
+            <small class="text-muted mt-2 d-block">Vous pouvez saisir l'ID de commande ou scanner le code-barres de la commande (imprimé sur le reçu)</small>
+            <div id="searchMessage" class="alert" style="display: none; margin-top: 15px;"></div>
+            <div id="searchResults" style="margin-top: 15px;"></div>
+        </div>
 
         <!-- Statistics -->
         <div class="order-stats">
@@ -310,4 +335,119 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const searchMessage = document.getElementById('searchMessage');
+        const searchResults = document.getElementById('searchResults');
+
+        if (searchInput && searchButton) {
+            // Handle Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            // Handle button click
+            searchButton.addEventListener('click', performSearch);
+
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                
+                if (!searchTerm) {
+                    showMessage('Veuillez entrer un ID de commande ou un code-barres', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('search', searchTerm);
+
+                fetch('{{ path('admin_orders_search') }}', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.order) {
+                        displayOrder(data.order);
+                        showMessage('Commande trouvée !', 'success');
+                    } else {
+                        showMessage(data.message || 'Commande non trouvée', 'error');
+                        searchResults.innerHTML = '';
+                    }
+                })
+                .catch(error => {
+                    showMessage('Erreur lors de la recherche', 'error');
+                    searchResults.innerHTML = '';
+                });
+            }
+
+            function displayOrder(order) {
+                const statusClass = order.status === 'pending' ? 'pending' : order.status === 'approved' ? 'approved' : 'rejected';
+                const statusBadgeClass = 'badge-' + statusClass;
+                const statusIcon = order.status === 'pending' ? 'hourglass-half' : order.status === 'approved' ? 'check-circle' : 'times-circle';
+                const statusText = order.status === 'pending' ? 'En Attente' : order.status === 'approved' ? 'Approuvée' : 'Rejetée';
+
+                let booksHtml = '';
+                order.items.forEach(item => {
+                    booksHtml += `
+                        <div class="book-item">
+                            <div class="book-info">
+                                <div class="book-title">${item.book_title}</div>
+                                <div class="book-author">
+                                    Code-barres: <code style="background: #f0f0f0; padding: 2px 5px; border-radius: 3px;">${item.barcode}</code>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const actionButton = order.treatUrl ? `
+                    <div class="action-buttons">
+                        <a href="${order.treatUrl}" class="btn-treat">
+                            <i class="fas fa-edit"></i> Traiter la commande
+                        </a>
+                    </div>
+                ` : '';
+
+                searchResults.innerHTML = `
+                    <div class="order-item status-${statusClass}" style="animation: fadeIn 0.3s;">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-id">#${order.id} - Commande du ${order.placedAt}</div>
+                            </div>
+                            <span class="status-badge ${statusBadgeClass}">
+                                <i class="fas fa-${statusIcon}"></i> ${statusText}
+                            </span>
+                        </div>
+                        <div class="user-info">
+                            <i class="fas fa-user-circle"></i>
+                            <strong>${order.lecteur.nom.toUpperCase()} ${order.lecteur.prenom}</strong>
+                            <span style="margin-left: 1rem; color: #7a6b52;">(${order.lecteur.email})</span>
+                        </div>
+                        <div class="books-list">
+                            <strong style="color: #1a2e4f;">Livres commandés :</strong>
+                            ${booksHtml}
+                        </div>
+                        ${actionButton}
+                    </div>
+                `;
+            }
+
+            function showMessage(message, type) {
+                searchMessage.textContent = message;
+                searchMessage.className = 'alert alert-' + (type === 'success' ? 'success' : 'danger');
+                searchMessage.style.display = 'block';
+                setTimeout(() => {
+                    searchMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+    });
+    </script>
 {% endblock %}
