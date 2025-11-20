@@ -56,56 +56,18 @@ class ReturnController extends AbstractController
             if (!$barcode) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => 'No barcode or order ID provided'
+                    'message' => 'No barcode provided'
                 ], 400);
             }
 
             $barcode = trim($barcode);
 
             // Log the incoming request
-            $this->logger->info('Processing scan request', [
-                'input' => $barcode
+            $this->logger->info('Processing barcode scan request', [
+                'barcode' => $barcode
             ]);
 
-            // Check if input is numeric (could be order ID)
-            if (is_numeric($barcode)) {
-                // Try to find by order ID first
-                $order = $this->entityManager->getRepository(Order::class)->find((int)$barcode);
-
-                if ($order && $order->getStatus() === 'approved' && $order->getReturnedAt() === null) {
-                    // Return all exemplaires for this order
-                    $exemplaires = [];
-                    foreach ($order->getItems() as $item) {
-                        $ex = $item->getExemplaire();
-                        if ($ex->getStatus() === 'borrowed') {
-                            $exemplaires[] = [
-                                'id' => $ex->getId(),
-                                'barcode' => $ex->getBarcode(),
-                                'book_title' => $ex->getBook()->getTitle(),
-                                'location' => $ex->getLocation() ? $ex->getLocation()->getName() : 'N/A'
-                            ];
-                        }
-                    }
-
-                    if (empty($exemplaires)) {
-                        return new JsonResponse([
-                            'success' => false,
-                            'message' => 'All books in order #' . $order->getId() . ' have already been returned'
-                        ], 400);
-                    }
-
-                    return new JsonResponse([
-                        'success' => true,
-                        'order_mode' => true,
-                        'order_id' => $order->getId(),
-                        'exemplaires' => $exemplaires,
-                        'borrowed_by' => $order->getLecteur()->getNom() . ' ' . $order->getLecteur()->getPrenom(),
-                        'borrowed_date' => $order->getProcessedAt()->format('Y-m-d')
-                    ]);
-                }
-            }
-
-            // Otherwise, treat as barcode
+            // Find exemplaire using repository
             $exemplaire = $this->exemplaireRepository->findOneByBarcode($barcode);
 
             if (!$exemplaire) {

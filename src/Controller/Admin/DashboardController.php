@@ -35,6 +35,7 @@ class DashboardController extends AbstractController
     {
         // Get total counts
         $total_books = $this->bookRepository->count([]);
+        $total_exemplaires = $this->exemplaireRepository->count([]);
         $total_orders = $this->orderRepository->count([]);
         $total_users = $this->userRepository->count([]);
         $total_disciplines = $this->disciplineRepository->count([]);
@@ -49,6 +50,7 @@ class DashboardController extends AbstractController
 
         return $this->render('admin/dashboard/index.html.twig', [
             'total_books' => $total_books,
+            'total_exemplaires' => $total_exemplaires,
             'total_orders' => $total_orders,
             'total_users' => $total_users,
             'total_disciplines' => $total_disciplines,
@@ -56,4 +58,4 @@ class DashboardController extends AbstractController
             'recent_orders' => $recent_orders
         ]);
     }
-} 
+}
