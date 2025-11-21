@@ -12,13 +12,7 @@
             <div class="mb-3">
                 <label for="name" class="form-label">Nom de l'auteur</label>
                 <input type="text" class="form-control" id="name" name="name" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="bio" class="form-label">Biographie</label>
-                <textarea class="form-control" id="bio" name="bio" rows="4"></textarea>
-            </div>
-            
+            </div>           
             <button type="submit" class="btn btn-primary">Créer l'auteur</button>
             <a href="{{ path('admin_authors_index') }}" class="btn btn-secondary">Retour à la liste</a>
         </form>

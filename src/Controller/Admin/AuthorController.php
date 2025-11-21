@@ -49,7 +49,7 @@ class AuthorController extends AbstractController
             $name = $request->request->get('name');
 
             if (empty($name)) {
-                $this->addFlash('error', 'Author name cannot be empty.');
+                $this->addFlash('error', "Le nom de l'auteur ne peut pas être vide.");
                 return $this->render('admin/author/new.html.twig');
             }
 
@@ -59,7 +59,7 @@ class AuthorController extends AbstractController
             $this->entityManager->persist($author);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'Author created successfully.');
+            $this->addFlash('success', "L'auteur a été créé avec succès");
 
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse([
@@ -115,7 +115,7 @@ class AuthorController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            $this->addFlash('success', 'Author updated successfully.');
+            $this->addFlash('success', "L'auteur a été mis à jour avec succès.");
             return $this->redirectToRoute('admin_authors_index');
         }
 
@@ -160,14 +160,14 @@ class AuthorController extends AbstractController
 
             // Check if it has books
             if (!$author->getBooks()->isEmpty()) {
-                $this->addFlash('error', 'Cannot delete author that has books.');
+                $this->addFlash('error', 'Impossible de supprimer un auteur qui a des livres.');
                 return $this->redirectToRoute('admin_authors_index');
             }
 
             $this->entityManager->remove($author);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'Author deleted successfully.');
+            $this->addFlash('success', "L'auteur a été supprimé avec succès.");
         }
 
         return $this->redirectToRoute('admin_authors_index');

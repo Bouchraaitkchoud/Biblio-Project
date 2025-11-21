@@ -315,11 +315,13 @@
     {% endif %}
     {# FIN NAVIGATION LECTEUR #}
     
+    {% if not (app.request.get('_route') is defined and app.request.get('_route') starts with 'admin_') %}
     <div class="container">
         {% for message in app.flashes('success') %}
             <div class="alert alert-success mt-3">{{ message }}</div>
         {% endfor %}
     </div>
+    {% endif %}
 
     {% block body %}
         {% if app.request.get('_route') is defined and app.request.get('_route') starts with 'admin_' %}

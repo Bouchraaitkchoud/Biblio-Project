@@ -78,7 +78,7 @@ class PublisherController extends AbstractController
             $name = $request->request->get('name');
 
             if (empty($name)) {
-                $this->addFlash('error', 'Publisher name cannot be empty.');
+                $this->addFlash('error', "Le nom de l'éditeur ne peut pas être vide.");
                 return $this->render('admin/publisher/new.html.twig');
             }
 
@@ -88,7 +88,7 @@ class PublisherController extends AbstractController
             $this->entityManager->persist($publisher);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'Publisher created successfully.');
+            $this->addFlash('success', "Éditeur créé avec succès.");
 
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse([
@@ -120,7 +120,7 @@ class PublisherController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            $this->addFlash('success', 'Publisher updated successfully.');
+            $this->addFlash('success', "Mise à jour de l'éditeur réussie.");
             return $this->redirectToRoute('admin_publishers_index');
         }
 
@@ -142,14 +142,14 @@ class PublisherController extends AbstractController
         if ($this->isCsrfTokenValid('delete' . $publisher->getId(), $request->request->get('_token'))) {
             // Check if it has books
             if (!$publisher->getBooks()->isEmpty()) {
-                $this->addFlash('error', 'Cannot delete publisher that has books.');
+                $this->addFlash('error', 'Impossible de supprimer un éditeur qui possède des livres.');
                 return $this->redirectToRoute('admin_publishers_index');
             }
 
             $this->entityManager->remove($publisher);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'Publisher deleted successfully.');
+            $this->addFlash('success', 'Éditeur supprimé avec succès.');
         }
 
         return $this->redirectToRoute('admin_publishers_index');
@@ -163,7 +163,7 @@ class PublisherController extends AbstractController
         if (empty($name)) {
             return new JsonResponse([
                 'success' => false,
-                'error' => 'Publisher name is required.'
+                'error' => "Le nom de l'éditeur est obligatoire."
             ], 400);
         }
 

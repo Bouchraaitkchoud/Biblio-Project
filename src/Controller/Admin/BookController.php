@@ -225,7 +225,7 @@ class BookController extends AbstractController
             }
 
             $this->entityManager->flush();
-            $this->addFlash('success', 'Book updated successfully.');
+            $this->addFlash('success', 'Livre mis à jour avec succès.');
             return $this->redirectToRoute('admin_books_index');
         }
 
@@ -258,14 +258,14 @@ class BookController extends AbstractController
                 ->getOneOrNullResult() !== null;
 
             if ($hasActiveCartItems) {
-                $this->addFlash('error', 'Cannot delete book that has items in active carts.');
+                $this->addFlash('error', 'Impossible de supprimer un livre contenant des articles dans un panier actif.');
                 return $this->redirectToRoute('admin_books_index');
             }
 
             $this->entityManager->remove($book);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'Book deleted successfully.');
+            $this->addFlash('success', 'Livre supprimé avec succès.');
         }
 
         return $this->redirectToRoute('admin_books_index');
@@ -302,7 +302,7 @@ class BookController extends AbstractController
                 // Rollback transaction on error
                 $this->entityManager->rollback();
 
-                $this->addFlash('error', 'An error occurred while adding the exemplaire. Please try again.');
+                $this->addFlash('error', "Une erreur s'est produite lors de l'ajout de l'exemplaire. Veuillez réessayer.");
                 // Log the error for debugging
                 error_log('Error adding exemplaire: ' . $e->getMessage());
             }
