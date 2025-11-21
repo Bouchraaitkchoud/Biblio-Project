@@ -116,6 +116,108 @@
             text-decoration: none;
             color: #fff;
         }
+        
+        /* Modal styles */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirmation-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            animation: slideIn 0.3s ease-out;
+            border-left: 5px solid #b2903e;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            color: #b2903e;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #1a2e4f;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal-message {
+            color: #7a6b52;
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-family: 'Georgia', serif;
+            font-size: 1.05rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .modal-btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: #b2903e;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background: #9a7a34;
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-secondary {
+            background: #e9ecef;
+            color: #1a2e4f;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
     </style>
 {% endblock %}
 
@@ -262,22 +364,17 @@
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
         button.disabled = true;
         
-        console.log('Submitting cart...');
-        
         fetch('/submit-cart', {
             method: 'POST',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('Response data:', data);
             if (data.success) {
+
                 showNotification('Demande envoyée avec succès ! Impression du reçu...', 'success');
                 
                 // Open PDF file directly for printing
@@ -317,18 +414,60 @@
                         window.location.href = '/';
                     }, 2000);
                 }
+=======
+                // Affiche la modal de succès personnalisée
+                showSuccessModal();
+
             } else {
-                button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
+                showNotification(data.message || 'Erreur lors de la soumission', 'error');
+                button.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la demande';
                 button.disabled = false;
-                showNotification(data.message || 'Erreur lors de l\'envoi', 'error');
             }
         })
         .catch(error => {
-            console.error('Submit cart error:', error);
-            button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
+            showNotification('Erreur: ' + error.message, 'error');
+            button.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la demande';
             button.disabled = false;
-            showNotification('Une erreur est survenue: ' + error.message, 'error');
         });
+    }
+
+    function showSuccessModal() {
+        // Crée la modal si elle n'existe pas
+        let modal = document.getElementById('successModal');
+        
+        if (!modal) {
+            const modalHTML = `
+                <div class="confirmation-modal" id="successModal">
+                    <div class="modal-content">
+                        <div class="modal-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="modal-title">Succès !</div>
+                        <div class="modal-message">
+                            Votre demande d'emprunt a été soumise avec succès !<br>
+                            <br>
+                            <strong>Vous allez être redirigé vers la page de connexion.</strong>
+                        </div>
+                        <div class="modal-buttons">
+                            <button class="modal-btn modal-btn-primary" onclick="redirectToLogin()">
+                                <i class="fas fa-check"></i> OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            modal = document.getElementById('successModal');
+        }
+        
+        modal.classList.add('show');
+        
+        // Redirection automatique après 3 secondes
+        setTimeout(redirectToLogin, 3000);
+    }
+
+    function redirectToLogin() {
+        window.location.href = '{{ path("app_login") }}';
     }
 
     function updateCartDisplay() {

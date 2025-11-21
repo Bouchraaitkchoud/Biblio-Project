@@ -30,6 +30,8 @@
             display: flex;
             gap: 2rem;
             align-items: flex-start;
+            width: 100% !important;
+            max-width: 100% !important;
         }
         .book-cover {
             width: 100px;
@@ -143,6 +145,8 @@
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            width: 100% !important;
+            max-width: 100% !important;
         }
         .exemplaires-header {
             display: flex;
@@ -177,7 +181,7 @@
             box-shadow: 0 4px 8px rgba(178, 144, 62, 0.3);
         }
         .exemplaires-table {
-            width: 100%;
+            width: 100% !important;
             border-collapse: separate;
             border-spacing: 0;
             border-radius: 8px;
@@ -293,6 +297,16 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
+        }
+
+        /* Make container full width */
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
     </style>
 {% endblock %}
@@ -469,12 +483,7 @@
                                         <td>
                                             <div class="actions-cell">
                                                 {% if exemplaire.status == 'borrowed' %}
-                                                    <form method="post" action="{{ path('admin_exemplaire_return', {'id': exemplaire.id}) }}" style="display:inline-block;">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('return' ~ exemplaire.id) }}">
-                                                        <button type="submit" class="btn btn-action btn-return" onclick="return confirm('Marquer cet exemplaire comme retourné ?')" title="Marquer comme retourné">
-                                                            <i class="fas fa-undo-alt"></i>
-                                                        </button>
-                                                    </form>
+
                                                 {% endif %}
                                                 <a href="{{ path('admin_exemplaire_edit', {'id': exemplaire.id}) }}" class="btn btn-action btn-action-edit" title="Modifier">
                                                     <i class="fas fa-edit"></i>

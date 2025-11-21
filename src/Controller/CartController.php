@@ -143,14 +143,15 @@ class CartController extends AbstractController
     {
         // Block LIMITED_ADMIN from submitting cart
         if ($this->isGranted('ROLE_LIMITED_ADMIN') && !$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Les administrateurs limités n\'ont pas accès au panier.');
+            $this->addFlash('error', 'Les administrateurs limités ne peuvent pas accéder à cette fonctionnalité.');
+            return $this->redirectToRoute('app_logout');
         }
 
         /** @var \App\Entity\Lecteur $lecteur */
         $lecteur = $security->getUser();
 
         if (!$lecteur) {
-            return new JsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
+            return $this->redirectToRoute('app_login');
         }
 
         try {
