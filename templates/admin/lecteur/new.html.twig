@@ -254,7 +254,7 @@
                 </div>
             </div>
             <a href="{{ path('admin_lecteurs_index') }}" class="btn btn-cancel">
-                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                <i class="fas fa-arrow-left me-2"></i>Retour Ã  la liste
             </a>
         </div>
     </div>
@@ -300,12 +300,12 @@
                                 {{ form_row(form.nom, {label: 'Nom *'}) }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                {{ form_row(form.prenom, {label: 'Prénom *'}) }}
+                                {{ form_row(form.prenom, {label: 'PrÃ©nom *'}) }}
                             </div>
                         </div>
                         <div class="mb-3">
                             {{ form_row(form.email, {label: 'Adresse email *', attr: {placeholder: 'exemple@email.com'}}) }}
-                            <small class="form-text">L'email doit être unique dans le système</small>
+                            <small class="form-text">L'email doit Ãªtre unique dans le systÃ¨me</small>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -316,8 +316,8 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            {{ form_row(form.password, {label: 'Mot de passe *', attr: {placeholder: 'Minimum 6 caractères'}}) }}
-                            <small class="form-text">Le mot de passe sera stocké en clair (minimum 6 caractères)</small>
+                            {{ form_row(form.password, {label: 'Mot de passe *', attr: {placeholder: 'Minimum 6 caractÃ¨res'}}) }}
+                            <small class="form-text">Le mot de passe sera stockÃ© en clair (minimum 6 caractÃ¨res)</small>
                         </div>
                 </div>
                 <div class="action-buttons">
@@ -340,22 +340,22 @@
                 <div class="lecteur-form-card-body">
                     <div class="csv-info-alert">
                         <h6><i class="fas fa-info-circle me-2"></i>Format du fichier CSV requis</h6>
-                        <p class="mb-2">Votre fichier CSV doit contenir les colonnes suivantes (dans cet ordre précis) :</p>
-                        <p class="mb-0"><code>Nom, Prénom, Code d'admission, Établissement, Formation, Promotion, Email, Mot de passe</code></p>
+                        <p class="mb-2">Votre fichier CSV doit contenir les colonnes suivantes (dans cet ordre prÃ©cis) :</p>
+                        <p class="mb-0"><code>Nom, PrÃ©nom, Code d'admission, Ã©tablissement, Formation, Promotion, Email, Mot de passe</code></p>
                     </div>
                     <form action="{{ path('admin_lecteurs_import_csv') }}" method="post" enctype="multipart/form-data">
                         <div class="mb-4">
                             <label for="csvFile" class="form-label">
-                                <i class="fas fa-cloud-upload-alt me-2"></i>Sélectionner un fichier CSV
+                                <i class="fas fa-cloud-upload-alt me-2"></i>SÃ©lectionner un fichier CSV
                             </label>
                             <div class="custom-file-upload">
                                 <input type="file" class="form-control form-control-lg" id="csvFile" name="csv_file" accept=".csv" required style="display: none;">
                                 <button type="button" class="btn-choose-file" onclick="document.getElementById('csvFile').click()">
                                     <i class="fas fa-folder-open me-2"></i>Choisir un fichier
                                 </button>
-                                <span class="file-name" id="fileName">Aucun fichier sélectionné</span>
+                                <span class="file-name" id="fileName">Aucun fichier sÃ©lectionnÃ©</span>
                             </div>
-                            <small class="form-text"><i class="fas fa-file-alt me-1"></i>Formats acceptés : .csv uniquement</small>
+                            <small class="form-text"><i class="fas fa-file-alt me-1"></i>Formats acceptÃ©s : .csv uniquement</small>
                         </div>
                         <input type="hidden" name="_token" value="{{ csrf_token('csv_import') }}">
                 </div>
@@ -380,16 +380,16 @@
                     <h6><i class="fas fa-asterisk me-2" style="font-size: 0.7rem; color: #dc3545;"></i>Champs obligatoires</h6>
                     <ul>
                         <li>Nom du lecteur</li>
-                        <li>Prénom du lecteur</li>
-                        <li>Adresse email (doit être unique)</li>
-                        <li>Mot de passe (minimum 6 caractères)</li>
+                        <li>PrÃ©nom du lecteur</li>
+                        <li>Adresse email (doit Ãªtre unique)</li>
+                        <li>Mot de passe (minimum 6 caractÃ¨res)</li>
                     </ul>
-                    <h6><i class="fas fa-lock me-2"></i>Sécurité du mot de passe</h6>
-                    <p>Le mot de passe sera stocké en clair dans la base de données.</p>
+                    <h6><i class="fas fa-lock me-2"></i>SÃ©curitÃ© du mot de passe</h6>
+                    <p>Le mot de passe sera stockÃ© en clair dans la base de donnÃ©es.</p>
                     <h6><i class="fas fa-file-csv me-2"></i>Import en masse</h6>
-                    <p>Utilisez le mode CSV pour créer plusieurs lecteurs simultanément.</p>
+                    <p>Utilisez le mode CSV pour crÃ©er plusieurs lecteurs simultanÃ©ment.</p>
                     <h6><i class="fas fa-lightbulb me-2"></i>Conseil</h6>
-                    <p class="mb-0">Vérifiez bien les informations avant de valider, notamment l'email.</p>
+                    <p class="mb-0">VÃ©rifiez bien les informations avant de valider, notamment l'email.</p>
                 </div>
             </div>
         </div>
@@ -418,7 +418,7 @@
                 fileName.textContent = e.target.files[0].name;
                 fileName.classList.add('has-file');
             } else {
-                fileName.textContent = 'Aucun fichier sélectionné';
+                fileName.textContent = 'Aucun fichier sÃ©lectionnÃ©';
                 fileName.classList.remove('has-file');
             }
         });
