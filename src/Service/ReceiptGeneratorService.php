@@ -28,11 +28,6 @@ class ReceiptGeneratorService
         $pdf->Cell(0, 3, str_repeat('=', 28), 0, 1, 'C');
         $pdf->Ln(1);
 
-        // Order ID
-        $pdf->SetFont('helvetica', '', 7);
-        $pdf->Cell(0, 3, 'ID Commande: #' . $order->getId(), 0, 1, 'C');
-        $pdf->Ln(1);
-
         // Receipt code displayed prominently
         $pdf->SetFont('helvetica', 'B', 14);
         $pdf->Cell(0, 6, $order->getReceiptCode(), 0, 1, 'C');
@@ -42,6 +37,21 @@ class ReceiptGeneratorService
         $barcodeData = $order->getReceiptCode();
         $pdf->write1DBarcode($barcodeData, 'C128', null, null, 50, 12, 0.4, ['position' => 'C', 'align' => 'C'], 'N');
         $pdf->Ln(2);
+
+        // Order ID
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, 'ID Commande: #' . $order->getId(), 0, 1, 'C');
+        $pdf->Ln(1);
+
+        // Student name
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, 'Nom et prénom: ' . $order->getLecteur()->getNom() . ' ' . $order->getLecteur()->getPrenom(), 0, 1, 'C');
+        $pdf->Ln(1);
+
+        // Date
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->Cell(0, 3, 'Date de commande: ' . $order->getPlacedAt()->format('d/m/Y H:i'), 0, 1, 'C');
+        $pdf->Ln(1);
 
         // Order info section - Simple list of books
         $pdf->SetFont('helvetica', '', 7);
