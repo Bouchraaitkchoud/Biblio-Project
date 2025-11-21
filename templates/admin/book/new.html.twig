@@ -9,7 +9,7 @@
             Ajouter un nouveau livre
         </div>
 
-        {{ form_start(form, {'attr': {'data-controller': 'select2', 'multipart': true}}) }}
+        {{ form_start(form, {'multipart': true, 'attr': {'data-controller': 'select2'}}) }}
         
         <!-- Section 1: Basic Information -->
         <div class="form-section">
@@ -131,14 +131,6 @@
                 </div>
             </div>
         </div>
-        </div>
-        
-        {{ form_end(form) }}
-        </div>
-
- 
-  
-
         
         <!-- Section 5: Exemplaires (REQUIRED) -->
         <div class="form-section" style="border-left-color: #dc3545; background-color: #fff5f5;">
@@ -167,7 +159,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Mode d'acquisition</label>
-                            <select name="exemplaire_acquisition_mode" class="form-control">
+                            <select name="exemplaire_acquisition_mode[]" class="form-control">
                                 <option value="Achat">Achat</option>
                                 <option value="Don">Don</option>
                                 <option value="Échange">Échange</option>
@@ -180,14 +172,14 @@
                         <div class="col-md-6">
                             <label class="form-label">Date d'acquisition</label>
                             <input type="date" 
-                                   name="exemplaire_acquisition_date" 
+                                   name="exemplaire_acquisition_date[]" 
                                    class="form-control"
                                    value="{{ 'now'|date('Y-m-d') }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Prix (€)</label>
                             <input type="number" 
-                                   name="exemplaire_price" 
+                                   name="exemplaire_price[]" 
                                    class="form-control" 
                                    step="0.01"
                                    placeholder="0.00">
@@ -197,7 +189,7 @@
                     <div class="row mt-2">
                         <div class="col-md-12">
                             <label class="form-label">Remarques</label>
-                            <textarea name="exemplaire_comment" 
+                            <textarea name="exemplaire_comment[]" 
                                       class="form-control" 
                                       rows="2"
                                       placeholder="Exemples: État du livre, notes spéciales..."></textarea>
@@ -224,6 +216,10 @@
             <a href="{{ path('admin_books_index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Retour aux Livres
             </a>
+        </div>
+        
+        {{ form_end(form) }}
+    </div>
 
 
     <style>
@@ -340,14 +336,21 @@
     </style>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let exemplairCount = 1;
+    // Use event delegation to handle clicks even after Turbo navigation
+    document.addEventListener('click', function(e) {
+        // Check if the clicked element is the add button or inside it
+        const addBtn = e.target.closest('#addExemplaireBtn');
         
-        document.getElementById('addExemplaireBtn').addEventListener('click', function() {
+        if (addBtn) {
+            console.log('Add button clicked via delegation');
             const container = document.getElementById('exemplairesContainer');
+            
+            // Calculate index based on current items
+            const currentIndex = container.querySelectorAll('.exemplaire-item').length;
+            
             const newItem = document.createElement('div');
             newItem.className = 'exemplaire-item mb-3';
-            newItem.dataset.exemplaiIndex = exemplairCount;
+            newItem.dataset.exemplaireIndex = currentIndex;
             
             newItem.innerHTML = `
                 <div class="row">
@@ -361,7 +364,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Mode d'acquisition</label>
-                        <select name="exemplaire_acquisition_mode" class="form-control">
+                        <select name="exemplaire_acquisition_mode[]" class="form-control">
                             <option value="Achat">Achat</option>
                             <option value="Don">Don</option>
                             <option value="Échange">Échange</option>
@@ -374,14 +377,14 @@
                     <div class="col-md-6">
                         <label class="form-label">Date d'acquisition</label>
                         <input type="date" 
-                               name="exemplaire_acquisition_date" 
+                               name="exemplaire_acquisition_date[]" 
                                class="form-control"
                                value="${new Date().toISOString().split('T')[0]}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Prix (€)</label>
                         <input type="number" 
-                               name="exemplaire_price" 
+                               name="exemplaire_price[]" 
                                class="form-control" 
                                step="0.01"
                                placeholder="0.00">
@@ -391,7 +394,7 @@
                 <div class="row mt-2">
                     <div class="col-md-12">
                         <label class="form-label">Remarques</label>
-                        <textarea name="exemplaire_comment" 
+                        <textarea name="exemplaire_comment[]" 
                                   class="form-control" 
                                   rows="2"
                                   placeholder="Exemples: État du livre, notes spéciales..."></textarea>
@@ -406,13 +409,15 @@
             `;
             
             container.appendChild(newItem);
-            exemplairCount++;
-            
-            // Attach remove listener
-            newItem.querySelector('.remove-exemplaire').addEventListener('click', function() {
-                newItem.remove();
-            });
-        });
+        }
+        
+        // Handle remove button click
+        if (e.target.closest('.remove-exemplaire')) {
+            const item = e.target.closest('.exemplaire-item');
+            if (item) {
+                item.remove();
+            }
+        }
     });
     </script>
 {% endblock %}

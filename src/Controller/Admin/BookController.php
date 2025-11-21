@@ -117,7 +117,7 @@ class BookController extends AbstractController
             }
 
             // Handle exemplaire creation (at least one is required)
-            $exemplaireBarcodes = $request->request->get('exemplaire_barcodes', []);
+            $exemplaireBarcodes = $request->request->all()['exemplaire_barcodes'] ?? [];
             $exemplaireBarcodes = array_filter(array_map('trim', (array)$exemplaireBarcodes));
 
             if (empty($exemplaireBarcodes)) {
@@ -135,23 +135,32 @@ class BookController extends AbstractController
                 $this->entityManager->flush();
 
                 // Create exemplaires for each barcode
-                foreach ($exemplaireBarcodes as $barcode) {
+                // Create exemplaires for each barcode
+                $acquisitionModes = $request->request->all()['exemplaire_acquisition_mode'] ?? [];
+                $acquisitionDates = $request->request->all()['exemplaire_acquisition_date'] ?? [];
+                $prices = $request->request->all()['exemplaire_price'] ?? [];
+                $comments = $request->request->all()['exemplaire_comment'] ?? [];
+
+                foreach ($exemplaireBarcodes as $index => $barcode) {
                     $exemplaire = new Exemplaire();
                     $exemplaire->setBook($book);
                     $exemplaire->setBarcode($barcode);
                     $exemplaire->setStatus('available');
-                    $exemplaire->setAcquisitionMode($request->request->get('exemplaire_acquisition_mode') ?: 'Achat');
 
-                    if ($acquisitionDate = $request->request->get('exemplaire_acquisition_date')) {
-                        $exemplaire->setAcquisitionDate(new \DateTime($acquisitionDate));
+                    // Get value at current index or default
+                    $mode = isset($acquisitionModes[$index]) ? $acquisitionModes[$index] : 'Achat';
+                    $exemplaire->setAcquisitionMode($mode);
+
+                    if (!empty($acquisitionDates[$index])) {
+                        $exemplaire->setAcquisitionDate(new \DateTime($acquisitionDates[$index]));
                     }
 
-                    if ($price = $request->request->get('exemplaire_price')) {
-                        $exemplaire->setPrice($price);
+                    if (!empty($prices[$index])) {
+                        $exemplaire->setPrice($prices[$index]);
                     }
 
-                    if ($comment = $request->request->get('exemplaire_comment')) {
-                        $exemplaire->setComment($comment);
+                    if (!empty($comments[$index])) {
+                        $exemplaire->setComment($comments[$index]);
                     }
 
                     $this->entityManager->persist($exemplaire);
