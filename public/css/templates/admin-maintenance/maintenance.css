@@ -54,7 +54,7 @@
 
 .info-card .academic-year {
     font-size: 1.3rem;
-    color: #17A2B8;
+    color: #3365b7;
     font-weight: 700;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .btn-backup-clean {
-    background: linear-gradient(135deg, #17A2B8, #16A085);
+    background: linear-gradient(135deg, #3365b7, #4575c7);
     color: #FFFFFF;
     border: none;
     border-radius: 8px;
@@ -81,7 +81,7 @@
 }
 
 .btn-backup-clean:hover {
-    background: linear-gradient(135deg, #16A085, #1ABC9C);
+    background: linear-gradient(135deg, #4575c7, #5a8fd9);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
     color: #FFFFFF;
@@ -113,7 +113,7 @@
 }
 
 .backup-table thead {
-    background: linear-gradient(135deg, #5A9BB5 0%, #4A90A4 100%);
+    background: linear-gradient(135deg, #3365b7 0%, #2555a7 100%);
     color: #FFFFFF;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .btn-download {
-    background: linear-gradient(135deg, #17A2B8, #16A085);
+    background: linear-gradient(135deg, #3365b7, #4575c7);
     color: #FFFFFF;
     border: none;
     border-radius: 6px;
@@ -161,7 +161,7 @@
 }
 
 .btn-download:hover {
-    background: linear-gradient(135deg, #16A085, #1ABC9C);
+    background: linear-gradient(135deg, #4575c7, #5a8fd9);
     color: #FFFFFF;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
@@ -238,5 +238,6 @@
     padding: 1rem;
     background: #F8F9FA;
     border-radius: 6px;
-    border-left: 3px solid #17A2B8;
+    border-left: 3px solid #3365b7;
 }
+

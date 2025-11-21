@@ -1,4 +1,4 @@
-ï»¿{% extends "base.html.twig" %}
+{% extends "base.html.twig" %}
 
 {% block title %}Livres - {{ discipline.name }}{% endblock %}
 
@@ -332,7 +332,7 @@
                 <small class="text-muted mt-2 d-block">
                     Recherche par titre, auteur ou ISBN dans cette discipline
                     {% if searchQuery %}
-                        - <strong>{{ books|length }}</strong> rÃ©sultat(s) pour "{{ searchQuery }}"
+                        - <strong>{{ books|length }}</strong> résultat(s) pour "{{ searchQuery }}"
                         <a href="{{ path('discipline_books', {id: discipline.id}) }}" class="ms-2 text-primary">
                             <i class="fas fa-times"></i> Effacer
                         </a>
@@ -401,7 +401,7 @@
                                 </span>
                             </div>
                             <div class="meta-item">
-                                <span class="meta-label">AnnÃ©e</span>
+                                <span class="meta-label">Année</span>
                                 <span class="meta-value">
                                     {% if book.publicationYear %}
                                         {{ book.publicationYear }}
@@ -430,7 +430,7 @@
     {% else %}
         <div class="no-books">
             <i class="fas fa-book-open"></i>
-            <h4>Aucun livre trouvÃ©</h4>
+            <h4>Aucun livre trouvé</h4>
             <p>Il n'y a pas encore de livres dans cette discipline.</p>
         </div>
     {% endif %}
@@ -479,3 +479,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

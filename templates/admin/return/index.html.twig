@@ -25,7 +25,7 @@
         }
         .scanner-section, .return-history, .book-details, .pending-orders {
             background: #fff;
-            border-left: 4px solid #b2903e;
+            border-left: 4px solid #3365b7;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.03);
             padding: 1.5rem 2rem;
@@ -55,11 +55,11 @@
             transition: background 0.2s;
         }
         .input-group .btn-primary:hover {
-            background: #b2903e;
+            background: #3365b7;
             color: #fff;
         }
         .input-group .btn-secondary {
-            background: #b2903e;
+            background: #3365b7;
             color: #fff;
             border: none;
             border-radius: 6px;
@@ -130,7 +130,7 @@
             transition: background 0.2s;
         }
         .btn-success:hover {
-            background: #b2903e;
+            background: #3365b7;
             color: #fff;
         }
         .quick-return-btn {
@@ -197,7 +197,7 @@
                             </td>
                             <td style="white-space: nowrap;">{{ order.placedAt|date('d/m/Y') }}<br><small>{{ order.placedAt|date('H:i') }}</small></td>
                             <td>{{ item.exemplaire.book.title }}</td>
-                            <td style="font-family: monospace; font-weight: bold; color: #b2903e;">{{ item.exemplaire.barcode }}</td>
+                            <td style="font-family: monospace; font-weight: bold; color: #3365b7;">{{ item.exemplaire.barcode }}</td>
                             <td>{{ item.exemplaire.location ? item.exemplaire.location.name : 'N/A' }}</td>
                             <td style="text-align: center;">
                                 {% if item.exemplaire.status == 'borrowed' %}
@@ -228,7 +228,7 @@
                 <div class="col-md-6">
                     <p><strong>Titre :</strong> <span id="bookTitle"></span></p>
                     <p><strong>Code-barres :</strong> <span id="bookBarcode"></span></p>
-                    <p><strong>Emplacement :</strong> <span id="bookLocation" style="color: #b2903e; font-weight: bold;"></span></p>
+                    <p><strong>Emplacement :</strong> <span id="bookLocation" style="color: #3365b7; font-weight: bold;"></span></p>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Emprunté par :</strong> <span id="borrowedBy"></span></p>
