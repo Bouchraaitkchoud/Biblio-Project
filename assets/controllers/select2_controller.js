@@ -27,19 +27,19 @@ export default class extends Controller {
 
     // Load jQuery if not present
     if (!window.$) {
-      await this.loadScript("https://code.jquery.com/jquery-3.6.0.min.js");
+      await this.loadScript("/assets/jquery/jquery-3.6.0.min.js");
     }
 
     // Load Select2 if not present
     if (!window.$.fn.select2) {
       await this.loadScript(
-        "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"
+        "/assets/select2/js/select2.min.js"
       );
     }
 
     // Ensure Select2 CSS is loaded
     this.loadCSS(
-      "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      "/assets/select2/css/select2.min.css"
     );
   }
 
