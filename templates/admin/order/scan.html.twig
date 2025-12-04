@@ -238,8 +238,10 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
             const barcodeInput = document.getElementById('barcodeInput');
+            if (!barcodeInput) return;
+
             const orderDetails = document.getElementById('orderDetails');
             const scanHistory = document.getElementById('scanHistory');
             const scanError = document.getElementById('scanError');
@@ -412,6 +414,6 @@
                 `;
                 scanHistory.insertBefore(scanItem, scanHistory.firstChild);
             }
-        });
+        })();
     </script>
 {% endblock %}

@@ -243,6 +243,15 @@
         <!-- Notification des messages -->
         <div id="cart-notification" class="alert" style="display: none;"></div>
         
+        {% if maxBooks is defined %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Vous avez actuellement <strong>{{ activeBooksCount }}</strong> livre(s) emprunté(s) ou en cours de validation.
+                Votre panier contient <strong>{{ items|length }}</strong> livre(s).
+                La limite totale est de <strong>{{ maxBooks }}</strong> livre(s).
+            </div>
+        {% endif %}
+
         <div class="cart-content" id="cart-content">
             {% if items|length > 0 %}
                 {% for item in items %}
@@ -260,9 +269,15 @@
                     </div>
                 {% endfor %}
                 <div class="text-center">
-                    <button type="button" class="submit-btn" onclick="submitCart()">
-                        <i class="fas fa-check"></i> Envoyer la demande
-                    </button>
+                    {% if (activeBooksCount + items|length) > maxBooks %}
+                        <button type="button" class="submit-btn" disabled style="opacity: 0.5; cursor: not-allowed;" title="Limite dépassée">
+                            <i class="fas fa-ban"></i> Limite dépassée
+                        </button>
+                    {% else %}
+                        <button type="button" class="submit-btn" onclick="submitCart()">
+                            <i class="fas fa-check"></i> Envoyer la demande
+                        </button>
+                    {% endif %}
                 </div>
             {% else %}
                 <div class="empty-cart">
@@ -275,13 +290,6 @@
                     </a>
                 </div>
             {% endif %}
-        </div>
-
-        <!-- Limite d'emprunt information -->
-        <div style="background: #e7f1ff; border-left: 4px solid #0066cc; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-            <i class="fas fa-info-circle"></i> 
-            <strong>Limite :</strong> Vous pouvez emprunter maximum <span style="color: #0066cc; font-weight: bold;">{{ maxBooks }}</span> livre(s) par commande.
-            
         </div>
     </div>
 

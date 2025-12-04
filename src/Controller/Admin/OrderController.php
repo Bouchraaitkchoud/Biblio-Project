@@ -169,7 +169,7 @@ class OrderController extends AbstractController
                 // Commit transaction
                 $em->commit();
 
-                $this->addFlash('success', 'Order approved successfully.');
+                $this->addFlash('success', 'La commande a été approuvée avec succès.');
                 return $this->redirectToRoute('admin_orders_index', ['status' => 'approved']);
             } catch (\Exception $e) {
                 // Rollback transaction on error
@@ -180,7 +180,7 @@ class OrderController extends AbstractController
                     'order_id' => $order->getId()
                 ]);
 
-                $this->addFlash('error', 'Failed to approve order. Please try again.');
+                $this->addFlash('error', 'Échec de l\'approbation de la commande. Veuillez réessayer.');
                 return $this->redirectToRoute('admin_orders_index');
             }
         }
@@ -207,7 +207,7 @@ class OrderController extends AbstractController
 
             $this->em->flush();
 
-            $this->addFlash('warning', 'Order has been rejected.');
+            $this->addFlash('warning', 'La commande a été rejetée.');
         }
 
         return $this->redirectToRoute('admin_orders_index');
@@ -221,12 +221,12 @@ class OrderController extends AbstractController
             $receipt = $this->em->getRepository(Receipt::class)->findOneBy(['cart' => $cart]);
 
             if (!$receipt) {
-                $this->logger->error('No receipt found for cart', [
+                $this->logger->error('Aucun reçu trouvé pour le panier', [
                     'cart_id' => $cart->getId(),
                     'cart_status' => $cart->getStatus()
                 ]);
 
-                $this->addFlash('error', 'No receipt found for this order. Please try approving the order again.');
+                $this->addFlash('error', 'Aucun reçu trouvé pour cette commande. Veuillez réessayer d\'approuver la commande.');
                 return $this->redirectToRoute('admin_orders_index');
             }
 
@@ -238,7 +238,7 @@ class OrderController extends AbstractController
                 'cart_id' => $cart->getId()
             ]);
 
-            $this->addFlash('error', 'Failed to view receipt. Please try again.');
+            $this->addFlash('error', 'Échec de l\'affichage du reçu. Veuillez réessayer.');
             return $this->redirectToRoute('admin_orders_index');
         }
     }

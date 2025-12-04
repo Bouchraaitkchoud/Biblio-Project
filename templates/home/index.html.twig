@@ -260,17 +260,15 @@
 
     <!-- Section de recherche générale -->
     <div class="search-section">
-        <h3 class="text-center mb-3" style="color: #1a2e4f; font-family: 'Merriweather', serif;">Recherche globale</h3>
         <form action="{{ path('search_results') }}" method="GET">
             <div class="input-group mb-3">
                 <input type="text" class="form-control search-input" name="q" placeholder="Rechercher un livre, auteur, éditeur...">
                 <button class="btn btn-search" type="submit">
-                    <i class="fas fa-search"></i> Rechercher
+                    <i class="fas fa-search"></i>
                 </button>
             </div>
             
             <div class="search-filters text-center">
-                <small class="text-muted d-block mb-3">Recherche par :</small>
                 <div class="radio-group" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
                         <input type="radio" name="search_type" value="all" style="margin: 0;">

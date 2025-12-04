@@ -245,8 +245,10 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
             const barcodeInput = document.getElementById('barcodeInput');
+            if (!barcodeInput) return;
+
             const scanButton = document.getElementById('scanButton');
             const scanMessage = document.getElementById('scanMessage');
             const bookDetails = document.getElementById('bookDetails');
@@ -442,6 +444,6 @@
                 hideBookDetails();
                 barcodeInput.focus();
             }
-        });
+        })();
     </script>
 {% endblock %}

@@ -86,19 +86,26 @@ class CartController extends AbstractController
                 // Récupère la limite maximale
                 $maxBooks = $this->configService->getMaxBooksPerOrder();
 
-                // Vérifie le nombre de livres actuels
+                // Vérifie le nombre de livres actuels dans le panier
                 $items = $this->cartService->getCartItems();
+                $currentCartCount = count($items);
 
-                if (count($items) >= $maxBooks) {
+                // Vérifie le nombre de livres déjà empruntés ou en cours de commande
+                $activeBooksCount = $entityManager->getRepository(Order::class)->countActiveBooksForLecteur($user);
+
+                $totalBooks = $activeBooksCount + $currentCartCount;
+
+                if ($totalBooks >= $maxBooks) {
                     return new JsonResponse([
                         'success' => false,
                         'message' => sprintf(
-                            '❌ Limite atteinte ! Vous avez déjà %d livre(s) dans votre panier. Vous ne pouvez pas ajouter plus de %d livre(s) par commande.',
-                            count($items),
+                            '❌ Limite atteinte ! Vous avez %d livre(s) en cours d\'emprunt/commande et %d dans votre panier. La limite est de %d livre(s) au total.',
+                            $activeBooksCount,
+                            $currentCartCount,
                             $maxBooks
                         ),
                         'limit_reached' => true,
-                        'current_count' => count($items),
+                        'current_count' => $totalBooks,
                         'max_count' => $maxBooks
                     ], 400);
                 }
@@ -155,6 +162,24 @@ class CartController extends AbstractController
         }
 
         try {
+            // Check limit before creating order
+            $maxBooks = $this->configService->getMaxBooksPerOrder();
+            $items = $this->cartService->getCartItems();
+            $currentCartCount = count($items);
+            $activeBooksCount = $em->getRepository(Order::class)->countActiveBooksForLecteur($lecteur);
+
+            if (($activeBooksCount + $currentCartCount) > $maxBooks) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => sprintf(
+                        '❌ Limite atteinte ! Vous avez %d livre(s) en cours et %d dans votre panier. La limite est de %d.',
+                        $activeBooksCount,
+                        $currentCartCount,
+                        $maxBooks
+                    )
+                ], 400);
+            }
+
             // Convert cookie cart to database order entity
             $order = $this->cartService->convertCookieCartToEntity($lecteur);
 
@@ -348,7 +373,7 @@ class CartController extends AbstractController
 
     #[Route('/my-cart', name: 'view_cart')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function viewCart(): Response
+    public function viewCart(EntityManagerInterface $em): Response
     {
         // Block admins from viewing cart - redirect with message
         $user = $this->getUser();
@@ -378,6 +403,10 @@ class CartController extends AbstractController
         }
 
         $maxBooks = $this->configService->getMaxBooksPerOrder();
+        $activeBooksCount = 0;
+        if ($user) {
+            $activeBooksCount = $em->getRepository(Order::class)->countActiveBooksForLecteur($user);
+        }
 
         $response = $this->render('cart/cartView.html.twig', [
             'cart' => null, // No database cart for draft
@@ -385,7 +414,8 @@ class CartController extends AbstractController
             'total' => count($items),
             'discipline' => $discipline,
             'removedItems' => $validation['removed'], // Pass removed items to template
-            'maxBooks' => $maxBooks  // Ajoute ici
+            'maxBooks' => $maxBooks,
+            'activeBooksCount' => $activeBooksCount
         ]);
 
         // Set updated cookie if items were removed

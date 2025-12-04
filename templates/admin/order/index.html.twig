@@ -337,8 +337,10 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         const searchInput = document.getElementById('searchInput');
+        if (!searchInput) return;
+
         const searchButton = document.getElementById('searchButton');
         const searchMessage = document.getElementById('searchMessage');
         const searchResults = document.getElementById('searchResults');
@@ -448,6 +450,6 @@
                 }, 3000);
             }
         }
-    });
+    })();
     </script>
 {% endblock %}

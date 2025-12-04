@@ -12,6 +12,16 @@ class AdminSecurityController extends AbstractController
     #[Route('/admin/login', name: 'app_admin_login', methods: ['GET'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
+        if ($this->getUser()) {
+            if ($this->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('admin_dashboard');
+            }
+            if ($this->isGranted('ROLE_LIMITED_ADMIN')) {
+                return $this->redirectToRoute('admin_limited_panel');
+            }
+            return $this->redirectToRoute('home');
+        }
+
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 

@@ -193,8 +193,10 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         const searchInput = document.getElementById('disciplineSearch');
+        if (!searchInput) return;
+
         const tableRows = document.querySelectorAll('.discipline-row');
         const searchInfo = document.getElementById('searchInfo');
         const noResultsMessage = document.getElementById('noResultsMessage');
@@ -248,7 +250,7 @@
                 this.focus();
             }
         });
-    });
+    })();
     </script>
 {% endblock %}
 
