@@ -262,7 +262,7 @@
                             <div class="cart-book-barcode">Barcode: {{ item.getBarcode() }}</div>
                         </div>
                         <div class="book-actions">
-                            <button type="button" class="remove-btn" onclick="removeFromCart({{ item.getBook().getId() }})">
+                            <button type="button" class="remove-btn" onclick="removeFromCart(this, {{ item.getBook().getId() }})">
                                 <i class="fas fa-trash"></i> Supprimer
                             </button>
                         </div>
@@ -274,7 +274,7 @@
                             <i class="fas fa-ban"></i> Limite dépassée
                         </button>
                     {% else %}
-                        <button type="button" class="submit-btn" onclick="submitCart()">
+                        <button type="button" class="submit-btn" onclick="submitCart(this)">
                             <i class="fas fa-check"></i> Envoyer la demande
                         </button>
                     {% endif %}
@@ -294,8 +294,9 @@
     </div>
 
     <script>
-    function removeFromCart(bookId) {
-        const button = event.target.closest('.remove-btn');
+    // Define functions in global scope so they persist across Turbo navigations
+    window.removeFromCart = function(btnElement, bookId) {
+        const button = btnElement;
         const cartItem = document.getElementById(`cart-item-${bookId}`);
         
         // Feedback visuel
@@ -334,10 +335,10 @@
             button.disabled = false;
             showNotification('Une erreur est survenue', 'error');
         });
-    }
+    };
 
-    function submitCart() {
-        const button = event.target;
+    window.submitCart = function(btnElement) {
+        const button = btnElement;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
         button.disabled = true;
         
@@ -395,9 +396,9 @@
             button.innerHTML = '<i class="fas fa-check"></i> Envoyer la demande';
             button.disabled = false;
         });
-    }
+    };
 
-    function showSuccessModal(isPrinting) {
+    window.showSuccessModal = function(isPrinting) {
         // Supprime la modal existante si elle existe pour la recréer
         const existingModal = document.getElementById('successModal');
         if (existingModal) {
@@ -434,13 +435,13 @@
         // Redirection automatique (plus longue si impression)
         const delay = isPrinting ? 8000 : 3000;
         setTimeout(logoutAndRedirect, delay);
-    }
+    };
 
-    function logoutAndRedirect() {
+    window.logoutAndRedirect = function() {
         window.location.href = '{{ path("app_logout") }}';
-    }
+    };
 
-    function updateCartDisplay() {
+    window.updateCartDisplay = function() {
         const cartCards = document.querySelectorAll('.cart-card').length;
         if (cartCards === 0) {
             document.getElementById('cart-content').innerHTML = `
@@ -455,25 +456,9 @@
                 </div>
             `;
         }
-    }
+    };
 
-    function updateCartBadge() {
-        if (typeof window.updateCartBadge === 'function') {
-            window.updateCartBadge();
-        } else {
-            const badge = document.querySelector('.cart-badge');
-            if (badge) {
-                const currentCount = parseInt(badge.textContent) - 1;
-                if (currentCount <= 0) {
-                    badge.style.display = 'none';
-                } else {
-                    badge.textContent = currentCount;
-                }
-            }
-        }
-    }
-
-    function showNotification(message, type) {
+    window.showNotification = function(message, type) {
         const notification = document.getElementById('cart-notification');
         notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
         notification.textContent = message;
@@ -482,7 +467,7 @@
         setTimeout(() => {
             notification.style.display = 'none';
         }, 4000);
-    }
+    };
     </script>
 {% endblock %}
 

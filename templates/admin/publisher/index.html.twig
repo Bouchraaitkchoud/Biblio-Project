@@ -4,125 +4,6 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        body {
-            background-color: #fdfaf5 !important;
-            font-family: 'Georgia', serif;
-            color: #4e4a45;
-            min-height: 100vh;
-        }
-        .page-header {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin: 2rem 0 1.5rem 0;
-            color: #1a2e4f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .btn-add {
-            background-color: #3365b7;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.6rem 1.2rem;
-            font-weight: bold;
-            font-family: 'Georgia', serif;
-            transition: background 0.2s;
-        }
-        .btn-add:hover {
-            background-color: #967a2b;
-            color: #fff;
-        }
-        .admin-search-form {
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        .admin-search-form .input-group {
-            flex: 1;
-        }
-        .form-control {
-            border: 1px solid #d8d2c4;
-            border-radius: 6px;
-        }
-        .publisher-entry {
-            background: #fff;
-            border-left: 4px solid #3365b7;
-            margin-bottom: 1.5rem;
-            padding: 1.2rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .publisher-info {
-            flex: 1;
-        }
-        .publisher-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #1a2e4f;
-        }
-        .publisher-location {
-            color: #7a6b52;
-            font-size: 1rem;
-            margin-top: 0.2rem;
-        }
-        .publisher-books {
-            color: #7a6b52;
-            font-size: 1rem;
-            margin-top: 0.2rem;
-        }
-        .publisher-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .btn-sm {
-            padding: 0.35rem 0.7rem;
-            font-size: 0.95em;
-            border-radius: 5px;
-        }
-        .btn-edit {
-            background: #f7e7c1;
-            color: #3365b7;
-            border: none;
-        }
-        .btn-edit:hover {
-            background: #3365b7;
-            color: #fff;
-        }
-        .btn-delete {
-            background: #f8d7da;
-            color: #dc3545;
-            border: none;
-        }
-        .btn-delete:hover {
-            background: #dc3545;
-            color: #fff;
-        }
-        .btn-primary {
-            background: #1a2e4f;
-            color: #fff;
-            border: none;
-        }
-        .btn-primary:hover {
-            background: #3365b7;
-            color: #fff;
-        }
-        .no-items {
-            text-align: center;
-            padding: 40px 20px;
-            color: #7a6b52;
-            font-family: 'Georgia', serif;
-        }
-        .pagination {
-            margin-top: 2rem;
-            justify-content: center;
-        }
-    </style>
 {% endblock %}
 
 {% block admin_content %}
@@ -180,12 +61,18 @@
                         <a href="{{ path('admin_publisher_edit', {'id': publisher.id}) }}" class="btn btn-sm btn-edit" title="Modifier l'éditeur">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <form method="post" action="{{ path('admin_publisher_delete', {'id': publisher.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet éditeur ?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ publisher.id) }}">
-                            <button class="btn btn-sm btn-delete" title="Supprimer l'éditeur">
+                        {% if publisher.books|length == 0 %}
+                            <form method="post" action="{{ path('admin_publisher_delete', {'id': publisher.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet éditeur ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ publisher.id) }}">
+                                <button class="btn btn-sm btn-delete" title="Supprimer l'éditeur">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-sm btn-secondary" disabled title="Impossible de supprimer: cet éditeur a des livres associés" style="background-color: #6c757d; border-color: #6c757d; color: white; cursor: not-allowed;">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
-                        </form>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}

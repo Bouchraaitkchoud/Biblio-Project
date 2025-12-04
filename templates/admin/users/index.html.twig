@@ -92,12 +92,17 @@
                                                    title="Modifier">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                                {% set isSelf = user.id == app.user.id %}
+                                                {% set isTargetSuperAdmin = 'ROLE_ADMIN' in user.roles %}
+                                                {% set isCurrentSuperAdmin = is_granted('ROLE_ADMIN') %}
+                                                {% set canDelete = not isSelf and (not isTargetSuperAdmin or isCurrentSuperAdmin) %}
+                                                
                                                 <form method="post" 
                                                       action="{{ path('admin_user_delete', {id: user.id}) }}" 
                                                       style="display: inline;" 
                                                       onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?');">
                                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-                                                    <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <button class="btn btn-sm btn-outline-danger" title="{% if not canDelete %}Action non autorisée{% else %}Supprimer{% endif %}" {% if not canDelete %}disabled style="cursor: not-allowed; opacity: 0.5;"{% endif %}>
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>

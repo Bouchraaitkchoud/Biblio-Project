@@ -178,3 +178,130 @@
     border-radius: 8px;
     margin-bottom: 30px;
 }
+
+/* Admin Card List Styles (Authors, Books, Publishers) */
+.page-header {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 2rem 0 1.5rem 0;
+    color: #1a2e4f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-add {
+    background-color: #3365b7;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+    transition: background 0.2s;
+}
+
+.btn-add:hover {
+    background-color: #967a2b;
+    color: #fff;
+}
+
+.admin-search-form {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.admin-search-form .input-group {
+    flex: 1;
+}
+
+/* Common Card Entry Style */
+.author-entry, .publisher-entry, .book-entry {
+    background: #fff;
+    border-left: 4px solid #3365b7;
+    margin-bottom: 1.5rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex;
+    align-items: center;
+}
+
+.author-entry, .publisher-entry {
+    justify-content: space-between;
+}
+
+.book-entry {
+    gap: 1.5rem;
+}
+
+.author-info, .publisher-info, .book-info {
+    flex: 1;
+}
+
+.author-name, .publisher-name, .book-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #1a2e4f;
+}
+
+.book-title {
+    font-size: 1.15rem;
+}
+
+.author-books, .publisher-books, .publisher-location, .book-meta {
+    color: #7a6b52;
+    font-size: 1rem;
+    margin-top: 0.2rem;
+}
+
+.book-meta {
+    font-size: 0.98rem;
+}
+
+.author-actions, .publisher-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.book-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.book-cover {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-edit {
+    background: #f7e7c1;
+    color: #3365b7;
+    border: none;
+}
+
+.btn-edit:hover {
+    background: #3365b7;
+    color: #fff;
+}
+
+.btn-delete {
+    background: #f8d7da;
+    color: #dc3545;
+    border: none;
+}
+
+.btn-delete:hover {
+    background: #dc3545;
+    color: #fff;
+}

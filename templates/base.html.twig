@@ -360,7 +360,7 @@
                                 <span>Disciplines</span>
                             </a>
                         {% endif %}
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_EMPLACEMENTS') %}
                             <a href="{{ path('admin_locations_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_locations' %} active{% endif %}">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span>Emplacements</span>
@@ -394,6 +394,12 @@
                             <a href="{{ path('admin_lecteurs_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_lecteurs' %} active{% endif %}">
                                 <i class="fas fa-user-graduate"></i>
                                 <span>Lecteurs</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_GERER_HISTORIQUE') %}
+                            <a href="{{ path('admin_historique_index') }}" class="admin-nav-link{% if app.request.get('_route') starts with 'admin_historique' %} active{% endif %}">
+                                <i class="fas fa-history"></i>
+                                <span>Historique</span>
                             </a>
                         {% endif %}
                         {% if is_granted('ROLE_ADMIN') %}

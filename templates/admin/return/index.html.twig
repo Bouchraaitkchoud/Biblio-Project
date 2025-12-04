@@ -241,7 +241,23 @@
         </div>
         <div class="return-history">
             <h3>Retours d'aujourd'hui</h3>
-            <div id="returnHistory"></div>
+            <div id="returnHistory">
+                {% if todaysReturns is defined %}
+                    {% for order in todaysReturns %}
+                        {% for item in order.items %}
+                            <div class="return-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ item.exemplaire.book.title }}</strong><br>
+                                        <small>Code-barres : {{ item.exemplaire.barcode }}</small>
+                                    </div>
+                                    <span class="status-badge status-success">Retourné</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
     </div>
     <script>

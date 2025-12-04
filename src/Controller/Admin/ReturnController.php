@@ -42,8 +42,25 @@ class ReturnController extends AbstractController
             ->getQuery()
             ->getResult();
 
+        // Retrieve orders returned today
+        $today = new \DateTime();
+        $today->setTime(0, 0, 0);
+
+        $todaysReturns = $entityManager->getRepository(Order::class)
+            ->createQueryBuilder('o')
+            ->leftJoin('o.lecteur', 'l')
+            ->leftJoin('o.items', 'oi')
+            ->leftJoin('oi.exemplaire', 'e')
+            ->addSelect('l', 'oi', 'e')
+            ->where('o.returnedAt >= :today')
+            ->setParameter('today', $today)
+            ->orderBy('o.returnedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
         return $this->render('admin/return/index.html.twig', [
             'pendingOrders' => $pendingOrders,
+            'todaysReturns' => $todaysReturns,
         ]);
     }
 
